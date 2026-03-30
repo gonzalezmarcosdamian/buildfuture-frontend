@@ -1,0 +1,102 @@
+"use client";
+
+interface StreakData {
+  current: number;
+  longest: number;
+  calendar: { month: string; invested: boolean }[];
+}
+
+const MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+function badge(months: number): { label: string; emoji: string } | null {
+  if (months >= 12) return { label: "1 año", emoji: "🌳" };
+  if (months >= 6)  return { label: "6 meses", emoji: "🌿" };
+  if (months >= 3)  return { label: "3 meses", emoji: "🌱" };
+  return null;
+}
+
+export function InvestmentStreak({ streak }: { streak: StreakData }) {
+  const currentBadge = badge(streak.current);
+  const longestBadge = badge(streak.longest);
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-slate-500 uppercase tracking-wider">Racha de inversión</p>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+          <p className="text-2xl font-bold text-blue-400">{streak.current}</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">meses seguidos</p>
+          {currentBadge && (
+            <p className="text-xs mt-1">{currentBadge.emoji} {currentBadge.label}</p>
+          )}
+        </div>
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+          <p className="text-2xl font-bold text-slate-300">{streak.longest}</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">mejor racha</p>
+          {longestBadge && (
+            <p className="text-xs mt-1">{longestBadge.emoji} {longestBadge.label}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Calendario estilo GitHub */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
+        <div className="grid grid-cols-12 gap-1">
+          {streak.calendar.map((entry, i) => {
+            const d = new Date(entry.month + "T00:00:00");
+            const monthLabel = MONTH_LABELS[d.getMonth()];
+            return (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <div
+                  className={`w-full aspect-square rounded-sm transition-colors ${
+                    entry.invested
+                      ? "bg-emerald-500"
+                      : "bg-slate-800"
+                  }`}
+                  title={`${monthLabel} ${d.getFullYear()}`}
+                />
+                <span className="text-[8px] text-slate-600">{monthLabel[0]}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Próximos badges */}
+      <div className="flex gap-2">
+        {[
+          { months: 3, emoji: "🌱", label: "3 meses" },
+          { months: 6, emoji: "🌿", label: "6 meses" },
+          { months: 12, emoji: "🌳", label: "1 año" },
+        ].map((b) => {
+          const reached = streak.longest >= b.months;
+          const inProgress = !reached && streak.current > 0 && streak.current < b.months;
+          return (
+            <div
+              key={b.months}
+              className={`flex-1 rounded-xl p-2 text-center border transition-all ${
+                reached
+                  ? "bg-emerald-950/30 border-emerald-800"
+                  : inProgress
+                  ? "bg-blue-950/20 border-blue-900/50"
+                  : "bg-slate-900 border-slate-800 opacity-40"
+              }`}
+            >
+              <p className="text-base">{b.emoji}</p>
+              <p className={`text-[9px] mt-0.5 ${reached ? "text-emerald-400" : "text-slate-500"}`}>
+                {b.label}
+              </p>
+              {inProgress && (
+                <p className="text-[8px] text-blue-400 mt-0.5">
+                  {b.months - streak.current}m más
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
