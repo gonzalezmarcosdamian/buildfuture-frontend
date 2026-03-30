@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { CheckCircle2, XCircle, RefreshCw, Loader2 } from "lucide-react";
 import { ConnectIOLForm } from "./ConnectIOLForm";
-import { ConnectNexoForm } from "./ConnectNexoForm";
 import { useRouter } from "next/navigation";
 
 const providerMeta: Record<string, { label: string; description: string; color: string }> = {
@@ -11,15 +10,10 @@ const providerMeta: Record<string, { label: string; description: string; color: 
     description: "Acciones, CEDEARs, bonos, letras, FCI",
     color: "text-blue-400",
   },
-  NEXO: {
-    label: "Nexo",
-    description: "Crypto con yield — BTC, ETH, stablecoins",
-    color: "text-blue-300",
-  },
-  BITSO: {
-    label: "Bitso",
-    description: "Crypto y ARS ↔ crypto",
-    color: "text-orange-400",
+  PPI: {
+    label: "Portfolio Personal",
+    description: "Acciones, bonos, CEDEARs, FCI",
+    color: "text-purple-400",
   },
 };
 
@@ -100,8 +94,6 @@ export function IntegrationCard({ integration }: { integration: any }) {
           </div>
         ) : integration.provider === "IOL" ? (
           <ConnectIOLForm onSuccess={handleConnected} />
-        ) : integration.provider === "NEXO" ? (
-          <ConnectNexoForm onSuccess={handleConnected} />
         ) : (
           <p className="text-xs text-slate-600 italic">Próximamente</p>
         )}
