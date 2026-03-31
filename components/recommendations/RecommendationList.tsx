@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Sparkles, RefreshCw, Shield, TrendingUp, Zap, ChevronRight } from "lucide-react";
+import { Sparkles, RefreshCw, Shield, TrendingUp, Zap } from "lucide-react";
 import { formatARS } from "@/lib/formatters";
 
 interface Rec {
@@ -46,10 +46,8 @@ const assetColor: Record<string, string> = {
   ON:     "text-teal-400",
 };
 
-function daysUntil(iso: string) {
-  const diff = new Date(iso).getTime() - Date.now();
-  return Math.max(0, Math.ceil(diff / 86400000));
-}
+// Perfil recomendado para el usuario (basado en su perfil configurado)
+const RECOMMENDED_PROFILE = "moderado";
 
 const RISK_PROFILES = [
   { id: "conservador", label: "Conservador", color: "text-emerald-400 border-emerald-800 bg-emerald-950/30" },
@@ -57,18 +55,24 @@ const RISK_PROFILES = [
   { id: "agresivo",    label: "Agresivo",    color: "text-red-400 border-red-800 bg-red-950/30" },
 ];
 
+function daysUntil(iso: string) {
+  const diff = new Date(iso).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / 86400000));
+}
+
 export function RecommendationList({ capitalArs = 500000 }: { capitalArs?: number }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
   const [data, setData] = useState<RecsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [riskProfile, setRiskProfile] = useState("moderado");
+  const [riskProfile, setRiskProfile] = useState(RECOMMENDED_PROFILE);
 
   async function load(force = false, profile = riskProfile) {
     force ? setRefreshing(true) : setLoading(true);
     try {
       const url = `${API_URL}/portfolio/recommendations?capital_ars=${capitalArs}&risk_profile=${profile}${force ? "&force_refresh=true" : ""}`;
       const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setData(json);
     } finally {
@@ -105,7 +109,7 @@ export function RecommendationList({ capitalArs = 500000 }: { capitalArs?: numbe
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles size={14} className="text-blue-400" />
-          <h2 className="text-sm font-semibold text-slate-100">Recomendaciones IA</h2>
+          <h2 className="text-sm font-semibold text-slate-100">Recomendaciones</h2>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-slate-500">Válido {days}d</span>
@@ -125,11 +129,16 @@ export function RecommendationList({ capitalArs = 500000 }: { capitalArs?: numbe
           <button
             key={p.id}
             onClick={() => changeProfile(p.id)}
-            className={`flex-1 py-1.5 rounded-xl text-[11px] font-medium border transition-all ${
+            className={`relative flex-1 py-1.5 rounded-xl text-[11px] font-medium border transition-all ${
               riskProfile === p.id ? p.color : "text-slate-500 border-slate-800 bg-slate-900"
             }`}
           >
             {p.label}
+            {p.id === RECOMMENDED_PROFILE && (
+              <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[8px] bg-yellow-500 text-black font-bold px-1.5 py-px rounded-full leading-tight whitespace-nowrap">
+                para vos
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -231,7 +240,7 @@ export function RecommendationList({ capitalArs = 500000 }: { capitalArs?: numbe
       ))}
 
       <p className="text-[10px] text-slate-600 text-center">
-        Generado por IA · Se actualiza cada 7 días · No es asesoramiento financiero formal
+        Datos en tiempo real · No es asesoramiento financiero formal
       </p>
     </div>
   );

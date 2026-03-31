@@ -1,4 +1,4 @@
-import { fetchIntegrations } from "@/lib/api";
+import { fetchIntegrations } from "@/lib/api-server";
 import { Settings, Clock } from "lucide-react";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
 

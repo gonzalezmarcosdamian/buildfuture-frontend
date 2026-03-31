@@ -1,4 +1,4 @@
-import { fetchBudget } from "@/lib/api";
+import { fetchBudget } from "@/lib/api-server";
 import { BudgetEditor } from "@/components/budget/BudgetEditor";
 import { Wallet } from "lucide-react";
 

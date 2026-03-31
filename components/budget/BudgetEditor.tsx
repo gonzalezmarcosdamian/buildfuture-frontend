@@ -37,7 +37,7 @@ function calcNeto(bruto: number, descPct: number) {
 
 export function BudgetEditor({ initial }: { initial: Budget }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
-  const [useBruto, setUseBruto] = useState(false);
+  const [useBruto, setUseBruto] = useState(true);
   const [bruto, setBruto] = useState(Math.round(initial.income_monthly_ars / (1 - DESCUENTOS_AFIP)));
   const [descPct, setDescPct] = useState(DESCUENTOS_AFIP);
   const [income, setIncome] = useState(initial.income_monthly_ars);

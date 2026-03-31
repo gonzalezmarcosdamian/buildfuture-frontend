@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/nav/BottomNav";
+import { CurrencyProvider } from "@/lib/currency-context";
+import { AuthProvider } from "@/lib/auth-context";
 
 const geist = Geist({ variable: "--font-sans", subsets: ["latin"] });
 
@@ -14,10 +16,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${geist.variable} dark h-full`}>
       <body className="min-h-full bg-slate-950 text-slate-50 antialiased">
-        <main className="max-w-lg mx-auto pb-20 min-h-screen">
-          {children}
-        </main>
-        <BottomNav />
+        <AuthProvider>
+          <CurrencyProvider>
+            <main className="max-w-lg mx-auto pb-20 min-h-screen">
+              {children}
+            </main>
+            <BottomNav />
+          </CurrencyProvider>
+        </AuthProvider>
       </body>
     </html>
   );

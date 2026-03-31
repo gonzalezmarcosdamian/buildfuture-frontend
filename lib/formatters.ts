@@ -16,8 +16,9 @@ export function formatARS(value: number): string {
   }).format(value);
 }
 
-export function formatPct(value: number, decimals = 1): string {
-  return `${(value * 100).toFixed(decimals)}%`;
+export function formatPct(value: number, decimals = 1, signed = false): string {
+  const prefix = signed && value >= 0 ? "+" : "";
+  return `${prefix}${(value * 100).toFixed(decimals)}%`;
 }
 
 export function freedomColor(pct: number): string {
