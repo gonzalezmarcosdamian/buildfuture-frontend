@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full bg-slate-950 text-slate-50 antialiased">
         <AuthProvider>
           <CurrencyProvider>
-            <main className="max-w-lg mx-auto pb-20 min-h-screen">
+            <main className="max-w-lg mx-auto min-h-screen" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 90px)" }}>
               {children}
             </main>
             <BottomNav />
