@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Loader2, CheckCircle2, AlertCircle, ChevronRight } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -66,14 +66,36 @@ export function AddManualPosition() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  // FCI: carga todos los fondos al entrar al step 2
+  const [allFci, setAllFci] = useState<SearchResult[]>([]);
+  const [loadingFci, setLoadingFci] = useState(false);
+
+  useEffect(() => {
+    if (assetType === "FCI" && step === 2 && allFci.length === 0) {
+      setLoadingFci(true);
+      authFetch("/positions/search/fci?q=")
+        .then((r) => r.json())
+        .then((d) => setAllFci(d.results || []))
+        .catch(() => {})
+        .finally(() => setLoadingFci(false));
+    }
+  }, [assetType, step]);
+
+  // FCI: filtro local mientras escribe
+  const filteredFci = useMemo(() => {
+    if (!searchQuery.trim()) return allFci;
+    const q = searchQuery.toLowerCase();
+    return allFci.filter((r) => (r.fondo ?? r.name ?? "").toLowerCase().includes(q));
+  }, [searchQuery, allFci]);
+
   async function doSearch() {
     if (!searchQuery.trim() || !assetType) return;
+    if (assetType === "FCI") return; // FCI usa filtro local
     setSearching(true);
     setSearchResults([]);
     try {
       let path = "";
       if (assetType === "CRYPTO") path = `/positions/search/crypto?q=${encodeURIComponent(searchQuery)}`;
-      else if (assetType === "FCI") path = `/positions/search/fci?q=${encodeURIComponent(searchQuery)}`;
       else if (assetType === "ETF") path = `/positions/search/etf?ticker=${encodeURIComponent(searchQuery)}`;
       const res = await authFetch(path);
       if (!res.ok) {
@@ -192,31 +214,37 @@ export function AddManualPosition() {
       {step === 2 && assetType && assetType !== "OTRO" && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-xs text-slate-400">
-            <button onClick={() => setStep(1)} className="hover:text-slate-200">← Tipo</button>
+            <button onClick={() => { setStep(1); setSearchQuery(""); setSearchResults([]); }} className="hover:text-slate-200">← Tipo</button>
             <span>/</span>
-            <span className="text-slate-200">Buscar {assetType === "FCI" ? "fondo" : assetType === "CRYPTO" ? "cripto" : "ticker"}</span>
+            <span className="text-slate-200">
+              {assetType === "FCI" ? "Elegir fondo" : assetType === "CRYPTO" ? "Buscar cripto" : "Buscar ticker"}
+            </span>
           </div>
 
+          {/* Input: para FCI filtra local, para CRYPTO/ETF dispara búsqueda */}
           <div className="flex gap-2">
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setError(""); }}
               onKeyDown={(e) => e.key === "Enter" && doSearch()}
               placeholder={
                 assetType === "CRYPTO" ? "Ej: bitcoin, ethereum..."
-                : assetType === "FCI" ? "Ej: Cocos, Balanz..."
+                : assetType === "FCI" ? "Filtrar por nombre..."
                 : "Ej: SPY, QQQ, AAPL"
               }
+              autoFocus
               className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
             />
-            <button
-              onClick={doSearch}
-              disabled={searching || !searchQuery.trim()}
-              className="px-3 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 rounded-xl transition-colors"
-            >
-              {searching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-            </button>
+            {assetType !== "FCI" && (
+              <button
+                onClick={doSearch}
+                disabled={searching || !searchQuery.trim()}
+                className="px-3 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 rounded-xl transition-colors"
+              >
+                {searching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+              </button>
+            )}
           </div>
 
           {error && (
@@ -225,29 +253,66 @@ export function AddManualPosition() {
             </div>
           )}
 
-          <div className="space-y-1.5">
-            {searchResults.map((r, i) => (
-              <button
-                key={i}
-                onClick={() => pickResult(r)}
-                className="w-full flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-600 transition-colors text-left"
-              >
-                <div>
-                  <p className="text-xs font-semibold text-slate-100">
-                    {r.fondo ?? r.name}
-                    {r.symbol && <span className="ml-1.5 text-slate-500 font-normal">{r.symbol}</span>}
-                  </p>
-                  {r.categoria && <p className="text-[10px] text-slate-500">{r.categoria}</p>}
-                  {r.market_cap_rank && <p className="text-[10px] text-slate-500">Rank #{r.market_cap_rank}</p>}
+          {/* FCI: lista completa con filtro local */}
+          {assetType === "FCI" && (
+            <div className="space-y-1 max-h-96 overflow-y-auto pr-0.5">
+              {loadingFci ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-slate-500 text-xs">
+                  <Loader2 size={14} className="animate-spin" /> Cargando fondos...
                 </div>
-                {(r.vcp || r.price_usd) && (
-                  <span className="text-xs text-slate-400">
-                    {r.vcp ? `VCP $${r.vcp.toLocaleString("es-AR")}` : `$${r.price_usd?.toLocaleString()}`}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+              ) : filteredFci.length === 0 ? (
+                <p className="text-xs text-slate-600 text-center py-4">Sin resultados para "{searchQuery}"</p>
+              ) : (
+                <>
+                  <p className="text-[10px] text-slate-600 pb-1">
+                    {filteredFci.length} {filteredFci.length === 1 ? "fondo" : "fondos"}
+                    {searchQuery && ` · filtrado por "${searchQuery}"`}
+                  </p>
+                  {filteredFci.map((r, i) => (
+                    <button
+                      key={i}
+                      onClick={() => pickResult(r)}
+                      className="w-full flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-600 hover:bg-slate-800/60 transition-colors text-left"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-slate-100 truncate">{r.fondo ?? r.name}</p>
+                        <p className="text-[10px] text-slate-500">{r.categoria}</p>
+                      </div>
+                      {r.vcp && (
+                        <span className="text-[10px] text-slate-400 shrink-0 ml-2">
+                          VCP ${r.vcp.toLocaleString("es-AR", { maximumFractionDigits: 2 })}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* CRYPTO / ETF: resultados de búsqueda */}
+          {assetType !== "FCI" && (
+            <div className="space-y-1.5">
+              {searchResults.map((r, i) => (
+                <button
+                  key={i}
+                  onClick={() => pickResult(r)}
+                  className="w-full flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-600 transition-colors text-left"
+                >
+                  <div>
+                    <p className="text-xs font-semibold text-slate-100">
+                      {r.name}
+                      {r.symbol && <span className="ml-1.5 text-slate-500 font-normal">{r.symbol}</span>}
+                    </p>
+                    {r.market_cap_rank && <p className="text-[10px] text-slate-500">Rank #{r.market_cap_rank}</p>}
+                  </div>
+                  {r.price_usd && (
+                    <span className="text-xs text-slate-400">${r.price_usd.toLocaleString()}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
