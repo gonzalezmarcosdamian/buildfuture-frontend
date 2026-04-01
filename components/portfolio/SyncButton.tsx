@@ -6,11 +6,20 @@ import { supabase } from "@/lib/supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
 
-export function SyncButton() {
+interface Props {
+  /** Providers ALYC conectados, ej: ["IOL", "PPI"]. Si hay uno solo, el label es específico. */
+  connectedProviders: string[];
+}
+
+export function SyncButton({ connectedProviders }: Props) {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
   const router = useRouter();
+
+  const label = connectedProviders.length === 1
+    ? `Sync ${connectedProviders[0]}`
+    : "Sync todo";
 
   async function handleSync() {
     setSyncing(true);
@@ -19,18 +28,34 @@ export function SyncButton() {
     try {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
-      const res = await fetch(`${API_URL}/integrations/iol/sync`, {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (res.ok) {
+      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+
+      // Sincronizar todos los proveedores en paralelo
+      const results = await Promise.allSettled(
+        connectedProviders.map((provider) =>
+          fetch(`${API_URL}/integrations/${provider.toLowerCase()}/sync`, {
+            method: "POST",
+            headers,
+          })
+        )
+      );
+
+      const anyError = results.find(
+        (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
+      );
+
+      if (anyError) {
+        if (anyError.status === "fulfilled") {
+          const d = await anyError.value.json().catch(() => ({}));
+          setError(d.detail || `Error ${anyError.value.status}`);
+        } else {
+          setError("No se pudo conectar con el servidor");
+        }
+        setTimeout(() => setError(null), 4000);
+      } else {
         setOk(true);
         router.refresh();
         setTimeout(() => setOk(false), 3000);
-      } else {
-        const d = await res.json().catch(() => ({}));
-        setError(d.detail || `Error ${res.status}`);
-        setTimeout(() => setError(null), 4000);
       }
     } catch {
       setError("Sin conexión");
@@ -52,7 +77,7 @@ export function SyncButton() {
         } disabled:opacity-50`}
       >
         <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
-        {syncing ? "Sincronizando..." : ok ? "Listo" : "Sync IOL"}
+        {syncing ? "Sincronizando..." : ok ? "Listo" : label}
       </button>
       {error && <p className="text-[10px] text-red-400">{error}</p>}
     </div>

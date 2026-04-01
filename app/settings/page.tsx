@@ -7,13 +7,6 @@ export const dynamic = "force-dynamic";
 
 const UPCOMING = [
   {
-    label: "Portfolio Personal (PPI)",
-    type: "ALYC",
-    description: "Acciones, bonos, CEDEARs, FCI — API oficial documentada",
-    color: "text-purple-400",
-    eta: "Q2 2026",
-  },
-  {
     label: "Binance",
     type: "CRYPTO",
     description: "Spot: BTC, ETH, stablecoins y más de 300 pares",

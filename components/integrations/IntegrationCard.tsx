@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { CheckCircle2, XCircle, RefreshCw, Loader2, Unplug, AlertTriangle } from "lucide-react";
 import { ConnectIOLForm } from "./ConnectIOLForm";
+import { ConnectPPIForm } from "./ConnectPPIForm";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -170,6 +171,8 @@ export function IntegrationCard({ integration }: { integration: any }) {
           </div>
         ) : integration.provider === "IOL" ? (
           <ConnectIOLForm onSuccess={handleConnected} />
+        ) : integration.provider === "PPI" ? (
+          <ConnectPPIForm onSuccess={handleConnected} />
         ) : (
           <p className="text-xs text-slate-600 italic">Próximamente</p>
         )}
