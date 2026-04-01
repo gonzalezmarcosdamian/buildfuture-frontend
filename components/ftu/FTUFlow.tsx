@@ -21,19 +21,19 @@ async function authFetch(path: string, init: RequestInit = {}) {
 
 const RISK_OPTIONS = [
   {
-    value: "conservative",
+    value: "conservador",
     label: "Conservador",
     description: "Priorizo preservar el capital. Acepto menor rendimiento a cambio de más estabilidad.",
     color: "border-emerald-700 bg-emerald-950/30 text-emerald-400",
   },
   {
-    value: "moderate",
+    value: "moderado",
     label: "Moderado",
     description: "Busco un equilibrio entre rendimiento y riesgo. Acepto algo de volatilidad.",
     color: "border-blue-700 bg-blue-950/30 text-blue-400",
   },
   {
-    value: "aggressive",
+    value: "agresivo",
     label: "Agresivo",
     description: "Apunto al máximo crecimiento. Acepto caídas fuertes si el potencial es alto.",
     color: "border-orange-700 bg-orange-950/30 text-orange-400",

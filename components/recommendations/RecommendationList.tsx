@@ -247,8 +247,14 @@ export function RecommendationList({
   const [refreshing, setRefreshing] = useState(false);
   const [riskProfile, setRiskProfile] = useState(userProfile || "moderado");
   const [modalRec, setModalRec] = useState<Rec | null>(null);
-  // Fallback a "moderado" si el endpoint de perfil no devuelve un valor
-  const effectiveUserProfile = userProfile || "moderado";
+  // Normaliza inglés → español (valores legacy del FTU) y fallback a "moderado"
+  const PROFILE_MAP: Record<string, string> = {
+    conservative: "conservador",
+    moderate: "moderado",
+    aggressive: "agresivo",
+  };
+  const normalized = userProfile ? (PROFILE_MAP[userProfile] ?? userProfile) : null;
+  const effectiveUserProfile = normalized || "moderado";
 
   async function load(force = false, profile = riskProfile) {
     force ? setRefreshing(true) : setLoading(true);
