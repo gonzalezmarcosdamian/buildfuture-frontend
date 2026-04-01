@@ -211,12 +211,19 @@ export function ProfileSection() {
             </button>
           ))}
           <Feedback msg={riskMsg} />
-          <ActionButton
-            loading={savingRisk}
-            onClick={saveRisk}
-            disabled={!selectedRisk || selectedRisk === riskProfile}
-            label="Guardar perfil"
-          />
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-out ${
+              selectedRisk && selectedRisk !== riskProfile
+                ? "max-h-16 opacity-100"
+                : "max-h-0 opacity-0"
+            }`}
+          >
+            <ActionButton
+              loading={savingRisk}
+              onClick={saveRisk}
+              label="Guardar perfil"
+            />
+          </div>
         </div>
       </AccordionCard>
 
