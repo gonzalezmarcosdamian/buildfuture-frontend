@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Info, X, Clock, Wrench } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Info, X, Plus } from "lucide-react";
 import { PerformanceChart } from "./PerformanceChart";
 import { PortfolioTabs } from "./PortfolioTabs";
 
@@ -55,6 +56,7 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
 export function PortfolioClient({ positions, totalUsd, mep, history }: Props) {
   const [mode, setMode] = useState<ViewMode>("composicion");
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
+  const router = useRouter();
 
   const chartMode = mode === "rendimientos" ? "rendimiento" : "tenencia";
   const activeInfoKey: NonNullable<InfoModal> = mode === "rendimientos" ? "rendimiento" : "tenencia";
@@ -113,23 +115,21 @@ export function PortfolioClient({ positions, totalUsd, mep, history }: Props) {
       {/* Assets list — tab controlled externally */}
       <PortfolioTabs positions={positions} totalUsd={totalUsd} mep={mep} activeTab={mode} />
 
-      {/* Coming soon: ingreso manual */}
-      <div className="bg-slate-900/50 border border-dashed border-slate-700 rounded-2xl p-4 flex items-start gap-3">
-        <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 text-slate-500">
-          <Wrench size={16} />
+      {/* Agregar posición manual */}
+      <button
+        onClick={() => router.push("/portfolio/add-manual")}
+        className="w-full flex items-center gap-3 p-4 bg-slate-900/50 border border-dashed border-slate-700 hover:border-slate-500 hover:bg-slate-900 rounded-2xl transition-colors text-left"
+      >
+        <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 text-blue-400">
+          <Plus size={16} />
         </div>
         <div>
-          <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-xs font-semibold text-slate-400">Ingreso manual de tenencias</p>
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-500 border border-slate-700 flex items-center gap-1">
-              <Clock size={9} /> Próximamente
-            </span>
-          </div>
+          <p className="text-xs font-semibold text-slate-300">Agregar posición manual</p>
           <p className="text-[10px] text-slate-600">
-            Agregá posiciones en FCI, cripto u otros activos sin API directa.
+            Cripto, FCI (Cocos, Balanz…), ETFs internacionales y más
           </p>
         </div>
-      </div>
+      </button>
     </div>
   );
 }
