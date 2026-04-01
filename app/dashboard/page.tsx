@@ -122,7 +122,10 @@ export default async function Dashboard() {
       )}
 
       {/* 4 — Recomendaciones */}
-      <RecommendationList capitalArs={savingsARS > 0 ? Math.round(savingsARS) : 500000} />
+      <RecommendationList
+        capitalArs={savingsARS > 0 ? Math.round(savingsARS) : 500000}
+        userProfile={profile?.risk_profile ?? null}
+      />
 
     </div>
   );
