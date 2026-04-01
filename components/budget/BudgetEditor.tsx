@@ -118,7 +118,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
     return Math.min(0.9, Math.max(categories[idx].percentage, 1 - otherAllocated));
   }
 
-  function updateCat(idx: number, field: keyof Category, value: any) {
+  function updateCat(idx: number, field: keyof Category, value: string | number | boolean) {
     setCategories((prev) => prev.map((c, i) => i === idx ? { ...c, [field]: value } : c));
   }
 

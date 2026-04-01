@@ -261,7 +261,7 @@ export function AddManualPosition() {
                   <Loader2 size={14} className="animate-spin" /> Cargando fondos...
                 </div>
               ) : filteredFci.length === 0 ? (
-                <p className="text-xs text-slate-600 text-center py-4">Sin resultados para "{searchQuery}"</p>
+                <p className="text-xs text-slate-600 text-center py-4">Sin resultados para &quot;{searchQuery}&quot;</p>
               ) : (
                 <>
                   <p className="text-[10px] text-slate-600 pb-1">

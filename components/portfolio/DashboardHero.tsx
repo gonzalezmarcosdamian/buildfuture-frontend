@@ -38,8 +38,10 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
   const partial = covers.find((c) => c.status === "partial");
 
   // Markers for the progress bar
-  let cumUSD = 0;
-  const markers = covers.map((c) => { cumUSD += c.amount_usd; return cumUSD; });
+  const markers = covers.reduce<number[]>((acc, c) => {
+    acc.push((acc[acc.length - 1] ?? 0) + c.amount_usd);
+    return acc;
+  }, []);
 
   // Next unlock
   const nextTarget = partial ?? covers.find((c) => c.status === "pending");

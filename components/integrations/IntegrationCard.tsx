@@ -21,7 +21,7 @@ const providerMeta: Record<string, { label: string; description: string; color: 
   },
 };
 
-export function IntegrationCard({ integration }: { integration: any }) {
+export function IntegrationCard({ integration }: { integration: { id: number; provider: string; provider_type: string; is_active: boolean; is_connected: boolean; last_synced_at: string | null; last_error: string } }) {
   const meta = providerMeta[integration.provider];
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);

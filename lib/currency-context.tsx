@@ -15,6 +15,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem("bf_currency") as Currency | null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored === "USD" || stored === "ARS") setCurrency(stored);
   }, []);
 

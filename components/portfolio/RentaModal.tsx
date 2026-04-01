@@ -116,7 +116,7 @@ function RentaModal({ mep, onClose }: Props & { onClose: () => void }) {
               <span className="text-[11px] text-slate-300 font-medium">Acciones y ETFs USA</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              No pagan cupón. Su "renta" es la suba de precio. Mostramos la apreciación histórica anualizada ÷ 12 como referencia — pero cada mes puede ser muy distinto.
+              No pagan cupón. Su &quot;renta&quot; es la suba de precio. Mostramos la apreciación histórica anualizada ÷ 12 como referencia — pero cada mes puede ser muy distinto.
             </p>
             <div className="bg-slate-900 rounded-lg p-2.5 space-y-1 font-mono text-[10px]">
               <div className="text-slate-500">Ejemplo: {fmt(cedearCapitalUsd)} en QQQ, historial ~15%/año</div>

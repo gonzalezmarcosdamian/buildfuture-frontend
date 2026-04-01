@@ -18,6 +18,7 @@ export function BottomNav() {
 
   // Cuando el pathname cambia, la navegación completó
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPending(null);
   }, [pathname]);
 
