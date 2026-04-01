@@ -120,7 +120,7 @@ function TRow({ label, value, dim, color }: {
 }
 
 function TenenciaTooltip({ active, payload, currency, mep }: {
-  active?: boolean; payload?: any[]; currency: "USD" | "ARS"; mep: number;
+  active?: boolean; payload?: { payload: HistoryPoint }[]; currency: "USD" | "ARS"; mep: number;
 }) {
   if (!active || !payload?.length) return null;
   const p: HistoryPoint = payload[0].payload;
@@ -158,7 +158,7 @@ function TenenciaTooltip({ active, payload, currency, mep }: {
 }
 
 function RendimientoTooltip({ active, payload, currency, mep }: {
-  active?: boolean; payload?: any[]; currency: "USD" | "ARS"; mep: number;
+  active?: boolean; payload?: { payload: HistoryPoint }[]; currency: "USD" | "ARS"; mep: number;
 }) {
   if (!active || !payload?.length) return null;
   const p: HistoryPoint = payload[0].payload;
@@ -253,10 +253,10 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
   const yWidthTenencia = yAxisWidth(totalValues);
   const yWidthRendimiento = yAxisWidth(deltaValues);
 
-  const renderTenenciaTooltip = (props: any) => (
+  const renderTenenciaTooltip = (props: { active?: boolean; payload?: { payload: HistoryPoint }[] }) => (
     <TenenciaTooltip {...props} currency={currency} mep={mep} />
   );
-  const renderRendimientoTooltip = (props: any) => (
+  const renderRendimientoTooltip = (props: { active?: boolean; payload?: { payload: HistoryPoint }[] }) => (
     <RendimientoTooltip {...props} currency={currency} mep={mep} />
   );
 
