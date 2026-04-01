@@ -253,10 +253,12 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
   const yWidthTenencia = yAxisWidth(totalValues);
   const yWidthRendimiento = yAxisWidth(deltaValues);
 
-  const renderTenenciaTooltip = (props: { active?: boolean; payload?: { payload: HistoryPoint }[] }) => (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const renderTenenciaTooltip = (props: any) => (
     <TenenciaTooltip {...props} currency={currency} mep={mep} />
   );
-  const renderRendimientoTooltip = (props: { active?: boolean; payload?: { payload: HistoryPoint }[] }) => (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const renderRendimientoTooltip = (props: any) => (
     <RendimientoTooltip {...props} currency={currency} mep={mep} />
   );
 

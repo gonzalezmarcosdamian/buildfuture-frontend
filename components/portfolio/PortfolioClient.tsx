@@ -27,7 +27,8 @@ interface Props {
   positions: Position[];
   totalUsd: number;
   mep: number;
-  history: { period: "daily" | "monthly" | "annual"; points: Record<string, unknown>[]; has_data: boolean };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  history: { period: "daily" | "monthly" | "annual"; points: any[]; has_data: boolean };
 }
 
 const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: string[] }> = {
