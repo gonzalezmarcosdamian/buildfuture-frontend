@@ -56,8 +56,10 @@ function calcNeto(bruto: number, descPct: number) {
   return Math.round(bruto * (1 - descPct));
 }
 
-// Clases para ocultar las flechas de type="number" en todos los browsers
-const NO_SPIN = "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+// Formatea enteros ARS con separador de miles (es-AR usa punto)
+const fmt = (n: number) => (n > 0 ? Math.round(n).toLocaleString("es-AR") : "");
+// Extrae sólo dígitos y convierte a número
+const parse = (s: string) => parseInt(s.replace(/\D/g, ""), 10) || 0;
 
 export function BudgetEditor({ initial }: { initial: Budget }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
@@ -163,13 +165,13 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Sueldo bruto mensual (ARS)</label>
               <input
-                type="number"
-                min="0"
-                step="1"
-                value={bruto || ""}
-                placeholder="800000"
-                onChange={(e) => { const b = Math.round(Number(e.target.value)) || 0; setBruto(b); setIncome(calcNeto(b, descPct)); }}
-                className={`w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 ${NO_SPIN}`}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={fmt(bruto)}
+                placeholder="800.000"
+                onChange={(e) => { const b = parse(e.target.value); setBruto(b); setIncome(calcNeto(b, descPct)); }}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
                 style={INPUT_STYLE}
               />
             </div>
@@ -205,13 +207,13 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Sueldo neto mensual (ARS)</label>
               <input
-                type="number"
-                min="0"
-                step="1"
-                value={income || ""}
-                placeholder="664000"
-                onChange={(e) => setIncome(Math.round(Number(e.target.value)) || 0)}
-                className={`w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 ${NO_SPIN}`}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={fmt(income)}
+                placeholder="664.000"
+                onChange={(e) => setIncome(parse(e.target.value))}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
                 style={INPUT_STYLE}
               />
             </div>
@@ -368,9 +370,9 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={Math.round(income * cat.percentage)}
+                  value={fmt(income * cat.percentage)}
                   onChange={(e) => {
-                    const ars = Number(e.target.value);
+                    const ars = parse(e.target.value);
                     const pct = income > 0 ? Math.min(ars / income, maxForCat(i)) : 0;
                     updateCat(i, "percentage", Math.max(0, isNaN(pct) ? 0 : pct));
                   }}
