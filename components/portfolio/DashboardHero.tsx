@@ -53,28 +53,36 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
       {/* ── Top: números y toggle ─────────────────────────────── */}
       <div className="p-5 space-y-4">
         <div className="flex items-start justify-between">
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
               Tu portafolio trabaja por vos
             </p>
             <div className="flex items-end gap-1.5">
-              <span className="text-4xl font-extrabold text-emerald-400">
+              <span
+                className="font-extrabold text-emerald-400 whitespace-nowrap"
+                style={{ fontSize: "clamp(1.15rem, 6.5vw, 2.25rem)" }}
+              >
                 +{fmt(monthlyReturn)}
               </span>
-              <span className="text-sm text-slate-500 mb-1">/mes</span>
+              <span className="text-sm text-slate-500 mb-1 shrink-0">/mes</span>
             </div>
-            <p className="text-[10px] text-slate-500 mt-0.5">
+            <p className="text-[10px] text-slate-500 mt-0.5 truncate">
               de {fmt(monthlyExpenses)} en gastos ·{" "}
               <span className="text-emerald-500 font-medium">
                 {(coveragePct * 100).toFixed(1)}% cubierto
               </span>
             </p>
           </div>
-          <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <div className="flex flex-col items-end gap-1.5 shrink-0 ml-2">
             <CurrencyToggle />
             <div className="text-right">
               <p className="text-[9px] text-slate-600 uppercase tracking-wider">Portafolio</p>
-              <p className="text-lg font-bold text-slate-300">{fmt(portfolioTotal)}</p>
+              <p
+                className="font-bold text-slate-300 whitespace-nowrap"
+                style={{ fontSize: "clamp(0.75rem, 3.5vw, 1.125rem)" }}
+              >
+                {fmt(portfolioTotal)}
+              </p>
             </div>
           </div>
         </div>
