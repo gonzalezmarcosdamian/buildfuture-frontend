@@ -18,7 +18,6 @@ interface Position {
   annual_yield_pct: number;
   current_price_usd: number;
   avg_purchase_price_usd: number;
-  snapshot_date?: string | null;
 }
 
 export type TabMode = "composicion" | "rendimientos";
@@ -49,22 +48,6 @@ const ASSET_BADGES: Record<string, string> = {
 };
 
 const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" };
-
-const SOURCE_BADGES: Record<string, string> = {
-  IOL:    "bg-blue-900/60 text-blue-400",
-  PPI:    "bg-purple-900/60 text-purple-400",
-  NEXO:   "bg-green-900/60 text-green-400",
-  MANUAL: "bg-slate-700/60 text-slate-400",
-};
-
-function SourceBadge({ source }: { source: string }) {
-  const cls = SOURCE_BADGES[source] ?? "bg-slate-700/60 text-slate-400";
-  return (
-    <span className={`text-[9px] px-1 py-0.5 rounded font-medium ${cls}`}>
-      {source}
-    </span>
-  );
-}
 
 export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
   const tab = activeTab;
@@ -142,7 +125,9 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                       <div className="flex items-center gap-1.5">
                         <span className="text-base leading-none">💵</span>
                         <span className="text-xs font-semibold text-slate-200">Disponible</span>
-                        <SourceBadge source={p.source} />
+                        <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES.CASH}`}>
+                          IOL
+                        </span>
                       </div>
                       <p className="text-[10px] text-slate-500 mt-0.5">Sin invertir</p>
                     </div>
@@ -170,7 +155,6 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                       <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-slate-700 text-slate-300"}`}>
                         {p.asset_type}
                       </span>
-                      <SourceBadge source={p.source} />
                     </div>
                     <p className="text-[10px] text-slate-500">{p.quantity.toLocaleString("es-AR")} u.</p>
                   </div>
@@ -205,11 +189,8 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
-                      <SourceBadge source={p.source} />
-                    </div>
-                    <span className="text-[10px] text-slate-500">{p.description.split(" ").slice(0, 3).join(" ")}</span>
+                    <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
+                    <span className="text-[10px] text-slate-500 ml-1.5">{p.description.split(" ").slice(0, 3).join(" ")}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="text-right">

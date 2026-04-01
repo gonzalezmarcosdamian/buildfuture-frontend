@@ -29,6 +29,8 @@ interface HistoryPoint {
   pnl_usd: number;
   pnl_pct: number;
   fx_mep: number;
+  market_gain_usd?: number;
+  capital_in_usd?: number;
   displayTotal?: number;
   displayDelta?: number;
   displayPnl?: number;
@@ -226,18 +228,15 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
     }
   }
 
-  const chartData: HistoryPoint[] = data.points.map((p, i, arr) => {
-    const prevPnl = i > 0 ? (arr[i - 1].pnl_usd ?? 0) : (p.pnl_usd ?? 0);
-    const marketGain = i === 0 ? 0 : (p.pnl_usd ?? 0) - prevPnl;
-    const capitalIn = i === 0 ? p.delta_usd : p.delta_usd - marketGain;
+  const chartData: HistoryPoint[] = data.points.map((p) => {
     const toDisplay = (v: number) => currency === "ARS" ? v * mep : v;
     return {
       ...p,
       displayTotal: toDisplay(p.total_usd),
       displayDelta: toDisplay(p.delta_usd),
       displayPnl: toDisplay(p.pnl_usd ?? 0),
-      displayMarketGain: toDisplay(marketGain),
-      displayCapitalIn: toDisplay(capitalIn),
+      displayMarketGain: toDisplay(p.market_gain_usd ?? p.delta_usd),
+      displayCapitalIn: toDisplay(p.capital_in_usd ?? 0),
     };
   });
 
