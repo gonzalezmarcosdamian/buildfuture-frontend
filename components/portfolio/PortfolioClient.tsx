@@ -115,21 +115,18 @@ export function PortfolioClient({ positions, totalUsd, mep, history }: Props) {
       {/* Assets list — tab controlled externally */}
       <PortfolioTabs positions={positions} totalUsd={totalUsd} mep={mep} activeTab={mode} />
 
-      {/* Agregar posición manual */}
-      <button
-        onClick={() => router.push("/portfolio/add-manual")}
-        className="w-full flex items-center gap-3 p-4 bg-slate-900/50 border border-dashed border-slate-700 hover:border-slate-500 hover:bg-slate-900 rounded-2xl transition-colors text-left"
-      >
-        <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 text-blue-400">
+      {/* Agregar posición manual — próximamente */}
+      <div className="w-full flex items-center gap-3 p-4 bg-slate-900/30 border border-dashed border-slate-800 rounded-2xl opacity-50 cursor-not-allowed">
+        <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 text-slate-600">
           <Plus size={16} />
         </div>
         <div>
-          <p className="text-xs font-semibold text-slate-300">Agregar posición manual</p>
+          <p className="text-xs font-semibold text-slate-500">Agregar posición manual</p>
           <p className="text-[10px] text-slate-600">
-            Cripto, FCI (Cocos, Balanz…), ETFs internacionales y más
+            Próximamente · Cripto, FCI, ETFs internacionales y más
           </p>
         </div>
-      </button>
+      </div>
     </div>
   );
 }

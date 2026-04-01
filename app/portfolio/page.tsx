@@ -20,13 +20,10 @@ export default async function Portfolio() {
     <div className="px-4 pt-8 pb-24 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-slate-100">Portafolio</h1>
-        <Link
-          href="/portfolio/add-manual"
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-300 transition-colors"
-        >
+        <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-slate-800/50 border border-slate-800 rounded-xl text-slate-600 cursor-not-allowed opacity-50">
           <Plus size={12} />
           Agregar manual
-        </Link>
+        </span>
       </div>
 
       <PortfolioHeader
