@@ -346,29 +346,26 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
               />
               <div className="flex items-center gap-1">
                 <input
-                  type="number"
-                  min={0}
-                  max={(maxForCat(i) * 100).toFixed(0)}
+                  type="text"
+                  inputMode="numeric"
                   value={(cat.percentage * 100).toFixed(0)}
                   onChange={(e) => {
                     const v = Math.min(Number(e.target.value) / 100, maxForCat(i));
-                    updateCat(i, "percentage", Math.max(0, v));
+                    updateCat(i, "percentage", Math.max(0, isNaN(v) ? 0 : v));
                   }}
-                  className="w-10 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-[10px] text-slate-300 text-center focus:outline-none focus:border-blue-500"
-                  style={INPUT_STYLE}
+                  className="w-10 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs text-slate-300 text-center focus:outline-none focus:border-blue-500"
                 />
                 <span className="text-[10px] text-slate-500">%</span>
                 <input
-                  type="number"
-                  min={0}
+                  type="text"
+                  inputMode="numeric"
                   value={Math.round(income * cat.percentage)}
                   onChange={(e) => {
                     const ars = Number(e.target.value);
                     const pct = income > 0 ? Math.min(ars / income, maxForCat(i)) : 0;
-                    updateCat(i, "percentage", Math.max(0, pct));
+                    updateCat(i, "percentage", Math.max(0, isNaN(pct) ? 0 : pct));
                   }}
-                  className="w-20 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-[10px] text-slate-300 text-right focus:outline-none focus:border-blue-500"
-                  style={INPUT_STYLE}
+                  className="w-20 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-xs text-slate-300 text-right focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
