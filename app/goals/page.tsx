@@ -1,5 +1,6 @@
 import { fetchGamification, fetchFreedomScore, fetchBudget } from "@/lib/api-server";
 import { PortfolioCovers } from "@/components/goals/PortfolioCovers";
+import { SavingsGoalsTeaser } from "@/components/goals/SavingsGoalsTeaser";
 import { CurrencyValue } from "@/components/ui/CurrencyValue";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { Target, Lock, Zap } from "lucide-react";
@@ -81,6 +82,9 @@ export default async function Goals() {
       <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
         <PortfolioCovers monthly_return_usd={monthlyReturn} items={covers} mep={mep} />
       </div>
+
+      {/* Objetivos de capital — teaser */}
+      <SavingsGoalsTeaser />
 
       {/* Roadmap */}
       {unlockRoadmap.length > 0 && (

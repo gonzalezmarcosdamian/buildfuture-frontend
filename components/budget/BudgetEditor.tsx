@@ -1,8 +1,11 @@
 "use client";
 import { supabase } from "@/lib/supabase";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from "lucide-react";
 import { formatARS } from "@/lib/formatters";
+
+// fix iOS zoom: todos los inputs deben tener font-size >= 16px
+const INPUT_STYLE = { fontSize: "16px" } as const;
 
 interface Category {
   id?: number;
@@ -47,10 +50,23 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
   const [fxLoading, setFxLoading] = useState(false);
   const [fxDirty, setFxDirty] = useState(false);
   const [categories, setCategories] = useState<Category[]>(initial.categories);
+  const [openEmojiIdx, setOpenEmojiIdx] = useState<number | null>(null);
+  const emojiRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     refreshFx();
   }, []);
+
+  useEffect(() => {
+    if (openEmojiIdx === null) return;
+    function handleClick(e: MouseEvent) {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setOpenEmojiIdx(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [openEmojiIdx]);
 
   async function refreshFx() {
     setFxLoading(true);
@@ -125,6 +141,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                 value={bruto}
                 onChange={(e) => { const b = Number(e.target.value); setBruto(b); setIncome(calcNeto(b, descPct)); }}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                style={INPUT_STYLE}
               />
             </div>
             <div className="bg-slate-800 rounded-xl p-3 space-y-2">
@@ -163,6 +180,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                 value={income}
                 onChange={(e) => setIncome(Number(e.target.value))}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                style={INPUT_STYLE}
               />
             </div>
             <button
@@ -235,27 +253,49 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
       <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
         <p className="text-sm font-semibold text-slate-100">Distribución</p>
 
+        <div ref={emojiRef}>
         {categories.map((cat, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                const cur = ICONS.indexOf(cat.icon);
-                updateCat(i, "icon", ICONS[(cur + 1) % ICONS.length]);
-              }}
-              className="text-lg shrink-0"
-            >
-              {cat.icon}
-            </button>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="text"
-                  value={cat.name}
-                  onChange={(e) => updateCat(i, "name", e.target.value)}
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 min-w-0"
-                />
-              </div>
+          <div key={i} className="flex items-center gap-2 py-1">
+
+            {/* Emoji picker */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setOpenEmojiIdx(openEmojiIdx === i ? null : i)}
+                className="text-lg w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-700 active:bg-slate-600 transition-colors"
+              >
+                {cat.icon}
+              </button>
+              {openEmojiIdx === i && (
+                <div className="absolute left-0 top-9 z-50 bg-slate-800 border border-slate-700 rounded-xl p-2 grid grid-cols-4 gap-1 shadow-xl shadow-black/40 w-36">
+                  {ICONS.map((ic) => (
+                    <button
+                      key={ic}
+                      type="button"
+                      onClick={() => { updateCat(i, "icon", ic); setOpenEmojiIdx(null); }}
+                      className={`text-base w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${
+                        cat.icon === ic ? "bg-blue-600" : "hover:bg-slate-700"
+                      }`}
+                    >
+                      {ic}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* Nombre */}
+            <div className="flex-1 min-w-0">
+              <input
+                type="text"
+                value={cat.name}
+                onChange={(e) => updateCat(i, "name", e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 min-w-0"
+                style={INPUT_STYLE}
+              />
+            </div>
+
+            {/* Slider + inputs */}
             <div className="flex flex-col gap-1 shrink-0">
               <input
                 type="range"
@@ -272,6 +312,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                   value={(cat.percentage * 100).toFixed(0)}
                   onChange={(e) => updateCat(i, "percentage", Math.min(Number(e.target.value) / 100, 0.5))}
                   className="w-10 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-[10px] text-slate-300 text-center focus:outline-none focus:border-blue-500"
+                  style={INPUT_STYLE}
                 />
                 <span className="text-[10px] text-slate-500">%</span>
                 <input
@@ -283,14 +324,17 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                     updateCat(i, "percentage", pct);
                   }}
                   className="w-20 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-[10px] text-slate-300 text-right focus:outline-none focus:border-blue-500"
+                  style={INPUT_STYLE}
                 />
               </div>
             </div>
+
             <button onClick={() => removeCategory(i)} className="text-slate-600 hover:text-red-400 shrink-0">
               <Trash2 size={13} />
             </button>
           </div>
         ))}
+        </div>
 
         <button
           onClick={addCategory}
