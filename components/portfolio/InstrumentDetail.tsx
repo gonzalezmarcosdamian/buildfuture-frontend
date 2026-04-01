@@ -112,6 +112,12 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
           sub={hint(inst.cost_basis_usd)}
         />
         <MetricRow
+          label="Ganancia neta"
+          value={`${inst.pnl_usd >= 0 ? "+" : ""}${FLAG[currency]} ${fmt(inst.pnl_usd)}`}
+          sub={`${formatPct(inst.performance_pct, 2, true)} · ${hint(inst.pnl_usd)}`}
+          highlight={inst.pnl_usd >= 0 ? "green" : "red"}
+        />
+        <MetricRow
           label="Renta mensual estimada"
           value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
           sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(1)}%`}
@@ -158,6 +164,12 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
         label="Tenencia valorizada"
         value={`${FLAG[currency]} ${fmt(inst.current_value_usd)}`}
         sub={hint(inst.current_value_usd)}
+      />
+      <MetricRow
+        label="Ganancia neta"
+        value={`${inst.pnl_usd >= 0 ? "+" : ""}${FLAG[currency]} ${fmt(inst.pnl_usd)}`}
+        sub={`${formatPct(inst.performance_pct, 2, true)} · ${hint(inst.pnl_usd)}`}
+        highlight={inst.pnl_usd >= 0 ? "green" : "red"}
       />
       <MetricRow
         label="Renta mensual estimada"
