@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile } from "@/lib/api-server";
+import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile, fetchIntegrations } from "@/lib/api-server";
 import { formatUSD, formatARS } from "@/lib/formatters";
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
 import { InvestmentStreak } from "@/components/goals/InvestmentStreak";
+import { SyncButton } from "@/components/portfolio/SyncButton";
 
 export const dynamic = "force-dynamic";
 
@@ -49,13 +50,15 @@ function BudgetFlow({
 }
 
 export default async function Dashboard() {
-  const [score, budget, gamification, portfolio, profile] = await Promise.all([
+  const [score, budget, gamification, portfolio, profile, integrations] = await Promise.all([
     fetchFreedomScore().catch(() => ({ portfolio_total_usd: 0, monthly_expenses_usd: 0 })),
     fetchBudget().catch(() => null),
     fetchGamification().catch(() => ({ monthly_return_usd: 0, portfolio_covers: 0 })),
     fetchPortfolio().catch(() => []),
     fetchProfile().catch(() => ({ risk_profile: null, available: false })),
+    fetchIntegrations().catch(() => []),
   ]);
+  const hasIOL = Array.isArray(integrations) && integrations.some((i: any) => i.provider === "IOL" && i.is_connected);
 
   const hasBudget = !!(budget && (budget.income_monthly_ars ?? 0) > 0);
   const hasPortfolio = !!(score.portfolio_total_usd > 0) ||
@@ -89,9 +92,12 @@ export default async function Dashboard() {
           <h1 className="text-xl font-bold text-slate-100">BuildFuture</h1>
           <p className="text-xs text-slate-500">Tu camino a la libertad financiera</p>
         </div>
-        <Link href="/settings" className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white hover:bg-blue-500 transition-colors">
-          M
-        </Link>
+        <div className="flex items-center gap-2">
+          {hasIOL && <SyncButton />}
+          <Link href="/settings" className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white hover:bg-blue-500 transition-colors">
+            M
+          </Link>
+        </div>
       </div>
 
       {/* 1 — Principal */}
