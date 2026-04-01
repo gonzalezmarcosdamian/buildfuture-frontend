@@ -70,6 +70,13 @@ export async function fetchProfile(): Promise<{ risk_profile: string | null; ava
   }
 }
 
+export async function fetchInstrumentDetail(ticker: string) {
+  const res = await serverFetch(`/portfolio/instrument/${encodeURIComponent(ticker)}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error("Failed to fetch instrument");
+  return res.json();
+}
+
 export async function fetchRecommendations(params: {
   capital_ars?: number;
   risk_profile?: string;

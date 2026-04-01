@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { TrendingUp, TrendingDown, ChevronRight } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
 
@@ -52,6 +52,7 @@ const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" }
 export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
   const tab = activeTab;
   const { currency } = useCurrency();
+  const router = useRouter();
 
   const fmt  = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
   const hint = (usd: number) => currency === "USD"
@@ -110,9 +111,13 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
           </div>
 
           {/* Position list */}
-          <div className="space-y-3 pt-1 border-t border-slate-800">
+          <div className="space-y-1 pt-1 border-t border-slate-800">
             {positions.map((p) => (
-              <div key={p.id} className="flex items-center justify-between">
+              <button
+                key={p.id}
+                onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
+                className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-slate-800/60 transition-colors text-left"
+              >
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
@@ -122,16 +127,19 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                   </div>
                   <p className="text-[10px] text-slate-500">{p.quantity.toLocaleString("es-AR")} u.</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-medium text-slate-200">
-                    {FLAG[currency]} {fmt(p.current_value_usd)}
-                  </p>
-                  <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
-                  <p className="text-[10px] text-slate-500">
-                    {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
-                  </p>
+                <div className="flex items-center gap-1">
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-slate-200">
+                      {FLAG[currency]} {fmt(p.current_value_usd)}
+                    </p>
+                    <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
+                    <p className="text-[10px] text-slate-500">
+                      {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
+                    </p>
+                  </div>
+                  <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -142,20 +150,27 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
             const pnlUsd   = p.current_value_usd - p.cost_basis_usd;
             const barPct   = Math.min(Math.abs(p.performance_pct) * 100, 100);
             return (
-              <div key={p.id} className="space-y-1">
+              <button
+                key={p.id}
+                onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
+                className="w-full text-left space-y-1 hover:opacity-80 transition-opacity"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
                     <span className="text-[10px] text-slate-500 ml-1.5">{p.description.split(" ").slice(0, 3).join(" ")}</span>
                   </div>
-                  <div className="text-right">
-                    <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
-                      {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                      <span className="font-semibold">{formatPct(p.performance_pct, 1, true)}</span>
+                  <div className="flex items-center gap-1">
+                    <div className="text-right">
+                      <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
+                        {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                        <span className="font-semibold">{formatPct(p.performance_pct, 1, true)}</span>
+                      </div>
+                      <p className={`text-[10px] ${positive ? "text-emerald-600" : "text-red-600"}`}>
+                        {positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)}
+                      </p>
                     </div>
-                    <p className={`text-[10px] ${positive ? "text-emerald-600" : "text-red-600"}`}>
-                      {positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)}
-                    </p>
+                    <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
                   </div>
                 </div>
                 <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -168,7 +183,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                   <span>Costo {FLAG[currency]} {fmt(p.cost_basis_usd)}</span>
                   <span>Actual {FLAG[currency]} {fmt(p.current_value_usd)}</span>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>

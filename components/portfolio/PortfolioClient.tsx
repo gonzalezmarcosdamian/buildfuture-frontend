@@ -33,21 +33,21 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
   tenencia: {
     title: "¿Cómo se calcula la tenencia?",
     items: [
-      "Snapshot diario capturado a las 17:30 ART (cierre del mercado).",
-      "Cada posición: precio de cierre × cantidad, convertido a USD con el MEP del día.",
-      "CEDEARs: precio en ARS desde IOL ÷ MEP vigente.",
-      "LECAPs y FCI: valor técnico (nominal × precio de cierre ARS) ÷ MEP.",
-      "Total = suma de todas las posiciones en USD.",
+      "Valor total del portafolio en cada momento: precio actual × cantidad de cada activo.",
+      "Snapshot diario a las 17:30 ART. Hoy se actualiza con precios en tiempo real.",
+      "CEDEARs: precio ARS de IOL ÷ MEP del día → USD.",
+      "LECAPs y FCI: valor técnico (nominal × precio ARS) ÷ MEP.",
+      "Podés ver los valores en USD 🇺🇸 o ARS 🇦🇷 con el selector de moneda.",
     ],
   },
   rendimiento: {
-    title: "¿Cómo se calcula el rendimiento del día?",
+    title: "¿Cómo se calcula el rendimiento?",
     items: [
-      "Diferencia entre la tenencia de hoy y la del día anterior.",
-      "Barra verde: el portafolio creció ese día. Roja: bajó.",
-      "LECAPs y FCI: acumulan interés diario (TNA ÷ 365) — casi siempre verde.",
-      "CEDEARs: refleja el movimiento del subyacente en USD (via precio IOL).",
-      "Porcentaje = variación ÷ tenencia del día anterior × 100.",
+      "Ganancia o pérdida vs tu precio de compra (PPC) — no vs el día anterior.",
+      "Barra verde: el portafolio vale más de lo que pagaste. Roja: menos.",
+      "Fórmula: valor actual − costo base. El costo base usa el MEP al momento de compra.",
+      "Cada punto histórico muestra el P&L acumulado de ese día vs lo que invertiste.",
+      "Podés ver los valores en USD 🇺🇸 o ARS 🇦🇷 con el selector de moneda.",
     ],
   },
 };
