@@ -97,18 +97,19 @@ function RecCard({ rec }: { rec: Rec }) {
           </div>
         </div>
 
-        {/* Allocation + return row */}
-        <div className="flex items-center justify-between bg-slate-800/50 rounded-xl px-3 py-2">
-          <div>
-            <p className="text-[10px] text-slate-500">Asignar</p>
+        {/* Capital → retorno */}
+        <div className="bg-slate-800/50 rounded-xl px-3 py-2 space-y-1">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-slate-500">Invertir</p>
             <p className="text-xs font-semibold text-slate-200">
-              {(rec.allocation_pct * 100).toFixed(0)}% del capital
+              ${rec.amount_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD
+              <span className="text-slate-600 font-normal"> ({(rec.allocation_pct * 100).toFixed(0)}%)</span>
             </p>
           </div>
-          <div className="text-right">
+          <div className="flex items-center justify-between">
             <p className="text-[10px] text-slate-500">Retorno est.</p>
             <p className="text-xs font-semibold text-emerald-400">
-              +${rec.monthly_return_usd.toFixed(1)}/mes
+              +${rec.monthly_return_usd.toFixed(1)} USD/mes
             </p>
           </div>
         </div>
@@ -195,22 +196,32 @@ export function RecommendationList({
 
       {/* Risk profile tabs */}
       <div className="flex bg-slate-900 border border-slate-800 rounded-xl p-1 gap-1">
-        {RISK_PROFILES.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => changeProfile(p.id)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all flex flex-col items-center gap-0.5 ${
-              riskProfile === p.id
-                ? "bg-slate-700 text-slate-100"
-                : "text-slate-500 hover:text-slate-300"
-            }`}
-          >
-            <span>{p.label}</span>
-            {userProfile === p.id && (
-              <span className="text-[8px] text-blue-400 font-semibold leading-none">para vos</span>
-            )}
-          </button>
-        ))}
+        {RISK_PROFILES.map((p) => {
+          const isSelected = riskProfile === p.id;
+          const isUserProfile = userProfile === p.id;
+          return (
+            <button
+              key={p.id}
+              onClick={() => changeProfile(p.id)}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all flex flex-col items-center gap-0.5 ${
+                isSelected && isUserProfile
+                  ? "bg-blue-600 text-white"
+                  : isSelected
+                  ? "bg-slate-700 text-slate-100"
+                  : isUserProfile
+                  ? "border border-blue-800/60 text-blue-300 hover:text-blue-200"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              <span>{p.label}</span>
+              {isUserProfile && (
+                <span className={`text-[8px] font-semibold leading-none ${isSelected ? "text-blue-200" : "text-blue-400"}`}>
+                  para vos
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Carousel */}
