@@ -16,8 +16,8 @@ export default async function Portfolio() {
   ]);
   const connectedALYCs: string[] = Array.isArray(integrations)
     ? integrations
-        .filter((i: any) => i.provider_type === "ALYC" && i.is_connected)
-        .map((i: any) => i.provider as string)
+        .filter((i: { provider_type: string; is_connected: boolean }) => i.provider_type === "ALYC" && i.is_connected)
+        .map((i: { provider: string }) => i.provider)
     : [];
 
   const { positions, summary } = data;

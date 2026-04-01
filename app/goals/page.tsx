@@ -15,7 +15,7 @@ export default async function Goals() {
   ]);
 
   const mep = budget?.fx_rate ?? 1430;
-  const covers: any[] = gamification.portfolio_covers;
+  const covers: { status: string; name: string; icon: string; amount_usd: number; covered_pct: number }[] = gamification.portfolio_covers;
   const covered = covers.filter((c) => c.status === "covered");
   const pending = covers.filter((c) => c.status === "pending");
 
