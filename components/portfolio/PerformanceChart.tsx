@@ -1,4 +1,5 @@
 "use client";
+import { supabase } from "@/lib/supabase";
 
 import { useState } from "react";
 import {
@@ -199,7 +200,9 @@ export function PerformanceChart({ initialData, mep = 1430 }: Props) {
     setPeriod(p);
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/portfolio/history?period=${p}`);
+      const { data: _s } = await supabase.auth.getSession();
+      const _tok = _s.session?.access_token;
+      const res = await fetch(`${API_URL}/portfolio/history?period=${p}`, { headers: _tok ? { Authorization: `Bearer ${_tok}` } : {} });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setData(await res.json());
     } finally {

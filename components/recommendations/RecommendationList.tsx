@@ -1,4 +1,5 @@
 "use client";
+import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Sparkles, RefreshCw, Shield, TrendingUp, Zap } from "lucide-react";
 import { formatARS } from "@/lib/formatters";
@@ -71,7 +72,9 @@ export function RecommendationList({ capitalArs = 500000 }: { capitalArs?: numbe
     force ? setRefreshing(true) : setLoading(true);
     try {
       const url = `${API_URL}/portfolio/recommendations?capital_ars=${capitalArs}&risk_profile=${profile}${force ? "&force_refresh=true" : ""}`;
-      const res = await fetch(url);
+      const { data: _s } = await supabase.auth.getSession();
+      const _tok = _s.session?.access_token;
+      const res = await fetch(url, { headers: _tok ? { Authorization: `Bearer ${_tok}` } : {} });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setData(json);
