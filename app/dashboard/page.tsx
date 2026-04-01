@@ -106,6 +106,7 @@ export default async function Dashboard() {
         monthlyExpenses={score.monthly_expenses_usd}
         covers={gamification.portfolio_covers}
         portfolioTotal={score.portfolio_total_usd}
+        portfolioTotalArs={portfolio?.summary?.total_ars ?? null}
         mep={mep}
       />
 

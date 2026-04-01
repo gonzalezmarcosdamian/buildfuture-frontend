@@ -34,6 +34,7 @@ export default async function Portfolio() {
 
       <PortfolioHeader
         totalUsd={summary.total_usd}
+        totalArs={summary.total_ars ?? null}
         monthlyReturnUsd={summary.monthly_return_usd}
         annualReturnPct={summary.annual_return_pct}
         freedomPct={summary.freedom_pct}

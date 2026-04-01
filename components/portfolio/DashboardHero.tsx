@@ -19,16 +19,19 @@ interface Props {
   monthlyExpenses: number;
   covers: CoverItem[];
   portfolioTotal: number;
+  portfolioTotalArs?: number | null;
   mep: number;
 }
 
 const VISIBLE_DEFAULT = 3;
 
-export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfolioTotal, mep }: Props) {
+export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfolioTotal, portfolioTotalArs, mep }: Props) {
   const { currency } = useCurrency();
   const [expanded, setExpanded] = useState(false);
 
   const fmt = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
+  const fmtTotal = (usd: number) =>
+    currency === "USD" ? formatUSD(usd) : formatARS(portfolioTotalArs ?? usd * mep);
 
   const coveragePct = monthlyExpenses > 0 ? Math.min(monthlyReturn / monthlyExpenses, 1) : 0;
   const coveredCount = covers.filter((c) => c.status === "covered").length;
@@ -81,7 +84,7 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
                 className="font-bold text-slate-300 whitespace-nowrap"
                 style={{ fontSize: "clamp(0.75rem, 3.5vw, 1.125rem)" }}
               >
-                {fmt(portfolioTotal)}
+                {fmtTotal(portfolioTotal)}
               </p>
             </div>
           </div>

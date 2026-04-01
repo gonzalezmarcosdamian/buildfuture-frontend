@@ -15,6 +15,7 @@ interface Position {
 
 interface Props {
   totalUsd: number;
+  totalArs?: number | null;
   monthlyReturnUsd: number;
   annualReturnPct: number;
   freedomPct: number;
@@ -24,6 +25,7 @@ interface Props {
 
 export function PortfolioHeader({
   totalUsd,
+  totalArs,
   monthlyReturnUsd,
   annualReturnPct,
   freedomPct,
@@ -37,13 +39,15 @@ export function PortfolioHeader({
     .reduce((s, p) => s + (p.current_value_usd * p.annual_yield_pct) / 12, 0);
   const monthlyVar = monthlyReturnUsd - monthlyFixed;
 
+  // Si tenemos total_ars directo de IOL, usarlo para evitar error de MEP
+  const totalArsDisplay = totalArs ?? totalUsd * mep;
   const fmt = (usd: number) =>
     currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
 
-  const total    = fmt(totalUsd);
+  const total    = currency === "USD" ? formatUSD(totalUsd) : formatARS(totalArsDisplay);
   const monthly  = fmt(monthlyReturnUsd);
   const annual   = fmt(monthlyReturnUsd * 12);
-  const hint     = currency === "USD" ? `≈ ${formatARS(totalUsd * mep)}` : `≈ ${formatUSD(totalUsd)}`;
+  const hint     = currency === "USD" ? `≈ ${formatARS(totalArsDisplay)}` : `≈ ${formatUSD(totalUsd)}`;
   const monthHint= currency === "USD" ? `≈ ${formatARS(monthlyReturnUsd * mep)}` : `≈ ${formatUSD(monthlyReturnUsd)}`;
 
   return (
