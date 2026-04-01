@@ -28,7 +28,24 @@ interface Budget {
 }
 
 const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#6B7280", "#EC4899", "#14B8A6"];
-const ICONS = ["🏠", "🛒", "🚗", "🎯", "⚡", "📦", "🎓", "💊", "👕", "🍽️", "🌴"];
+const ICONS = [
+  // Hogar
+  "🏠", "💡", "🔧", "🧹", "🛋️",
+  // Comida
+  "🛒", "🍽️", "☕", "🍕", "🍺",
+  // Transporte
+  "🚗", "🚇", "⛽", "✈️", "🚲",
+  // Salud
+  "💊", "🏋️", "🧴", "🏥", "🦷",
+  // Educación y trabajo
+  "🎓", "📚", "💻", "📦", "🎯",
+  // Entretenimiento
+  "🎮", "🎬", "🎵", "🎨", "🎭",
+  // Personal
+  "👕", "💇", "👶", "🐾", "💍",
+  // Dinero y metas
+  "💰", "🌱", "🎁", "🏖️", "🛡️",
+];
 
 // Descuentos sobre el bruto en Argentina (relación de dependencia)
 // Jubilación 11% + Obra social 3% + PAMI 3% + Sindicato ~2% = ~17%
@@ -89,6 +106,12 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
   const savingsPct = Math.max(0, 1 - totalAllocated);
   const savingsARS = income * savingsPct;
   const savingsUSD = savingsARS / fxRate;
+  const remainingPct = 1 - totalAllocated; // puede ser negativo si se pasa de 100%
+
+  function maxForCat(idx: number) {
+    const otherAllocated = totalAllocated - categories[idx].percentage;
+    return Math.min(0.9, Math.max(categories[idx].percentage, 1 - otherAllocated));
+  }
 
   function updateCat(idx: number, field: keyof Category, value: any) {
     setCategories((prev) => prev.map((c, i) => i === idx ? { ...c, [field]: value } : c));
@@ -253,6 +276,21 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
       <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
         <p className="text-sm font-semibold text-slate-100">Distribución</p>
 
+        {totalAllocated >= 1.0 && (
+          <div className="flex items-center gap-2 bg-red-950/40 border border-red-800/60 rounded-xl px-3 py-2">
+            <span className="text-sm">🚨</span>
+            <p className="text-xs text-red-400 font-medium">Sin capacidad de ahorro — superaste el 100%</p>
+          </div>
+        )}
+        {totalAllocated >= 0.95 && totalAllocated < 1.0 && (
+          <div className="flex items-center gap-2 bg-yellow-950/40 border border-yellow-800/60 rounded-xl px-3 py-2">
+            <span className="text-sm">⚠️</span>
+            <p className="text-xs text-yellow-400 font-medium">
+              Capacidad de ahorro muy baja ({(savingsPct * 100).toFixed(0)}%)
+            </p>
+          </div>
+        )}
+
         <div ref={emojiRef}>
         {categories.map((cat, i) => (
           <div key={i} className="flex items-center gap-2 py-1">
@@ -267,7 +305,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                 {cat.icon}
               </button>
               {openEmojiIdx === i && (
-                <div className="absolute left-0 top-9 z-50 bg-slate-800 border border-slate-700 rounded-xl p-2 grid grid-cols-4 gap-1 shadow-xl shadow-black/40 w-36">
+                <div className="absolute left-0 top-9 z-50 bg-slate-800 border border-slate-700 rounded-xl p-2 grid grid-cols-5 gap-1 shadow-xl shadow-black/40 w-44">
                   {ICONS.map((ic) => (
                     <button
                       key={ic}
@@ -300,7 +338,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
               <input
                 type="range"
                 min={0}
-                max={0.5}
+                max={maxForCat(i)}
                 step={0.005}
                 value={cat.percentage}
                 onChange={(e) => updateCat(i, "percentage", Number(e.target.value))}
@@ -309,19 +347,25 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
               <div className="flex items-center gap-1">
                 <input
                   type="number"
+                  min={0}
+                  max={(maxForCat(i) * 100).toFixed(0)}
                   value={(cat.percentage * 100).toFixed(0)}
-                  onChange={(e) => updateCat(i, "percentage", Math.min(Number(e.target.value) / 100, 0.5))}
+                  onChange={(e) => {
+                    const v = Math.min(Number(e.target.value) / 100, maxForCat(i));
+                    updateCat(i, "percentage", Math.max(0, v));
+                  }}
                   className="w-10 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-[10px] text-slate-300 text-center focus:outline-none focus:border-blue-500"
                   style={INPUT_STYLE}
                 />
                 <span className="text-[10px] text-slate-500">%</span>
                 <input
                   type="number"
+                  min={0}
                   value={Math.round(income * cat.percentage)}
                   onChange={(e) => {
                     const ars = Number(e.target.value);
-                    const pct = income > 0 ? Math.min(ars / income, 0.5) : 0;
-                    updateCat(i, "percentage", pct);
+                    const pct = income > 0 ? Math.min(ars / income, maxForCat(i)) : 0;
+                    updateCat(i, "percentage", Math.max(0, pct));
                   }}
                   className="w-20 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-[10px] text-slate-300 text-right focus:outline-none focus:border-blue-500"
                   style={INPUT_STYLE}
@@ -346,14 +390,26 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
       </div>
 
       {/* Resumen inversión */}
-      <div className="bg-emerald-950/20 border border-emerald-900/50 rounded-2xl p-4">
-        <p className="text-xs text-emerald-400 font-medium mb-2">Disponible para invertir</p>
-        <p className="text-3xl font-bold text-emerald-400">{formatARS(savingsARS)}</p>
-        <p className="text-sm text-emerald-500 mt-1">≈ USD {savingsUSD.toFixed(0)} por mes · {(savingsPct * 100).toFixed(0)}% del ingreso</p>
-        <p className="text-[10px] text-emerald-600 mt-2">
-          En 12 meses: USD {(savingsUSD * 12).toFixed(0)} acumulados (sin rendimiento)
-        </p>
-      </div>
+      {(() => {
+        const danger = totalAllocated >= 1.0;
+        const warn = totalAllocated >= 0.95 && !danger;
+        const bg = danger ? "bg-red-950/30 border-red-800/50" : warn ? "bg-yellow-950/30 border-yellow-800/50" : "bg-emerald-950/20 border-emerald-900/50";
+        const accent = danger ? "text-red-400" : warn ? "text-yellow-400" : "text-emerald-400";
+        const sub = danger ? "text-red-500" : warn ? "text-yellow-500" : "text-emerald-500";
+        const muted = danger ? "text-red-700" : warn ? "text-yellow-700" : "text-emerald-600";
+        return (
+          <div className={`border rounded-2xl p-4 ${bg}`}>
+            <p className={`text-xs font-medium mb-2 ${accent}`}>Disponible para invertir</p>
+            <p className={`text-3xl font-bold ${accent}`}>{formatARS(savingsARS)}</p>
+            <p className={`text-sm mt-1 ${sub}`}>≈ USD {savingsUSD.toFixed(0)} por mes · {(savingsPct * 100).toFixed(0)}% del ingreso</p>
+            {!danger && (
+              <p className={`text-[10px] mt-2 ${muted}`}>
+                En 12 meses: USD {(savingsUSD * 12).toFixed(0)} acumulados (sin rendimiento)
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Guardar */}
       <button
