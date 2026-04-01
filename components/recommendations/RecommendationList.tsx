@@ -1,8 +1,14 @@
 "use client";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
-import { Sparkles, RefreshCw, Shield, TrendingUp, Zap } from "lucide-react";
-import { formatARS } from "@/lib/formatters";
+import { createPortal } from "react-dom";
+import { RefreshCw, Shield, TrendingUp, Zap, X, Info } from "lucide-react";
+
+interface AgentSignal {
+  agent: string;
+  conviction: number;
+  signal: string;
+}
 
 interface Rec {
   rank: number;
@@ -19,6 +25,7 @@ interface Rec {
   amount_usd: number;
   monthly_return_usd: number;
   is_hero: boolean;
+  agents_agreed?: AgentSignal[];
 }
 
 interface RecsData {
@@ -28,56 +35,229 @@ interface RecsData {
   recommendations: Rec[];
 }
 
+const RISK_PROFILES = [
+  { id: "conservador", label: "Conservador" },
+  { id: "moderado",    label: "Moderado"    },
+  { id: "agresivo",    label: "Agresivo"    },
+];
+
 const riskIcon: Record<string, React.ReactNode> = {
-  bajo:  <Shield size={11} />,
-  medio: <TrendingUp size={11} />,
-  alto:  <Zap size={11} />,
+  bajo:  <Shield size={9} />,
+  medio: <TrendingUp size={9} />,
+  alto:  <Zap size={9} />,
 };
 
 const riskColor: Record<string, string> = {
-  bajo:  "text-emerald-400 bg-emerald-950/40 border-emerald-900",
-  medio: "text-yellow-400 bg-yellow-950/40 border-yellow-900",
-  alto:  "text-red-400 bg-red-950/40 border-red-900",
+  bajo:  "text-emerald-400 bg-emerald-950/40 border-emerald-900/60",
+  medio: "text-yellow-400 bg-yellow-950/40 border-yellow-900/60",
+  alto:  "text-red-400 bg-red-950/40 border-red-900/60",
 };
 
-const assetColor: Record<string, string> = {
-  LETRA:  "text-purple-400",
-  CEDEAR: "text-blue-400",
-  BOND:   "text-orange-400",
-  ON:     "text-teal-400",
+const assetBg: Record<string, string> = {
+  LETRA:  "bg-purple-950/50 border-purple-800/40 text-purple-300",
+  CEDEAR: "bg-blue-950/50 border-blue-800/40 text-blue-300",
+  BOND:   "bg-orange-950/50 border-orange-800/40 text-orange-300",
+  ON:     "bg-teal-950/50 border-teal-800/40 text-teal-300",
+  FCI:    "bg-indigo-950/50 border-indigo-800/40 text-indigo-300",
 };
 
-// Perfil recomendado para el usuario (basado en su perfil configurado)
-const RECOMMENDED_PROFILE = "moderado";
-
-const RISK_PROFILES = [
-  { id: "conservador", label: "Conservador", color: "text-emerald-400 border-emerald-800 bg-emerald-950/30" },
-  { id: "moderado",    label: "Moderado",    color: "text-yellow-400 border-yellow-800 bg-yellow-950/30" },
-  { id: "agresivo",    label: "Agresivo",    color: "text-red-400 border-red-800 bg-red-950/30" },
-];
-
-function daysUntil(iso: string) {
-  const diff = new Date(iso).getTime() - Date.now();
-  return Math.max(0, Math.ceil(diff / 86400000));
+function convictionBar(conviction: number) {
+  const pct = Math.round(conviction * 100);
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-blue-500 rounded-full"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-[9px] text-slate-500 w-6 text-right">{pct}%</span>
+    </div>
+  );
 }
 
-export function RecommendationList({ capitalArs = 500000 }: { capitalArs?: number }) {
+function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
+  if (typeof document === "undefined") return null;
+  const yieldPct = (rec.annual_yield_pct * 100).toFixed(0);
+  const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
+
+  const modal = (
+    <div
+      className="fixed inset-0 z-[999] flex items-end justify-center bg-black/70"
+      onClick={onClose}
+    >
+      <div
+        className="bg-slate-900 border border-slate-700 rounded-t-2xl w-full max-w-lg p-5 pb-8 space-y-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold ${assetStyle}`}>
+              {rec.asset_type}
+            </div>
+            {rec.is_hero && (
+              <span className="text-[9px] bg-blue-600 text-white font-semibold px-1.5 py-0.5 rounded-full">
+                top pick
+              </span>
+            )}
+          </div>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-300">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div>
+          <p className="text-lg font-bold text-slate-100">{rec.ticker}</p>
+          <p className="text-xs text-slate-500">{rec.name}</p>
+        </div>
+
+        {/* Yield + risk */}
+        <div className="flex items-center gap-3">
+          <p className="text-3xl font-bold text-emerald-400">{yieldPct}%</p>
+          <div className="space-y-1">
+            <p className="text-[10px] text-slate-600">{rec.currency}/año</p>
+            <span className={`flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full border w-fit ${riskColor[rec.risk_level]}`}>
+              {riskIcon[rec.risk_level]}
+              <span className="ml-0.5 capitalize">{rec.risk_level}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Capital → retorno */}
+        <div className="flex items-center justify-between bg-slate-800/50 rounded-xl px-3 py-2.5">
+          <div>
+            <p className="text-[10px] text-slate-500">Invertir</p>
+            <p className="text-sm font-semibold text-slate-200">
+              ${rec.amount_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] text-slate-500">Genera</p>
+            <p className="text-sm font-semibold text-emerald-400">
+              +${rec.monthly_return_usd.toFixed(1)} USD/mes
+            </p>
+          </div>
+        </div>
+
+        {/* Por qué ahora */}
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Por qué ahora</p>
+          <p className="text-xs text-slate-300 leading-relaxed">{rec.why_now || rec.rationale}</p>
+        </div>
+
+        {/* Agentes */}
+        {rec.agents_agreed && rec.agents_agreed.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+              Comité — {rec.agents_agreed.length} agente{rec.agents_agreed.length > 1 ? "s" : ""} de acuerdo
+            </p>
+            {rec.agents_agreed.map((a) => (
+              <div key={a.agent} className="space-y-0.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-medium text-slate-300">{a.agent}</p>
+                </div>
+                {convictionBar(a.conviction)}
+                <p className="text-[10px] text-slate-500 leading-snug">{a.signal}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return createPortal(modal, document.body);
+}
+
+function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
+  const yieldPct = (rec.annual_yield_pct * 100).toFixed(0);
+  const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
+
+  return (
+    <div
+      className={`snap-center shrink-0 w-[58vw] max-w-[210px] rounded-2xl border flex flex-col ${
+        rec.is_hero
+          ? "bg-gradient-to-br from-blue-950/60 to-slate-900 border-blue-800/50"
+          : "bg-slate-900 border-slate-800"
+      }`}
+    >
+      <div className="p-3 flex flex-col gap-2.5">
+        {/* Top: badge + info button */}
+        <div className="flex items-center justify-between">
+          <div className={`px-1.5 py-0.5 rounded-md border text-[9px] font-bold tracking-wide ${assetStyle}`}>
+            {rec.asset_type}
+          </div>
+          <button
+            onPointerDown={(e) => { e.stopPropagation(); }}
+            onClick={(e) => { e.stopPropagation(); onInfo(); }}
+            className="text-slate-600 hover:text-slate-400 transition-colors p-1 -m-1"
+          >
+            <Info size={13} />
+          </button>
+        </div>
+
+        {/* Ticker */}
+        <div>
+          <p className="text-sm font-bold text-slate-100 leading-tight">{rec.ticker}</p>
+          <p className="text-[10px] text-slate-500 leading-tight mt-0.5 line-clamp-1">{rec.name}</p>
+        </div>
+
+        {/* Yield */}
+        <div className="flex items-end gap-1.5">
+          <p className="text-2xl font-bold text-emerald-400 leading-none">{yieldPct}%</p>
+          <div className="pb-0.5">
+            <p className="text-[9px] text-slate-600 leading-none">{rec.currency}/año</p>
+            <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit mt-0.5 ${riskColor[rec.risk_level]}`}>
+              {riskIcon[rec.risk_level]}
+            </span>
+          </div>
+        </div>
+
+        {/* Capital → retorno */}
+        <div className="bg-slate-800/50 rounded-lg px-2.5 py-2 space-y-1">
+          <div className="flex items-center justify-between">
+            <p className="text-[9px] text-slate-500">Invertir</p>
+            <p className="text-[11px] font-semibold text-slate-200">
+              ${rec.amount_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-[9px] text-slate-500">Retorno</p>
+            <p className="text-[11px] font-semibold text-emerald-400">
+              +${rec.monthly_return_usd.toFixed(1)}/mes
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function RecommendationList({
+  capitalArs = 500000,
+  userProfile,
+}: {
+  capitalArs?: number;
+  userProfile?: string | null;
+}) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
   const [data, setData] = useState<RecsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [riskProfile, setRiskProfile] = useState(RECOMMENDED_PROFILE);
+  const [riskProfile, setRiskProfile] = useState(userProfile || "moderado");
+  const [modalRec, setModalRec] = useState<Rec | null>(null);
+  // Fallback a "moderado" si el endpoint de perfil no devuelve un valor
+  const effectiveUserProfile = userProfile || "moderado";
 
   async function load(force = false, profile = riskProfile) {
     force ? setRefreshing(true) : setLoading(true);
     try {
+      const { data: s } = await supabase.auth.getSession();
+      const token = s.session?.access_token;
       const url = `${API_URL}/portfolio/recommendations?capital_ars=${capitalArs}&risk_profile=${profile}${force ? "&force_refresh=true" : ""}`;
-      const { data: _s } = await supabase.auth.getSession();
-      const _tok = _s.session?.access_token;
-      const res = await fetch(url, { headers: _tok ? { Authorization: `Bearer ${_tok}` } : {} });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      setData(json);
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (res.ok) setData(await res.json());
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -92,159 +272,79 @@ export function RecommendationList({ capitalArs = 500000 }: { capitalArs?: numbe
   }
 
   if (loading) return (
-    <div className="space-y-3">
-      <div className="h-4 w-48 bg-slate-800 rounded animate-pulse" />
-      <div className="h-32 bg-slate-800 rounded-2xl animate-pulse" />
-      <div className="h-20 bg-slate-800 rounded-2xl animate-pulse" />
-      <div className="h-20 bg-slate-800 rounded-2xl animate-pulse" />
+    <div className="flex gap-3 overflow-hidden">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="shrink-0 w-[58vw] max-w-[210px] h-44 bg-slate-800/60 rounded-2xl animate-pulse" />
+      ))}
     </div>
   );
 
   if (!data) return null;
 
-  const hero = data.recommendations.find(r => r.is_hero);
-  const rest = data.recommendations.filter(r => !r.is_hero);
-  const days = daysUntil(data.valid_until);
+  const sorted = [...data.recommendations].sort((a, b) => (b.is_hero ? 1 : 0) - (a.is_hero ? 1 : 0));
 
   return (
-    <div className="space-y-3">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles size={14} className="text-blue-400" />
-          <h2 className="text-sm font-semibold text-slate-100">Recomendaciones</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-500">Válido {days}d</span>
+    <>
+      {modalRec && <RecModal rec={modalRec} onClose={() => setModalRec(null)} />}
+
+      <div className="space-y-3">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-100">Dónde invertir</h2>
           <button
             onClick={() => load(true)}
             disabled={refreshing}
             className="text-slate-500 hover:text-blue-400 transition-colors"
           >
-            <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
+            <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
           </button>
         </div>
-      </div>
 
-      {/* Selector perfil de riesgo */}
-      <div className="flex gap-2">
-        {RISK_PROFILES.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => changeProfile(p.id)}
-            className={`relative flex-1 py-1.5 rounded-xl text-[11px] font-medium border transition-all ${
-              riskProfile === p.id ? p.color : "text-slate-500 border-slate-800 bg-slate-900"
-            }`}
-          >
-            {p.label}
-            {p.id === RECOMMENDED_PROFILE && (
-              <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[8px] bg-yellow-500 text-black font-bold px-1.5 py-px rounded-full leading-tight whitespace-nowrap">
-                para vos
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Context summary */}
-      <p className="text-xs text-slate-400 leading-relaxed">{data.context_summary}</p>
-
-      {/* Market data pill */}
-      {(data as any).market_data && (
-        <div className="flex flex-wrap gap-2 text-[10px] text-slate-500">
-          <span>MEP ${(data as any).market_data.mep}</span>
-          <span>·</span>
-          <span>Spread {(data as any).market_data.spread_pct}%</span>
-          <span>·</span>
-          <span>Inflación {(data as any).market_data.inflation_monthly}%/mes</span>
-          <span>·</span>
-          <span>Tasa real {(data as any).market_data.tasa_real_mensual > 0 ? "+" : ""}{(data as any).market_data.tasa_real_mensual}pp</span>
-        </div>
-      )}
-
-      {/* Hero card */}
-      {hero && (
-        <div className="bg-gradient-to-br from-blue-950/60 to-slate-900 border border-blue-800/50 rounded-2xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-blue-400 bg-blue-950 border border-blue-800 px-2 py-0.5 rounded-full font-medium">
-              Mejor match para vos ahora
-            </span>
-            <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${riskColor[hero.risk_level]}`}>
-              {riskIcon[hero.risk_level]} riesgo {hero.risk_level}
-            </span>
-          </div>
-
-          <div className="flex items-start justify-between">
-            <div>
-              <p className={`text-lg font-bold ${assetColor[hero.asset_type] || "text-slate-100"}`}>
-                {hero.ticker}
-              </p>
-              <p className="text-xs text-slate-400">{hero.name}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-emerald-400">{(hero.annual_yield_pct * 100).toFixed(0)}%</p>
-              <p className="text-[10px] text-slate-500">anual en {hero.currency}</p>
-            </div>
-          </div>
-
-          <p className="text-xs text-slate-300 leading-relaxed">{hero.rationale}</p>
-
-          <div className="bg-blue-950/40 rounded-xl px-3 py-2 border border-blue-900/30">
-            <p className="text-[10px] text-blue-300 font-medium mb-0.5">Por qué ahora</p>
-            <p className="text-[11px] text-slate-400">{hero.why_now}</p>
-          </div>
-
-          <div className="flex items-center justify-between pt-1">
-            <div>
-              <p className="text-xs font-semibold text-slate-200">{formatARS(hero.amount_ars)}</p>
-              <p className="text-[10px] text-slate-500">{(hero.allocation_pct * 100).toFixed(0)}% del capital</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs font-semibold text-emerald-400">+USD {hero.monthly_return_usd.toFixed(1)}/mes</p>
-              <p className="text-[10px] text-slate-500">retorno estimado</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Resto rankeado */}
-      {rest.map((rec) => (
-        <div key={rec.ticker} className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0">
-              <span className="text-[10px] font-bold text-slate-400">#{rec.rank}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className={`text-sm font-bold ${assetColor[rec.asset_type] || "text-slate-100"}`}>
-                  {rec.ticker}
-                  <span className="text-slate-500 font-normal text-xs ml-1.5">{rec.name}</span>
-                </p>
-                <p className="text-sm font-bold text-emerald-400 shrink-0">
-                  {(rec.annual_yield_pct * 100).toFixed(0)}%
-                </p>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{rec.rationale}</p>
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center gap-2">
-                  <span className={`flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border ${riskColor[rec.risk_level]}`}>
-                    {riskIcon[rec.risk_level]} {rec.risk_level}
+        {/* Risk profile tabs */}
+        <div className="flex bg-slate-900 border border-slate-800 rounded-xl p-1 gap-1">
+          {RISK_PROFILES.map((p) => {
+            const isSelected = riskProfile === p.id;
+            const isUser = effectiveUserProfile === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => changeProfile(p.id)}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all flex flex-col items-center gap-0.5
+                  ${isSelected && isUser
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
+                    : isSelected
+                    ? "bg-slate-700 text-slate-100"
+                    : isUser
+                    ? "bg-blue-950/60 border border-blue-700/70 text-blue-300"
+                    : "text-slate-500 hover:text-slate-300"
+                  }`}
+              >
+                <span>{p.label}</span>
+                {isUser && (
+                  <span className={`text-[8px] font-bold leading-none ${isSelected ? "text-blue-100" : "text-blue-400"}`}>
+                    para vos ✦
                   </span>
-                  <span className="text-[10px] text-slate-500">{rec.currency}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-slate-400">{formatARS(rec.amount_ars)}</span>
-                  <span className="text-[10px] text-slate-500 ml-1">→ +${rec.monthly_return_usd.toFixed(1)}/mes</span>
-                </div>
-              </div>
-            </div>
-          </div>
+                )}
+              </button>
+            );
+          })}
         </div>
-      ))}
 
-      <p className="text-[10px] text-slate-600 text-center">
-        Datos en tiempo real · No es asesoramiento financiero formal
-      </p>
-    </div>
+        {/* Carousel */}
+        <div
+          className="flex overflow-x-auto snap-x snap-mandatory gap-3 -mx-4 px-4 pb-1"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+        >
+          {sorted.map((rec) => (
+            <RecCard key={rec.ticker} rec={rec} onInfo={() => setModalRec(rec)} />
+          ))}
+          <div className="shrink-0 w-2" />
+        </div>
+
+        <p className="text-[10px] text-slate-700 text-center">
+          Datos en tiempo real · No es asesoramiento financiero
+        </p>
+      </div>
+    </>
   );
 }

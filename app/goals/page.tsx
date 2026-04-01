@@ -1,6 +1,5 @@
 import { fetchGamification, fetchFreedomScore, fetchBudget } from "@/lib/api-server";
 import { PortfolioCovers } from "@/components/goals/PortfolioCovers";
-import { InvestmentStreak } from "@/components/goals/InvestmentStreak";
 import { CurrencyValue } from "@/components/ui/CurrencyValue";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { Target, Lock, Zap } from "lucide-react";
@@ -130,11 +129,6 @@ export default async function Goals() {
           ))}
         </div>
       )}
-
-      {/* Racha */}
-      <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-        <InvestmentStreak streak={gamification.streak} />
-      </div>
 
     </div>
   );
