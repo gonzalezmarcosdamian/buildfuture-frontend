@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [splash, setSplash] = useState(false);
 
   // Detect Supabase recovery session (from password-reset email link)
   useEffect(() => {
@@ -47,7 +48,8 @@ export default function LoginPage() {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) { setError(error.message); return; }
-        router.push("/dashboard");
+        setSplash(true);
+        setTimeout(() => router.push("/dashboard"), 1400);
 
       } else if (mode === "register") {
         if (password !== confirmPassword) { setError("Las contraseñas no coinciden"); return; }
@@ -77,6 +79,18 @@ export default function LoginPage() {
   }
 
   const isResetMode = mode === "reset";
+
+  if (splash) return (
+    <div className="fixed inset-0 z-[999] bg-slate-950 flex flex-col items-center justify-center gap-5 animate-in fade-in duration-300">
+      <div className="space-y-1 text-center">
+        <h1 className="text-3xl font-bold text-slate-100 tracking-tight">BuildFuture</h1>
+        <p className="text-slate-500 text-sm">Preparando tu portafolio…</p>
+      </div>
+      <div className="w-48 h-0.5 bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-full bg-blue-500 rounded-full animate-[progress_1.2s_ease-out_forwards]" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">

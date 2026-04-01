@@ -121,6 +121,11 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+@keyframes progress {
+  from { width: 0%; }
+  to   { width: 90%; }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -336,16 +336,38 @@ export function RecommendationList({
           })}
         </div>
 
-        {/* Carousel */}
-        <div
-          className="flex overflow-x-auto snap-x snap-mandatory gap-3 -mx-4 px-4 pb-1"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-        >
-          {sorted.map((rec) => (
-            <RecCard key={rec.ticker} rec={rec} onInfo={() => setModalRec(rec)} />
-          ))}
-          <div className="shrink-0 w-2" />
-        </div>
+        {/* Carousel — skeleton al cambiar perfil */}
+        {refreshing ? (
+          <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="shrink-0 w-[58vw] max-w-[210px] rounded-2xl border border-slate-800 bg-slate-900 p-3 space-y-3 animate-pulse"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-12 bg-slate-800 rounded-md" />
+                  <div className="h-4 w-4 bg-slate-800 rounded-full" />
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-4 w-16 bg-slate-800 rounded" />
+                  <div className="h-3 w-24 bg-slate-800/60 rounded" />
+                </div>
+                <div className="h-8 w-20 bg-slate-800 rounded" />
+                <div className="h-14 bg-slate-800/50 rounded-lg" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            className="flex overflow-x-auto snap-x snap-mandatory gap-3 -mx-4 px-4 pb-1"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+          >
+            {sorted.map((rec) => (
+              <RecCard key={rec.ticker} rec={rec} onInfo={() => setModalRec(rec)} />
+            ))}
+            <div className="shrink-0 w-2" />
+          </div>
+        )}
 
         <p className="text-[10px] text-slate-700 text-center">
           Datos en tiempo real · No es asesoramiento financiero
