@@ -32,6 +32,8 @@ interface HistoryPoint {
   displayTotal?: number;
   displayDelta?: number;
   displayPnl?: number;
+  displayMarketGain?: number;
+  displayCapitalIn?: number;
 }
 
 interface Props {
@@ -158,10 +160,12 @@ function RendimientoTooltip({ active, payload, currency, mep }: {
 }) {
   if (!active || !payload?.length) return null;
   const p: HistoryPoint = payload[0].payload;
-  const prevTotal = p.total_usd - p.delta_usd;
-  const gain = p.delta_usd >= 0;
-  const pct = prevTotal > 0 ? (p.delta_usd / prevTotal) * 100 : 0;
   const usedMep = p.fx_mep > 0 ? p.fx_mep : mep;
+  const marketGain = p.displayMarketGain ?? 0;
+  const capitalIn = p.displayCapitalIn ?? 0;
+  const gainPositive = marketGain >= 0;
+  const prevTotal = p.total_usd - p.delta_usd;
+  const hasCapital = Math.abs(capitalIn) > 1;
 
   return (
     <div className="bg-slate-800/95 border border-slate-700 rounded-xl px-3 py-2.5 text-xs shadow-xl min-w-[168px]">
@@ -169,16 +173,24 @@ function RendimientoTooltip({ active, payload, currency, mep }: {
       <div className="space-y-1">
         <TRow label="Cierre" value={fmtFull(p.total_usd, currency, usedMep)} />
         <div className="flex justify-between gap-4">
-          <span className="text-slate-500">Variación</span>
-          <span className={`font-semibold ${gain ? "text-emerald-400" : "text-red-400"}`}>
-            {fmtFull(p.delta_usd, currency, usedMep, true)}
+          <span className="text-slate-500">Mercado</span>
+          <span className={`font-semibold ${gainPositive ? "text-emerald-400" : "text-red-400"}`}>
+            {fmtFull(marketGain / (currency === "ARS" ? mep : 1), currency, usedMep, true)}
           </span>
         </div>
-        {prevTotal > 0 && (
+        {prevTotal > 0 && marketGain !== 0 && (
           <div className="flex justify-between gap-4">
-            <span className="text-slate-500">Var. %</span>
-            <span className={`font-semibold ${gain ? "text-emerald-400" : "text-red-400"}`}>
-              {gain ? "+" : ""}{pct.toFixed(2)}%
+            <span className="text-slate-500">Rend. %</span>
+            <span className={`font-semibold ${gainPositive ? "text-emerald-400" : "text-red-400"}`}>
+              {gainPositive ? "+" : ""}{((marketGain / (currency === "ARS" ? mep : 1)) / prevTotal * 100).toFixed(2)}%
+            </span>
+          </div>
+        )}
+        {hasCapital && (
+          <div className="flex justify-between gap-4 pt-1 mt-0.5 border-t border-slate-700/50">
+            <span className="text-slate-500">Aporte</span>
+            <span className="text-blue-400 font-medium">
+              {fmtFull(capitalIn / (currency === "ARS" ? mep : 1), currency, usedMep, true)}
             </span>
           </div>
         )}
@@ -214,17 +226,26 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
     }
   }
 
-  const chartData: HistoryPoint[] = data.points.map((p) => ({
-    ...p,
-    displayTotal: currency === "ARS" ? p.total_usd * mep : p.total_usd,
-    displayDelta: currency === "ARS" ? p.delta_usd * mep : p.delta_usd,
-    displayPnl: currency === "ARS" ? (p.pnl_usd ?? 0) * mep : (p.pnl_usd ?? 0),
-  }));
+  const chartData: HistoryPoint[] = data.points.map((p, i, arr) => {
+    const prevPnl = i > 0 ? (arr[i - 1].pnl_usd ?? 0) : (p.pnl_usd ?? 0);
+    const marketGain = i === 0 ? 0 : (p.pnl_usd ?? 0) - prevPnl;
+    const capitalIn = i === 0 ? p.delta_usd : p.delta_usd - marketGain;
+    const toDisplay = (v: number) => currency === "ARS" ? v * mep : v;
+    return {
+      ...p,
+      displayTotal: toDisplay(p.total_usd),
+      displayDelta: toDisplay(p.delta_usd),
+      displayPnl: toDisplay(p.pnl_usd ?? 0),
+      displayMarketGain: toDisplay(marketGain),
+      displayCapitalIn: toDisplay(capitalIn),
+    };
+  });
 
-  // Symmetric domain for rendimiento so 0 is always centered
+  // Symmetric domain based on max absolute market gain
   const maxAbsDelta = Math.max(
-    ...chartData.map((p) => Math.abs(p.displayDelta ?? 0)),
-    0.01, // guard against all-zero
+    ...chartData.map((p) => Math.abs(p.displayMarketGain ?? 0)),
+    ...chartData.map((p) => Math.abs(p.displayCapitalIn ?? 0)),
+    0.01,
   );
   const rendPad = maxAbsDelta * 0.25;
   const rendDomain: [number, number] = [-(maxAbsDelta + rendPad), maxAbsDelta + rendPad];
@@ -319,7 +340,7 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
         </>
       ) : (
         <ResponsiveContainer width="100%" height={176}>
-          <BarChart data={chartData} barCategoryGap="30%" margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
+          <BarChart data={chartData} barCategoryGap="30%" barGap={2} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
             <XAxis
               dataKey="label"
@@ -335,17 +356,27 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
               width={yWidthRendimiento}
               domain={rendDomain}
             />
-            {/* Eje central en 0 — bien visible */}
             <ReferenceLine y={0} stroke="#475569" strokeWidth={1.5} />
             <Tooltip
               content={renderRendimientoTooltip}
               cursor={{ fill: "#1e293b50" }}
             />
-            <Bar dataKey="displayDelta" radius={[3, 3, 3, 3]} isAnimationActive={false}>
+            {/* Aporte de capital — barra azul/slate */}
+            <Bar dataKey="displayCapitalIn" radius={[2, 2, 0, 0]} isAnimationActive={false} maxBarSize={20}>
               {chartData.map((entry, i) => (
                 <Cell
                   key={i}
-                  fill={(entry.displayDelta ?? 0) >= 0 ? "#34d399" : "#f87171"}
+                  fill="#3b82f6"
+                  fillOpacity={(entry.displayCapitalIn ?? 0) > 1 ? 0.45 : 0}
+                />
+              ))}
+            </Bar>
+            {/* Rendimiento de mercado — barra verde/roja */}
+            <Bar dataKey="displayMarketGain" radius={[3, 3, 3, 3]} isAnimationActive={false} maxBarSize={20}>
+              {chartData.map((entry, i) => (
+                <Cell
+                  key={i}
+                  fill={(entry.displayMarketGain ?? 0) >= 0 ? "#34d399" : "#f87171"}
                   fillOpacity={0.88}
                 />
               ))}
@@ -361,11 +392,15 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
             <>
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-sm bg-emerald-400 inline-block" />
-                Ganancia
+                Mercado+
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-sm bg-red-400 inline-block" />
-                Pérdida
+                Mercado−
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-sm bg-blue-500/50 inline-block" />
+                Aporte
               </span>
             </>
           )}
