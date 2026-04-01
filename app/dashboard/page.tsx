@@ -3,6 +3,7 @@ import { formatUSD, formatARS } from "@/lib/formatters";
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
+import { InvestmentStreak } from "@/components/goals/InvestmentStreak";
 
 export const dynamic = "force-dynamic";
 
@@ -113,7 +114,14 @@ export default async function Dashboard() {
         </div>
       )}
 
-      {/* 3 — Recomendaciones */}
+      {/* 3 — Racha */}
+      {gamification.streak && (
+        <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+          <InvestmentStreak streak={gamification.streak} />
+        </div>
+      )}
+
+      {/* 4 — Recomendaciones */}
       <RecommendationList capitalArs={savingsARS > 0 ? Math.round(savingsARS) : 500000} />
 
     </div>
