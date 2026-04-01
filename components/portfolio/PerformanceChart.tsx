@@ -158,28 +158,30 @@ function RendimientoTooltip({ active, payload, currency, mep }: {
 }) {
   if (!active || !payload?.length) return null;
   const p: HistoryPoint = payload[0].payload;
-  const pnl = p.pnl_usd ?? 0;
-  const pnlPct = p.pnl_pct ?? 0;
-  const gain = pnl >= 0;
+  const prevTotal = p.total_usd - p.delta_usd;
+  const gain = p.delta_usd >= 0;
+  const pct = prevTotal > 0 ? (p.delta_usd / prevTotal) * 100 : 0;
   const usedMep = p.fx_mep > 0 ? p.fx_mep : mep;
 
   return (
     <div className="bg-slate-800/95 border border-slate-700 rounded-xl px-3 py-2.5 text-xs shadow-xl min-w-[168px]">
       <p className="text-slate-400 mb-2 font-medium">{p.label}</p>
       <div className="space-y-1">
-        <TRow label="Tenencia" value={fmtFull(p.total_usd, currency, usedMep)} />
-        <div className="flex justify-between gap-4 pt-1 mt-0.5 border-t border-slate-700/50">
-          <span className="text-slate-500">vs PPC</span>
-          <span className={`font-semibold ${gain ? "text-emerald-400" : "text-red-400"}`}>
-            {fmtFull(pnl, currency, usedMep, true)}
-          </span>
-        </div>
+        <TRow label="Cierre" value={fmtFull(p.total_usd, currency, usedMep)} />
         <div className="flex justify-between gap-4">
-          <span className="text-slate-500">P&L %</span>
+          <span className="text-slate-500">Variación</span>
           <span className={`font-semibold ${gain ? "text-emerald-400" : "text-red-400"}`}>
-            {gain ? "+" : ""}{pnlPct.toFixed(2)}%
+            {fmtFull(p.delta_usd, currency, usedMep, true)}
           </span>
         </div>
+        {prevTotal > 0 && (
+          <div className="flex justify-between gap-4">
+            <span className="text-slate-500">Var. %</span>
+            <span className={`font-semibold ${gain ? "text-emerald-400" : "text-red-400"}`}>
+              {gain ? "+" : ""}{pct.toFixed(2)}%
+            </span>
+          </div>
+        )}
         {p.fx_mep > 0 && (
           <p className="text-[9px] text-slate-600 pt-1 border-t border-slate-700/50 mt-1">
             MEP ${p.fx_mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
@@ -219,18 +221,18 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
     displayPnl: currency === "ARS" ? (p.pnl_usd ?? 0) * mep : (p.pnl_usd ?? 0),
   }));
 
-  // Symmetric domain for rendimiento (P&L vs PPC) so 0 is always centered
-  const maxAbsPnl = Math.max(
-    ...chartData.map((p) => Math.abs(p.displayPnl ?? 0)),
+  // Symmetric domain for rendimiento so 0 is always centered
+  const maxAbsDelta = Math.max(
+    ...chartData.map((p) => Math.abs(p.displayDelta ?? 0)),
     0.01, // guard against all-zero
   );
-  const rendPad = maxAbsPnl * 0.25;
-  const rendDomain: [number, number] = [-(maxAbsPnl + rendPad), maxAbsPnl + rendPad];
+  const rendPad = maxAbsDelta * 0.25;
+  const rendDomain: [number, number] = [-(maxAbsDelta + rendPad), maxAbsDelta + rendPad];
 
   const totalValues = chartData.map((p) => p.displayTotal ?? 0);
-  const pnlValues = chartData.map((p) => p.displayPnl ?? 0);
+  const deltaValues = chartData.map((p) => p.displayDelta ?? 0);
   const yWidthTenencia = yAxisWidth(totalValues);
-  const yWidthRendimiento = yAxisWidth(pnlValues);
+  const yWidthRendimiento = yAxisWidth(deltaValues);
 
   const renderTenenciaTooltip = (props: any) => (
     <TenenciaTooltip {...props} currency={currency} mep={mep} />
@@ -339,11 +341,11 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
               content={renderRendimientoTooltip}
               cursor={{ fill: "#1e293b50" }}
             />
-            <Bar dataKey="displayPnl" radius={[3, 3, 3, 3]} isAnimationActive={false}>
+            <Bar dataKey="displayDelta" radius={[3, 3, 3, 3]} isAnimationActive={false}>
               {chartData.map((entry, i) => (
                 <Cell
                   key={i}
-                  fill={(entry.displayPnl ?? 0) >= 0 ? "#34d399" : "#f87171"}
+                  fill={(entry.displayDelta ?? 0) >= 0 ? "#34d399" : "#f87171"}
                   fillOpacity={0.88}
                 />
               ))}

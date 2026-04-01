@@ -41,12 +41,12 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
     ],
   },
   rendimiento: {
-    title: "¿Cómo se calcula el rendimiento?",
+    title: "¿Cómo se calcula el rendimiento del día?",
     items: [
-      "Ganancia o pérdida vs tu precio de compra (PPC) — no vs el día anterior.",
-      "Barra verde: el portafolio vale más de lo que pagaste. Roja: menos.",
-      "Fórmula: valor actual − costo base. El costo base usa el MEP al momento de compra.",
-      "Cada punto histórico muestra el P&L acumulado de ese día vs lo que invertiste.",
+      "Diferencia entre la tenencia de hoy y la del día anterior.",
+      "Barra verde: el portafolio creció ese día. Roja: bajó.",
+      "LECAPs y FCI: acumulan interés diario (TNA ÷ 365) — casi siempre verde.",
+      "CEDEARs: refleja el movimiento del subyacente en USD (via precio IOL).",
       "Podés ver los valores en USD 🇺🇸 o ARS 🇦🇷 con el selector de moneda.",
     ],
   },
