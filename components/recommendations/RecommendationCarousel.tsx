@@ -1,4 +1,5 @@
 "use client";
+import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useRef } from "react";
 import { TrendingUp, Shield, Zap, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatARS } from "@/lib/formatters";
@@ -46,7 +47,7 @@ export function RecommendationCarousel({ capitalArs = 500000, fxRate = 1320 }: {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/portfolio/recommendations?capital_ars=${capitalArs}&fx_rate=${fxRate}&risk_profile=moderado`)
+    supabase.auth.getSession().then(({ data: _s }) => fetch(`${API_URL}/portfolio/recommendations?capital_ars=${capitalArs}&fx_rate=${fxRate}&risk_profile=moderado`, { headers: _s.session?.access_token ? { Authorization: `Bearer ${_s.session.access_token}` } : {} }))
       .then((r) => r.json())
       .then((data) => { setRecs(data); setLoading(false); })
       .catch(() => setLoading(false));
