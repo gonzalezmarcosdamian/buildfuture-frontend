@@ -68,7 +68,7 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
         return;
       }
       setRiskSaved(true);
-      // Full reload para que el server re-evalúe el FTU status
+      localStorage.setItem("bf_risk_profile", selectedRisk);
       window.location.href = "/dashboard";
     } catch {
       setSaveError("No se pudo conectar con el servidor");

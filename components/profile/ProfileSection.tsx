@@ -66,11 +66,22 @@ export function ProfileSection() {
       setNameInput(name);
     });
 
+    // localStorage como fuente inmediata mientras el backend responde
+    const local = localStorage.getItem("bf_risk_profile");
+    if (local) {
+      setRiskProfile(local);
+      setSelectedRisk(local);
+    }
+
     authFetch("/profile/").then(async (res) => {
       if (!res.ok) return;
       const d = await res.json();
-      setRiskProfile(d.risk_profile ?? null);
-      setSelectedRisk(d.risk_profile ?? null);
+      const saved = d.risk_profile ?? null;
+      if (saved) {
+        setRiskProfile(saved);
+        setSelectedRisk(saved);
+        localStorage.setItem("bf_risk_profile", saved);
+      }
     }).catch(() => {});
   }, []);
 
@@ -126,6 +137,7 @@ export function ProfileSection() {
         return;
       }
       setRiskProfile(selectedRisk);
+      localStorage.setItem("bf_risk_profile", selectedRisk);
       setRiskMsg({ ok: true, text: "Perfil de riesgo actualizado." });
     } finally {
       setSavingRisk(false);
@@ -195,21 +207,33 @@ export function ProfileSection() {
         onToggle={() => toggle("risk")}
       >
         <div className="space-y-2">
-          {RISK_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setSelectedRisk(opt.value)}
-              className={`w-full text-left p-3 rounded-xl border transition-colors ${
-                selectedRisk === opt.value
-                  ? "border-blue-600 bg-blue-950/30 text-blue-300"
-                  : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
-              }`}
-            >
-              <p className="text-xs font-semibold">{opt.label}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">{opt.desc}</p>
-            </button>
-          ))}
+          {RISK_OPTIONS.map((opt) => {
+            const isSaved    = opt.value === riskProfile;
+            const isSelected = opt.value === selectedRisk;
+            const isPending  = isSelected && !isSaved;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSelectedRisk(opt.value)}
+                className={`w-full text-left p-3 rounded-xl border transition-colors ${
+                  isSaved
+                    ? "border-emerald-700 bg-emerald-950/30 text-emerald-300"
+                    : isPending
+                    ? "border-blue-600 bg-blue-950/30 text-blue-300"
+                    : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold">{opt.label}</p>
+                  {isSaved && (
+                    <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">{opt.desc}</p>
+              </button>
+            );
+          })}
           <Feedback msg={riskMsg} />
           <div
             className={`overflow-hidden transition-all duration-300 ease-out ${
