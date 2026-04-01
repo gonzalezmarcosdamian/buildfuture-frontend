@@ -127,8 +127,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden; /* evita scroll horizontal por bleed del carousel */
   }
   html {
     @apply font-sans;
+    overflow-x: hidden;
   }
 }

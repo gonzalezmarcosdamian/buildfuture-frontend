@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile } from "@/lib/api-server";
 import { formatUSD, formatARS } from "@/lib/formatters";
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
@@ -88,9 +89,9 @@ export default async function Dashboard() {
           <h1 className="text-xl font-bold text-slate-100">BuildFuture</h1>
           <p className="text-xs text-slate-500">Tu camino a la libertad financiera</p>
         </div>
-        <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white">
+        <Link href="/settings" className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white hover:bg-blue-500 transition-colors">
           M
-        </div>
+        </Link>
       </div>
 
       {/* 1 — Principal */}
