@@ -58,7 +58,11 @@ export default async function Dashboard() {
     fetchProfile().catch(() => ({ risk_profile: null, available: false })),
     fetchIntegrations().catch(() => []),
   ]);
-  const hasIOL = Array.isArray(integrations) && integrations.some((i: any) => i.provider === "IOL" && i.is_connected);
+  const connectedALYCs: string[] = Array.isArray(integrations)
+    ? integrations
+        .filter((i: any) => i.provider_type === "ALYC" && i.is_connected)
+        .map((i: any) => i.provider as string)
+    : [];
 
   const hasBudget = !!(budget && (budget.income_monthly_ars ?? 0) > 0);
   const hasPortfolio = !!(score.portfolio_total_usd > 0) ||
@@ -93,7 +97,7 @@ export default async function Dashboard() {
           <p className="text-xs text-slate-500">Tu camino a la libertad financiera</p>
         </div>
         <div className="flex items-center gap-2">
-          {hasIOL && <SyncButton />}
+          {connectedALYCs.length > 0 && <SyncButton connectedProviders={connectedALYCs} />}
           <Link href="/settings" className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white hover:bg-blue-500 transition-colors">
             M
           </Link>

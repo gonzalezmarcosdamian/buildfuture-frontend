@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { TrendingUp, TrendingDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { TrendingUp, TrendingDown, ChevronRight, ChevronDown } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
 
@@ -10,7 +11,7 @@ interface Position {
   ticker: string;
   description: string;
   asset_type: string;
-  source: string;
+  source: string | null;
   quantity: number;
   current_value_usd: number;
   cost_basis_usd: number;
@@ -18,6 +19,7 @@ interface Position {
   annual_yield_pct: number;
   current_price_usd: number;
   avg_purchase_price_usd: number;
+  snapshot_date?: string | null;
 }
 
 export type TabMode = "composicion" | "rendimientos";
@@ -47,12 +49,84 @@ const ASSET_BADGES: Record<string, string> = {
   CASH:   "bg-slate-700 text-slate-300",
 };
 
+// Solo ALYCs regulados — NEXO es exchange crypto, distinto contexto
+const SOURCE_BADGES: Record<string, string> = {
+  IOL:    "bg-blue-900/60 text-blue-400",
+  PPI:    "bg-purple-900/60 text-purple-400",
+  MANUAL: "bg-slate-700/60 text-slate-400",
+};
+
+const SOURCE_LABELS: Record<string, string> = {
+  IOL:    "InvertirOnline",
+  PPI:    "Portfolio Personal",
+  MANUAL: "Manual",
+};
+
 const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" };
+
+function cashLabel(ticker: string): string {
+  if (ticker.includes("USD")) return "Disponible USD";
+  if (ticker.includes("ARS")) return "Disponible ARS";
+  return "Disponible";
+}
+
+function cashSubtitle(ticker: string): string {
+  if (ticker.includes("USD")) return "Dólares sin invertir";
+  if (ticker.includes("ARS")) return "Pesos sin invertir";
+  return "Sin invertir";
+}
+
+function SourceGroupHeader({
+  source,
+  collapsed,
+  groupTotal,
+  fmt,
+  currency,
+  onToggle,
+}: {
+  source: string;
+  collapsed: boolean;
+  groupTotal: number;
+  fmt: (n: number) => string;
+  currency: "USD" | "ARS";
+  onToggle: () => void;
+}) {
+  const badgeCls = SOURCE_BADGES[source] ?? "bg-slate-700/60 text-slate-400";
+  const label    = SOURCE_LABELS[source] ?? source;
+  const flag     = FLAG[currency];
+  return (
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center justify-between py-0.5 hover:opacity-80 transition-opacity"
+    >
+      <div className="flex items-center gap-2">
+        <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${badgeCls}`}>
+          {source}
+        </span>
+        <span className="text-[10px] text-slate-600">{label}</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        {collapsed && (
+          <span className="text-[10px] text-slate-500">{flag} {fmt(groupTotal)}</span>
+        )}
+        <ChevronDown
+          size={12}
+          className={`text-slate-600 transition-transform ${collapsed ? "-rotate-90" : ""}`}
+        />
+      </div>
+    </button>
+  );
+}
 
 export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
   const tab = activeTab;
   const { currency } = useCurrency();
   const router = useRouter();
+  const [collapsedSources, setCollapsedSources] = useState<Record<string, boolean>>({});
+
+  function toggleSource(source: string) {
+    setCollapsedSources((prev) => ({ ...prev, [source]: !prev[source] }));
+  }
 
   const fmt  = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
   const hint = (usd: number) => currency === "USD"
@@ -64,9 +138,23 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
     return acc;
   }, {});
 
-  const sorted = [...positions]
-    .filter((p) => p.asset_type !== "CASH")
-    .sort((a, b) => b.performance_pct - a.performance_pct);
+  // Agrupar por fuente — NEXO se agrupa igual pero sin label ALYC especial
+  const bySource = positions.reduce((acc: Record<string, Position[]>, p) => {
+    const src = p.source ?? "MANUAL";
+    if (!acc[src]) acc[src] = [];
+    acc[src].push(p);
+    return acc;
+  }, {});
+
+  // Para rendimientos: por fuente, sin CASH, ordenado por performance dentro de cada grupo
+  const bySourceRendimientos: Record<string, Position[]> = Object.fromEntries(
+    Object.entries(bySource)
+      .map(([src, ps]): [string, Position[]] => [
+        src,
+        ps.filter((p) => p.asset_type !== "CASH").sort((a, b) => b.performance_pct - a.performance_pct),
+      ])
+      .filter(([, ps]) => (ps as Position[]).length > 0)
+  );
 
   return (
     <div>
@@ -112,110 +200,153 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
               ))}
           </div>
 
-          {/* Position list */}
-          <div className="space-y-1 pt-1 border-t border-slate-800">
-            {positions.map((p) => {
-              if (p.asset_type === "CASH") {
-                return (
-                  <div
-                    key={p.id}
-                    className="w-full flex items-center justify-between py-2 px-1"
-                  >
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-base leading-none">💵</span>
-                        <span className="text-xs font-semibold text-slate-200">Disponible</span>
-                        <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES.CASH}`}>
-                          IOL
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-500 mt-0.5">Sin invertir</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs font-medium text-slate-200">
-                        {FLAG[currency]} {fmt(p.current_value_usd)}
-                      </p>
-                      <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
-                      <p className="text-[10px] text-slate-500">
-                        {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
-                      </p>
-                    </div>
-                  </div>
-                );
-              }
+          {/* Position list — agrupado por ALYC */}
+          <div className="pt-1 border-t border-slate-800 space-y-3">
+            {Object.entries(bySource).map(([source, sourcePositions]) => {
+              const collapsed  = !!collapsedSources[source];
+              const groupTotal = sourcePositions.reduce((s, p) => s + p.current_value_usd, 0);
               return (
-                <button
-                  key={p.id}
-                  onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
-                  className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-slate-800/60 transition-colors text-left"
-                >
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
-                      <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-slate-700 text-slate-300"}`}>
-                        {p.asset_type}
-                      </span>
+                <div key={source}>
+                  <SourceGroupHeader
+                    source={source}
+                    collapsed={collapsed}
+                    groupTotal={groupTotal}
+                    fmt={fmt}
+                    currency={currency as "USD" | "ARS"}
+                    onToggle={() => toggleSource(source)}
+                  />
+
+                  {!collapsed && (
+                    <div className="space-y-0.5 mt-1">
+                      {sourcePositions.map((p) => {
+                        if (p.asset_type === "CASH") {
+                          return (
+                            <div
+                              key={p.id}
+                              className="w-full flex items-center justify-between py-2 px-1"
+                            >
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-base leading-none">💵</span>
+                                  <span className="text-xs font-semibold text-slate-200">
+                                    {cashLabel(p.ticker)}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-slate-500 mt-0.5">
+                                  {cashSubtitle(p.ticker)}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs font-medium text-slate-200">
+                                  {FLAG[currency]} {fmt(p.current_value_usd)}
+                                </p>
+                                <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
+                                <p className="text-[10px] text-slate-500">
+                                  {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return (
+                          <button
+                            key={p.id}
+                            onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
+                            className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-slate-800/60 transition-colors text-left"
+                          >
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
+                                <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-slate-700 text-slate-300"}`}>
+                                  {p.asset_type}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-500">{p.quantity.toLocaleString("es-AR")} u.</p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div className="text-right">
+                                <p className="text-xs font-medium text-slate-200">
+                                  {FLAG[currency]} {fmt(p.current_value_usd)}
+                                </p>
+                                <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
+                                <p className="text-[10px] text-slate-500">
+                                  {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
+                                </p>
+                              </div>
+                              <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
-                    <p className="text-[10px] text-slate-500">{p.quantity.toLocaleString("es-AR")} u.</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="text-right">
-                      <p className="text-xs font-medium text-slate-200">
-                        {FLAG[currency]} {fmt(p.current_value_usd)}
-                      </p>
-                      <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
-                      <p className="text-[10px] text-slate-500">
-                        {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
-                      </p>
-                    </div>
-                    <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
-                  </div>
-                </button>
+                  )}
+                </div>
               );
             })}
           </div>
         </div>
       ) : (
         <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
-          {sorted.map((p) => {
-            const positive = p.performance_pct >= 0;
-            const pnlUsd   = p.current_value_usd - p.cost_basis_usd;
-            const barPct   = Math.min(Math.abs(p.performance_pct) * 100, 100);
+          {Object.entries(bySourceRendimientos).map(([source, sourcePositions]) => {
+            const collapsed  = !!collapsedSources[`r_${source}`];
+            const groupTotal = sourcePositions.reduce((s, p) => s + p.current_value_usd, 0);
             return (
-              <button
-                key={p.id}
-                onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
-                className="w-full text-left space-y-1 hover:opacity-80 transition-opacity"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
-                    <span className="text-[10px] text-slate-500 ml-1.5">{p.description.split(" ").slice(0, 3).join(" ")}</span>
+              <div key={source}>
+                <SourceGroupHeader
+                  source={source}
+                  collapsed={collapsed}
+                  groupTotal={groupTotal}
+                  fmt={fmt}
+                  currency={currency as "USD" | "ARS"}
+                  onToggle={() => toggleSource(`r_${source}`)}
+                />
+
+                {!collapsed && (
+                  <div className="space-y-3 mt-2">
+                    {sourcePositions.map((p) => {
+                      const positive = p.performance_pct >= 0;
+                      const pnlUsd   = p.current_value_usd - p.cost_basis_usd;
+                      const barPct   = Math.min(Math.abs(p.performance_pct) * 100, 100);
+                      return (
+                        <button
+                          key={p.id}
+                          onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
+                          className="w-full text-left space-y-1 hover:opacity-80 transition-opacity"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
+                              <p className="text-[10px] text-slate-500">{p.description.split(" ").slice(0, 3).join(" ")}</p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div className="text-right">
+                                <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
+                                  {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                                  <span className="font-semibold">{formatPct(p.performance_pct, 1, true)}</span>
+                                </div>
+                                <p className={`text-[10px] ${positive ? "text-emerald-600" : "text-red-600"}`}>
+                                  {positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)}
+                                </p>
+                              </div>
+                              <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
+                            </div>
+                          </div>
+                          <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${positive ? "bg-emerald-500" : "bg-red-500"}`}
+                              style={{ width: `${barPct}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[9px] text-slate-600">
+                            <span>Costo {FLAG[currency]} {fmt(p.cost_basis_usd)}</span>
+                            <span>Actual {FLAG[currency]} {fmt(p.current_value_usd)}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <div className="text-right">
-                      <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
-                        {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                        <span className="font-semibold">{formatPct(p.performance_pct, 1, true)}</span>
-                      </div>
-                      <p className={`text-[10px] ${positive ? "text-emerald-600" : "text-red-600"}`}>
-                        {positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)}
-                      </p>
-                    </div>
-                    <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
-                  </div>
-                </div>
-                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${positive ? "bg-emerald-500" : "bg-red-500"}`}
-                    style={{ width: `${barPct}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-[9px] text-slate-600">
-                  <span>Costo {FLAG[currency]} {fmt(p.cost_basis_usd)}</span>
-                  <span>Actual {FLAG[currency]} {fmt(p.current_value_usd)}</span>
-                </div>
-              </button>
+                )}
+              </div>
             );
           })}
         </div>
