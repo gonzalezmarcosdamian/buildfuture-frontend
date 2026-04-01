@@ -18,6 +18,7 @@ interface Position {
   annual_yield_pct: number;
   current_price_usd: number;
   avg_purchase_price_usd: number;
+  snapshot_date?: string | null;
 }
 
 export type TabMode = "composicion" | "rendimientos";
@@ -178,6 +179,8 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
       ) : (
         <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
           {sorted.map((p) => {
+            const today = new Date().toISOString().slice(0, 10);
+            const isNew = p.snapshot_date === today;
             const positive = p.performance_pct >= 0;
             const pnlUsd   = p.current_value_usd - p.cost_basis_usd;
             const barPct   = Math.min(Math.abs(p.performance_pct) * 100, 100);
@@ -192,24 +195,34 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                     <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
                     <span className="text-[10px] text-slate-500 ml-1.5">{p.description.split(" ").slice(0, 3).join(" ")}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <div className="text-right">
-                      <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
-                        {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                        <span className="font-semibold">{formatPct(p.performance_pct, 1, true)}</span>
+                  {isNew ? (
+                    <span className="text-[9px] bg-slate-800 text-slate-500 border border-slate-700 px-1.5 py-0.5 rounded-full">
+                      adquirida hoy
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <div className="text-right">
+                        <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
+                          {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                          <span className="font-semibold">{formatPct(p.performance_pct, 1, true)}</span>
+                        </div>
+                        <p className={`text-[10px] ${positive ? "text-emerald-600" : "text-red-600"}`}>
+                          {positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)}
+                        </p>
                       </div>
-                      <p className={`text-[10px] ${positive ? "text-emerald-600" : "text-red-600"}`}>
-                        {positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)}
-                      </p>
+                      <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
                     </div>
-                    <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
-                  </div>
+                  )}
                 </div>
                 <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${positive ? "bg-emerald-500" : "bg-red-500"}`}
-                    style={{ width: `${barPct}%` }}
-                  />
+                  {isNew ? (
+                    <div className="h-full w-full bg-slate-700/50 rounded-full" />
+                  ) : (
+                    <div
+                      className={`h-full rounded-full transition-all ${positive ? "bg-emerald-500" : "bg-red-500"}`}
+                      style={{ width: `${barPct}%` }}
+                    />
+                  )}
                 </div>
                 <div className="flex justify-between text-[9px] text-slate-600">
                   <span>Costo {FLAG[currency]} {fmt(p.cost_basis_usd)}</span>
