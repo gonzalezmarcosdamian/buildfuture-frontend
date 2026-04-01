@@ -1,6 +1,7 @@
 "use client";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { RefreshCw, Shield, TrendingUp, Zap, X, Info } from "lucide-react";
 
 interface AgentSignal {
@@ -76,12 +77,13 @@ function convictionBar(conviction: number) {
 }
 
 function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
+  if (typeof document === "undefined") return null;
   const yieldPct = (rec.annual_yield_pct * 100).toFixed(0);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 px-0"
+      className="fixed inset-0 z-[999] flex items-end justify-center bg-black/70"
       onClick={onClose}
     >
       <div
@@ -164,6 +166,8 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }
 
 function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
@@ -184,16 +188,13 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
           <div className={`px-1.5 py-0.5 rounded-md border text-[9px] font-bold tracking-wide ${assetStyle}`}>
             {rec.asset_type}
           </div>
-          <div className="flex items-center gap-1.5">
-            {rec.is_hero && (
-              <span className="text-[8px] bg-blue-600 text-white font-semibold px-1 py-0.5 rounded-full">
-                top
-              </span>
-            )}
-            <button onClick={onInfo} className="text-slate-600 hover:text-slate-400 transition-colors">
-              <Info size={13} />
-            </button>
-          </div>
+          <button
+            onPointerDown={(e) => { e.stopPropagation(); }}
+            onClick={(e) => { e.stopPropagation(); onInfo(); }}
+            className="text-slate-600 hover:text-slate-400 transition-colors p-1 -m-1"
+          >
+            <Info size={13} />
+          </button>
         </div>
 
         {/* Ticker */}
@@ -246,6 +247,8 @@ export function RecommendationList({
   const [refreshing, setRefreshing] = useState(false);
   const [riskProfile, setRiskProfile] = useState(userProfile || "moderado");
   const [modalRec, setModalRec] = useState<Rec | null>(null);
+  // Fallback a "moderado" si el endpoint de perfil no devuelve un valor
+  const effectiveUserProfile = userProfile || "moderado";
 
   async function load(force = false, profile = riskProfile) {
     force ? setRefreshing(true) : setLoading(true);
@@ -301,7 +304,7 @@ export function RecommendationList({
         <div className="flex bg-slate-900 border border-slate-800 rounded-xl p-1 gap-1">
           {RISK_PROFILES.map((p) => {
             const isSelected = riskProfile === p.id;
-            const isUser = userProfile === p.id;
+            const isUser = effectiveUserProfile === p.id;
             return (
               <button
                 key={p.id}
