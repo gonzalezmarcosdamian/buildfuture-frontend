@@ -1,0 +1,47 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+
+/**
+ * Maneja el callback de Supabase para flujos PKCE:
+ *  - Confirmación de email (registro)
+ *  - Reset de contraseña
+ *
+ * Supabase redirige aquí con ?code=... después de que el usuario
+ * hace click en el link del email.
+ */
+export async function GET(request: NextRequest) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  // `next` permite al caller indicar a dónde redirigir tras el exchange
+  const next = searchParams.get("next") ?? "/dashboard";
+
+  if (code) {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (!error) {
+      return NextResponse.redirect(`${origin}${next}`);
+    }
+  }
+
+  // Algo salió mal — redirigir a login con mensaje de error
+  return NextResponse.redirect(`${origin}/login?error=link_invalido`);
+}

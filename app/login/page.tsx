@@ -1,13 +1,15 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-type Mode = "login" | "register" | "forgot" | "reset";
+type Mode = "login" | "register" | "forgot";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,19 +20,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [splash, setSplash] = useState(false);
 
-  // Detect Supabase recovery session (from password-reset email link)
+  // Mostrar error si el callback de Supabase falló (link inválido o expirado)
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setMode("reset");
-        setError("");
-        setSuccess("");
-      }
-    });
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    if (searchParams.get("error") === "link_invalido") {
+      setError("El link es inválido o ya expiró. Solicitá uno nuevo.");
+    }
+  }, [searchParams]);
 
-  function reset(nextMode: Mode) {
+  function changeMode(nextMode: Mode) {
     setError("");
     setSuccess("");
     setPassword("");
@@ -54,31 +51,29 @@ export default function LoginPage() {
       } else if (mode === "register") {
         if (password !== confirmPassword) { setError("Las contraseñas no coinciden"); return; }
         if (password.length < 6) { setError("La contraseña debe tener al menos 6 caracteres"); return; }
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            // Supabase redirige al callback que confirma el email y luego va al dashboard
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
         if (error) { setError(error.message); return; }
         setSuccess("Cuenta creada. Revisá tu email para confirmar.");
 
       } else if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/login`,
+          // El callback intercambia el code PKCE y redirige al formulario de reset
+          redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
         });
         if (error) { setError(error.message); return; }
         setSuccess("Te enviamos un email para restablecer tu contraseña.");
-
-      } else if (mode === "reset") {
-        if (password !== confirmPassword) { setError("Las contraseñas no coinciden"); return; }
-        if (password.length < 6) { setError("La contraseña debe tener al menos 6 caracteres"); return; }
-        const { error } = await supabase.auth.updateUser({ password });
-        if (error) { setError(error.message); return; }
-        setSuccess("Contraseña actualizada correctamente.");
-        setTimeout(() => router.push("/dashboard"), 1500);
       }
     } finally {
       setLoading(false);
     }
   }
-
-  const isResetMode = mode === "reset";
 
   if (splash) return (
     <div className="fixed inset-0 z-[999] bg-slate-950 flex flex-col items-center justify-center gap-5 animate-in fade-in duration-300">
@@ -101,11 +96,11 @@ export default function LoginPage() {
           <p className="text-slate-500 text-sm mt-1">Tu portafolio de libertad financiera</p>
         </div>
 
-        {/* Tab switcher — hidden in reset/forgot modes */}
-        {!isResetMode && mode !== "forgot" && (
+        {/* Tab switcher — solo en login/register */}
+        {mode !== "forgot" && (
           <div className="flex bg-slate-800 rounded-xl p-1 mb-4 gap-1">
             <button
-              onClick={() => reset("login")}
+              onClick={() => changeMode("login")}
               className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                 mode === "login" ? "bg-slate-700 text-slate-100" : "text-slate-400 hover:text-slate-300"
               }`}
@@ -113,7 +108,7 @@ export default function LoginPage() {
               Ingresar
             </button>
             <button
-              onClick={() => reset("register")}
+              onClick={() => changeMode("register")}
               className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                 mode === "register" ? "bg-slate-700 text-slate-100" : "text-slate-400 hover:text-slate-300"
               }`}
@@ -128,39 +123,28 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
           className="bg-slate-900 rounded-2xl p-6 border border-slate-800 space-y-4"
         >
-          {/* Title for special modes */}
           {mode === "forgot" && (
             <p className="text-sm text-slate-300 font-medium">Recuperar contraseña</p>
           )}
-          {mode === "reset" && (
-            <div>
-              <p className="text-sm text-slate-300 font-medium">Nueva contraseña</p>
-              <p className="text-xs text-slate-500 mt-0.5">Ingresá tu nueva contraseña para continuar.</p>
-            </div>
-          )}
 
-          {/* Email — not shown in reset mode */}
-          {!isResetMode && (
-            <div>
-              <label className="text-xs text-slate-400 mb-1 block">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                placeholder="tu@email.com"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
-              />
-            </div>
-          )}
+          {/* Email */}
+          <div>
+            <label className="text-xs text-slate-400 mb-1 block">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              placeholder="tu@email.com"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
 
-          {/* Password — login, register, reset */}
+          {/* Password — solo en login y register */}
           {mode !== "forgot" && (
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">
-                {isResetMode ? "Nueva contraseña" : "Contraseña"}
-              </label>
+              <label className="text-xs text-slate-400 mb-1 block">Contraseña</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -182,8 +166,8 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Confirm password — register + reset */}
-          {(mode === "register" || isResetMode) && (
+          {/* Confirmar password — solo en register */}
+          {mode === "register" && (
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Confirmar contraseña</label>
               <input
@@ -198,7 +182,6 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <div className="flex items-center gap-2 text-xs text-red-400 bg-red-950/30 border border-red-900 rounded-lg px-3 py-2">
               <AlertCircle size={13} />
@@ -206,7 +189,6 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Success */}
           {success && (
             <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/30 border border-emerald-900 rounded-lg px-3 py-2">
               <CheckCircle2 size={13} />
@@ -214,38 +196,35 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium rounded-lg py-2.5 text-sm transition-colors"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
-            {loading ? "..." : mode === "login"
+            {loading
+              ? "..."
+              : mode === "login"
               ? "Ingresar"
               : mode === "register"
               ? "Crear cuenta"
-              : mode === "forgot"
-              ? "Enviar email"
-              : "Guardar nueva contraseña"}
+              : "Enviar email"}
           </button>
 
-          {/* Forgot link — login only */}
           {mode === "login" && (
             <button
               type="button"
-              onClick={() => reset("forgot")}
+              onClick={() => changeMode("forgot")}
               className="w-full text-xs text-slate-500 hover:text-slate-400 text-center transition-colors"
             >
               ¿Olvidaste tu contraseña?
             </button>
           )}
 
-          {/* Back link — forgot only */}
           {mode === "forgot" && (
             <button
               type="button"
-              onClick={() => reset("login")}
+              onClick={() => changeMode("login")}
               className="w-full text-xs text-slate-500 hover:text-slate-400 text-center transition-colors"
             >
               Volver a ingresar
@@ -254,5 +233,14 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+// useSearchParams requiere Suspense en Next.js App Router
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

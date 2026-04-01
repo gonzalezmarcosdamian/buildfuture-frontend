@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login"];
+// /auth/ cubre el callback PKCE y el formulario de reset-password
+const PUBLIC_PATHS = ["/login", "/auth/"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
