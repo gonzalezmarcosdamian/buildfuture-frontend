@@ -1,4 +1,6 @@
 "use client";
+import { supabase } from "@/lib/supabase";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
@@ -22,9 +24,11 @@ export function ConnectNexoForm({ onSuccess }: Props) {
     setSuccess("");
 
     try {
-      const res = await fetch("http://localhost:8007/integrations/nexo/connect", {
+      const { data: _s } = await supabase.auth.getSession();
+      const _tok = _s.session?.access_token;
+      const res = await fetch(`${API_URL}/integrations/nexo/connect`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(_tok ? { Authorization: `Bearer ${_tok}` } : {}) },
         body: JSON.stringify({ api_key: apiKey, api_secret: apiSecret }),
       });
 
