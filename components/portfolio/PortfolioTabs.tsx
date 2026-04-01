@@ -64,7 +64,9 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
     return acc;
   }, {});
 
-  const sorted = [...positions].sort((a, b) => b.performance_pct - a.performance_pct);
+  const sorted = [...positions]
+    .filter((p) => p.asset_type !== "CASH")
+    .sort((a, b) => b.performance_pct - a.performance_pct);
 
   return (
     <div>
@@ -112,35 +114,65 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
 
           {/* Position list */}
           <div className="space-y-1 pt-1 border-t border-slate-800">
-            {positions.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
-                className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-slate-800/60 transition-colors text-left"
-              >
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
-                    <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-slate-700 text-slate-300"}`}>
-                      {p.asset_type}
-                    </span>
+            {positions.map((p) => {
+              if (p.asset_type === "CASH") {
+                return (
+                  <div
+                    key={p.id}
+                    className="w-full flex items-center justify-between py-2 px-1"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-base leading-none">💵</span>
+                        <span className="text-xs font-semibold text-slate-200">Disponible</span>
+                        <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES.CASH}`}>
+                          IOL
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Sin invertir</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-medium text-slate-200">
+                        {FLAG[currency]} {fmt(p.current_value_usd)}
+                      </p>
+                      <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
+                      <p className="text-[10px] text-slate-500">
+                        {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-slate-500">{p.quantity.toLocaleString("es-AR")} u.</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-slate-200">
-                      {FLAG[currency]} {fmt(p.current_value_usd)}
-                    </p>
-                    <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
-                    <p className="text-[10px] text-slate-500">
-                      {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
-                    </p>
+                );
+              }
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
+                  className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-slate-800/60 transition-colors text-left"
+                >
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
+                      <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-slate-700 text-slate-300"}`}>
+                        {p.asset_type}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500">{p.quantity.toLocaleString("es-AR")} u.</p>
                   </div>
-                  <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
-                </div>
-              </button>
-            ))}
+                  <div className="flex items-center gap-1">
+                    <div className="text-right">
+                      <p className="text-xs font-medium text-slate-200">
+                        {FLAG[currency]} {fmt(p.current_value_usd)}
+                      </p>
+                      <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
+                      <p className="text-[10px] text-slate-500">
+                        {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
+                      </p>
+                    </div>
+                    <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : (
