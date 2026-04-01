@@ -56,6 +56,9 @@ function calcNeto(bruto: number, descPct: number) {
   return Math.round(bruto * (1 - descPct));
 }
 
+// Clases para ocultar las flechas de type="number" en todos los browsers
+const NO_SPIN = "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+
 export function BudgetEditor({ initial }: { initial: Budget }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
   const [useBruto, setUseBruto] = useState(true);
@@ -161,9 +164,12 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
               <label className="text-xs text-slate-400 mb-1 block">Sueldo bruto mensual (ARS)</label>
               <input
                 type="number"
-                value={bruto}
-                onChange={(e) => { const b = Number(e.target.value); setBruto(b); setIncome(calcNeto(b, descPct)); }}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                min="0"
+                step="1"
+                value={bruto || ""}
+                placeholder="800000"
+                onChange={(e) => { const b = Math.round(Number(e.target.value)) || 0; setBruto(b); setIncome(calcNeto(b, descPct)); }}
+                className={`w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 ${NO_SPIN}`}
                 style={INPUT_STYLE}
               />
             </div>
@@ -200,9 +206,12 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
               <label className="text-xs text-slate-400 mb-1 block">Sueldo neto mensual (ARS)</label>
               <input
                 type="number"
-                value={income}
-                onChange={(e) => setIncome(Number(e.target.value))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                min="0"
+                step="1"
+                value={income || ""}
+                placeholder="664000"
+                onChange={(e) => setIncome(Math.round(Number(e.target.value)) || 0)}
+                className={`w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 ${NO_SPIN}`}
                 style={INPUT_STYLE}
               />
             </div>
