@@ -212,7 +212,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
         {categories.map((c, i) => (
           <div
             key={i}
-            style={{ width: `${c.percentage * 100}%`, backgroundColor: c.is_vacation ? "#0EA5E9" : c.color }}
+            style={{ width: `${c.percentage * 100}%`, backgroundColor: c.color }}
             className="transition-all"
           />
         ))}
@@ -254,28 +254,23 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                   onChange={(e) => updateCat(i, "name", e.target.value)}
                   className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 min-w-0"
                 />
-                {cat.is_vacation && (
-                  <span className="text-[9px] text-sky-400 bg-sky-950/40 border border-sky-900 px-1.5 py-0.5 rounded shrink-0">
-                    no invierte
-                  </span>
-                )}
               </div>
             </div>
             <div className="flex flex-col gap-1 shrink-0">
               <input
                 type="range"
                 min={0}
-                max={cat.is_vacation ? 0.2 : 0.5}
+                max={0.5}
                 step={0.005}
                 value={cat.percentage}
                 onChange={(e) => updateCat(i, "percentage", Number(e.target.value))}
-                className={`w-24 ${cat.is_vacation ? "accent-sky-500" : "accent-blue-500"}`}
+                className="w-24 accent-blue-500"
               />
               <div className="flex items-center gap-1">
                 <input
                   type="number"
                   value={(cat.percentage * 100).toFixed(0)}
-                  onChange={(e) => updateCat(i, "percentage", Math.min(Number(e.target.value) / 100, cat.is_vacation ? 0.2 : 0.5))}
+                  onChange={(e) => updateCat(i, "percentage", Math.min(Number(e.target.value) / 100, 0.5))}
                   className="w-10 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-[10px] text-slate-300 text-center focus:outline-none focus:border-blue-500"
                 />
                 <span className="text-[10px] text-slate-500">%</span>
@@ -284,19 +279,16 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                   value={Math.round(income * cat.percentage)}
                   onChange={(e) => {
                     const ars = Number(e.target.value);
-                    const pct = income > 0 ? Math.min(ars / income, cat.is_vacation ? 0.2 : 0.5) : 0;
+                    const pct = income > 0 ? Math.min(ars / income, 0.5) : 0;
                     updateCat(i, "percentage", pct);
                   }}
                   className="w-20 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-[10px] text-slate-300 text-right focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
-            {!cat.is_vacation && (
-              <button onClick={() => removeCategory(i)} className="text-slate-600 hover:text-red-400 shrink-0">
-                <Trash2 size={13} />
-              </button>
-            )}
-            {cat.is_vacation && <div className="w-[13px] shrink-0" />}
+            <button onClick={() => removeCategory(i)} className="text-slate-600 hover:text-red-400 shrink-0">
+              <Trash2 size={13} />
+            </button>
           </div>
         ))}
 
