@@ -18,7 +18,7 @@ import {
 import { useCurrency } from "@/lib/currency-context";
 
 type Period = "daily" | "monthly" | "annual";
-type Mode = "tenencia" | "rendimiento";
+export type ChartMode = "tenencia" | "rendimiento";
 
 interface HistoryPoint {
   label: string;
@@ -34,6 +34,7 @@ interface HistoryPoint {
 interface Props {
   initialData: { period: Period; points: HistoryPoint[]; has_data: boolean };
   mep?: number;
+  chartMode: ChartMode;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -188,8 +189,8 @@ function RendimientoTooltip({ active, payload, currency, mep }: {
   );
 }
 
-export function PerformanceChart({ initialData, mep = 1430 }: Props) {
-  const [mode, setMode] = useState<Mode>("tenencia");
+export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) {
+  const mode = chartMode;
   const [period, setPeriod] = useState<Period>(initialData.period);
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
@@ -241,38 +242,21 @@ export function PerformanceChart({ initialData, mep = 1430 }: Props) {
   return (
     <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
 
-      {/* Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1">
-          {(["tenencia", "rendimiento"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className={`text-[11px] font-medium px-3 py-1 rounded-full transition-colors ${
-                mode === m
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-800 text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              {m === "tenencia" ? "Tenencia" : "Rendimiento"}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-1">
-          {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
-            <button
-              key={p}
-              onClick={() => changePeriod(p)}
-              className={`text-[10px] px-2 py-1 rounded-lg transition-colors ${
-                period === p
-                  ? "bg-slate-700 text-slate-100"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              {PERIOD_LABELS[p]}
-            </button>
-          ))}
-        </div>
+      {/* Period chips */}
+      <div className="flex justify-end gap-1">
+        {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (
+          <button
+            key={p}
+            onClick={() => changePeriod(p)}
+            className={`text-[10px] px-2 py-1 rounded-lg transition-colors ${
+              period === p
+                ? "bg-slate-700 text-slate-100"
+                : "text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            {PERIOD_LABELS[p]}
+          </button>
+        ))}
       </div>
 
       {/* Chart */}

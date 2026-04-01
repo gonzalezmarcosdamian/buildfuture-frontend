@@ -58,6 +58,18 @@ export async function fetchIntegrations() {
   return res.json();
 }
 
+export async function fetchProfile(): Promise<{ risk_profile: string | null; available: boolean }> {
+  try {
+    const res = await serverFetch("/profile/");
+    if (res.status === 404) return { risk_profile: null, available: false }; // backend sin endpoint aún
+    if (!res.ok) return { risk_profile: null, available: true };
+    const data = await res.json();
+    return { risk_profile: data.risk_profile ?? null, available: true };
+  } catch {
+    return { risk_profile: null, available: false };
+  }
+}
+
 export async function fetchRecommendations(params: {
   capital_ars?: number;
   risk_profile?: string;

@@ -1,6 +1,7 @@
 import { fetchIntegrations } from "@/lib/api-server";
-import { Settings, Clock } from "lucide-react";
+import { Settings, Clock, User } from "lucide-react";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
+import { ProfileSection } from "@/components/profile/ProfileSection";
 
 export const dynamic = "force-dynamic";
 
@@ -39,57 +40,69 @@ export default async function SettingsPage() {
   const integrations = await fetchIntegrations();
 
   return (
-    <div className="px-4 pt-8 pb-24 space-y-5">
-      <div className="flex items-center gap-2">
-        <Settings size={20} className="text-slate-400" />
-        <h1 className="text-xl font-bold text-slate-100">Integraciones</h1>
-      </div>
+    <div className="px-4 pt-8 pb-24 space-y-8">
 
-      <p className="text-xs text-slate-400">
-        Conectá tus cuentas para sincronizar tu portafolio real. Solo lectura — BuildFuture nunca opera en tu nombre.
-      </p>
-
-      {/* Integraciones activas */}
-      <div className="space-y-3">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider">Disponibles</p>
-        {integrations.map((integration: any) => (
-          <IntegrationCard key={integration.id} integration={integration} />
-        ))}
-      </div>
-
-      {/* En desarrollo */}
-      <div className="space-y-3">
+      {/* ── Mi perfil ─────────────────────────────────────── */}
+      <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Clock size={12} className="text-slate-500" />
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider">En desarrollo</p>
+          <User size={16} className="text-slate-400" />
+          <h2 className="text-base font-bold text-slate-100">Mi perfil</h2>
         </div>
-        {UPCOMING.map((item) => (
-          <div
-            key={item.label}
-            className="bg-slate-900 rounded-2xl p-4 border border-slate-800 opacity-60"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className={`font-semibold text-sm ${item.color}`}>{item.label}</p>
-                  <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
-                    {item.type}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
-              </div>
-              <span className="text-[10px] text-slate-600 shrink-0 mt-0.5">{item.eta}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+        <ProfileSection />
+      </section>
 
-      <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-        <p className="text-xs text-slate-400 font-medium mb-1">Seguridad</p>
-        <p className="text-xs text-slate-500">
-          Tus credenciales se guardan cifradas localmente. Las integraciones solo tienen permisos de lectura — nunca se realizan operaciones en tu nombre.
+      {/* ── Integraciones ─────────────────────────────────── */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Settings size={16} className="text-slate-400" />
+          <h2 className="text-base font-bold text-slate-100">Integraciones</h2>
+        </div>
+
+        <p className="text-xs text-slate-400">
+          Conectá tus cuentas para sincronizar tu portafolio. Solo lectura — BuildFuture nunca opera en tu nombre.
         </p>
-      </div>
+
+        <div className="space-y-3">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider">Disponibles</p>
+          {integrations.map((integration: any) => (
+            <IntegrationCard key={integration.id} integration={integration} />
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Clock size={12} className="text-slate-500" />
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider">En desarrollo</p>
+          </div>
+          {UPCOMING.map((item) => (
+            <div
+              key={item.label}
+              className="bg-slate-900 rounded-2xl p-4 border border-slate-800 opacity-60"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className={`font-semibold text-sm ${item.color}`}>{item.label}</p>
+                    <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
+                      {item.type}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                </div>
+                <span className="text-[10px] text-slate-600 shrink-0 mt-0.5">{item.eta}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+          <p className="text-xs text-slate-400 font-medium mb-1">Seguridad</p>
+          <p className="text-xs text-slate-500">
+            Tus credenciales se guardan cifradas. Las integraciones solo tienen permisos de lectura.
+          </p>
+        </div>
+      </section>
+
     </div>
   );
 }

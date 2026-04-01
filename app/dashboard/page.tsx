@@ -1,7 +1,8 @@
-import { fetchFreedomScore, fetchBudget, fetchGamification } from "@/lib/api-server";
+import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile } from "@/lib/api-server";
 import { formatUSD, formatARS } from "@/lib/formatters";
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
+import { FTUFlow } from "@/components/ftu/FTUFlow";
 
 export const dynamic = "force-dynamic";
 
@@ -46,11 +47,30 @@ function BudgetFlow({
 }
 
 export default async function Dashboard() {
-  const [score, budget, gamification] = await Promise.all([
-    fetchFreedomScore(),
+  const [score, budget, gamification, portfolio, profile] = await Promise.all([
+    fetchFreedomScore().catch(() => ({ portfolio_total_usd: 0, monthly_expenses_usd: 0 })),
     fetchBudget().catch(() => null),
-    fetchGamification(),
+    fetchGamification().catch(() => ({ monthly_return_usd: 0, portfolio_covers: 0 })),
+    fetchPortfolio().catch(() => []),
+    fetchProfile().catch(() => ({ risk_profile: null, available: false })),
   ]);
+
+  const hasBudget = !!(budget && (budget.income_monthly_ars ?? 0) > 0);
+  const hasPortfolio = !!(score.portfolio_total_usd > 0) ||
+    (Array.isArray(portfolio?.positions) && portfolio.positions.length > 0);
+  const hasRiskProfile = !!(profile?.risk_profile);
+  // Solo bloquear por risk profile si el endpoint ya existe en el backend
+  const blockOnRisk = profile.available && !hasRiskProfile;
+
+  if (!hasBudget || !hasPortfolio || blockOnRisk) {
+    return (
+      <FTUFlow
+        hasBudget={hasBudget}
+        hasPortfolio={hasPortfolio}
+        hasRiskProfile={hasRiskProfile}
+      />
+    );
+  }
 
   const mep = budget?.fx_rate ?? 1430;
   const incomeARS = budget?.income_monthly_ars ?? 0;

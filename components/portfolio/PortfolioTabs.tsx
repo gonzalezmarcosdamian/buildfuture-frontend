@@ -20,10 +20,13 @@ interface Position {
   avg_purchase_price_usd: number;
 }
 
+export type TabMode = "composicion" | "rendimientos";
+
 interface Props {
   positions: Position[];
   totalUsd: number;
   mep: number;
+  activeTab: TabMode;
 }
 
 const ASSET_COLORS: Record<string, string> = {
@@ -46,8 +49,8 @@ const ASSET_BADGES: Record<string, string> = {
 
 const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" };
 
-export function PortfolioTabs({ positions, totalUsd, mep }: Props) {
-  const [tab, setTab] = useState<"composicion" | "rendimientos">("composicion");
+export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
+  const tab = activeTab;
   const { currency } = useCurrency();
 
   const fmt  = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
@@ -63,22 +66,7 @@ export function PortfolioTabs({ positions, totalUsd, mep }: Props) {
   const sorted = [...positions].sort((a, b) => b.performance_pct - a.performance_pct);
 
   return (
-    <div className="space-y-3">
-      {/* Tab bar */}
-      <div className="flex gap-1 bg-slate-900 rounded-xl p-1 border border-slate-800">
-        {(["composicion", "rendimientos"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors ${
-              tab === t ? "bg-slate-700 text-slate-100" : "text-slate-500 hover:text-slate-300"
-            }`}
-          >
-            {t === "composicion" ? "Composición" : "Rendimientos"}
-          </button>
-        ))}
-      </div>
-
+    <div>
       {tab === "composicion" ? (
         <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-4">
           {/* Stacked bar */}

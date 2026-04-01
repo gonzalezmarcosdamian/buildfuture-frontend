@@ -1,7 +1,6 @@
 import { fetchPortfolio, fetchPortfolioHistory, fetchBudget } from "@/lib/api-server";
-import { PerformanceChart } from "@/components/portfolio/PerformanceChart";
-import { PortfolioTabs } from "@/components/portfolio/PortfolioTabs";
 import { PortfolioHeader } from "@/components/portfolio/PortfolioHeader";
+import { PortfolioClient } from "@/components/portfolio/PortfolioClient";
 
 export const dynamic = "force-dynamic";
 
@@ -28,13 +27,12 @@ export default async function Portfolio() {
         positions={positions}
       />
 
-      <PerformanceChart initialData={history} mep={mep} />
-
-      <PortfolioTabs positions={positions} totalUsd={summary.total_usd} mep={mep} />
-
-      <div className="pb-4 text-center text-xs text-slate-700">
-        Snapshot diario · cierre 17:30 ART
-      </div>
+      <PortfolioClient
+        positions={positions}
+        totalUsd={summary.total_usd}
+        mep={mep}
+        history={history}
+      />
     </div>
   );
 }
