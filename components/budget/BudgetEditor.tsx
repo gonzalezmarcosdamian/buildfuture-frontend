@@ -368,9 +368,18 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
                   style={INPUT_STYLE}
                 />
                 <span className="text-[10px] text-slate-500">%</span>
-                <span className="text-[10px] text-slate-500 w-20 text-right tabular-nums">
-                  {fmt(income * cat.percentage)}
-                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={fmt(income * cat.percentage)}
+                  onChange={(e) => {
+                    const ars = parse(e.target.value);
+                    const pct = income > 0 ? Math.min(ars / income, maxForCat(i)) : 0;
+                    updateCat(i, "percentage", Math.max(0, isNaN(pct) ? 0 : pct));
+                  }}
+                  className="w-24 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-slate-300 text-right focus:outline-none focus:border-blue-500"
+                  style={INPUT_STYLE}
+                />
               </div>
             </div>
 
