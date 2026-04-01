@@ -3,6 +3,9 @@ import { useState } from "react";
 import { CheckCircle2, XCircle, RefreshCw, Loader2 } from "lucide-react";
 import { ConnectIOLForm } from "./ConnectIOLForm";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
 
 const providerMeta: Record<string, { label: string; description: string; color: string }> = {
   IOL: {
@@ -18,7 +21,6 @@ const providerMeta: Record<string, { label: string; description: string; color: 
 };
 
 export function IntegrationCard({ integration }: { integration: any }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
   const meta = providerMeta[integration.provider];
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -30,17 +32,20 @@ export function IntegrationCard({ integration }: { integration: any }) {
     setSyncing(true);
     setSyncError(null);
     try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
       const res = await fetch(`${API_URL}/integrations/${integration.provider.toLowerCase()}/sync`, {
         method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (res.ok) {
         setLastSynced(new Date().toISOString());
         router.refresh();
       } else {
-        const data = await res.json().catch(() => ({}));
-        setSyncError(data.detail || `Error ${res.status}`);
+        const d = await res.json().catch(() => ({}));
+        setSyncError(d.detail || `Error ${res.status}`);
       }
-    } catch (e) {
+    } catch {
       setSyncError("No se pudo conectar con el servidor");
     } finally {
       setSyncing(false);
@@ -86,9 +91,7 @@ export function IntegrationCard({ integration }: { integration: any }) {
               disabled={syncing}
               className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors"
             >
-              {syncing
-                ? <Loader2 size={12} className="animate-spin" />
-                : <RefreshCw size={12} />}
+              {syncing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
               {syncing ? "Sincronizando..." : "Sync"}
             </button>
           </div>

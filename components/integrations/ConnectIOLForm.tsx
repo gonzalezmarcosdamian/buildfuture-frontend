@@ -1,9 +1,25 @@
 "use client";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface Props {
   onSuccess: () => void;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
+
+async function authFetch(path: string, init: RequestInit = {}) {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init.headers ?? {}),
+    },
+  });
 }
 
 export function ConnectIOLForm({ onSuccess }: Props) {
@@ -22,9 +38,8 @@ export function ConnectIOLForm({ onSuccess }: Props) {
     setSuccess("");
 
     try {
-      const res = await fetch("http://localhost:8007/integrations/iol/connect", {
+      const res = await authFetch("/integrations/iol/connect", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
