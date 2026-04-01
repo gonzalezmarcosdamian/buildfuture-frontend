@@ -244,7 +244,6 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
   // Symmetric domain based on max absolute market gain
   const maxAbsDelta = Math.max(
     ...chartData.map((p) => Math.abs(p.displayMarketGain ?? 0)),
-    ...chartData.map((p) => Math.abs(p.displayCapitalIn ?? 0)),
     0.01,
   );
   const rendPad = maxAbsDelta * 0.25;
@@ -340,7 +339,7 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
         </>
       ) : (
         <ResponsiveContainer width="100%" height={176}>
-          <BarChart data={chartData} barCategoryGap="30%" barGap={2} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
+          <BarChart data={chartData} barCategoryGap="30%" margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
             <XAxis
               dataKey="label"
@@ -361,25 +360,20 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
               content={renderRendimientoTooltip}
               cursor={{ fill: "#1e293b50" }}
             />
-            {/* Aporte de capital — barra azul/slate */}
-            <Bar dataKey="displayCapitalIn" radius={[2, 2, 0, 0]} isAnimationActive={false} maxBarSize={20}>
-              {chartData.map((entry, i) => (
-                <Cell
-                  key={i}
-                  fill="#3b82f6"
-                  fillOpacity={(entry.displayCapitalIn ?? 0) > 1 ? 0.45 : 0}
-                />
-              ))}
-            </Bar>
-            {/* Rendimiento de mercado — barra verde/roja */}
-            <Bar dataKey="displayMarketGain" radius={[3, 3, 3, 3]} isAnimationActive={false} maxBarSize={20}>
-              {chartData.map((entry, i) => (
-                <Cell
-                  key={i}
-                  fill={(entry.displayMarketGain ?? 0) >= 0 ? "#34d399" : "#f87171"}
-                  fillOpacity={0.88}
-                />
-              ))}
+            <Bar dataKey="displayMarketGain" radius={[3, 3, 3, 3]} isAnimationActive={false}>
+              {chartData.map((entry, i) => {
+                const hasCapital = (entry.displayCapitalIn ?? 0) > 1;
+                const positive = (entry.displayMarketGain ?? 0) >= 0;
+                return (
+                  <Cell
+                    key={i}
+                    fill={positive ? "#34d399" : "#f87171"}
+                    fillOpacity={hasCapital ? 0.55 : 0.88}
+                    stroke={hasCapital ? "#3b82f6" : "none"}
+                    strokeWidth={hasCapital ? 1.5 : 0}
+                  />
+                );
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
