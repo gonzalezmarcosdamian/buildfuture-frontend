@@ -1,4 +1,5 @@
 "use client";
+import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from "lucide-react";
 import { formatARS } from "@/lib/formatters";
@@ -94,9 +95,11 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
   async function handleSave() {
     setSaving(true);
     try {
+      const { data: _s } = await supabase.auth.getSession();
+      const _tok = _s.session?.access_token;
       await fetch(`${API_URL}/budget/`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(_tok ? { Authorization: `Bearer ${_tok}` } : {}) },
         body: JSON.stringify({ income_monthly_ars: income, fx_rate: fxRate, categories }),
       });
       setSaved(true);
