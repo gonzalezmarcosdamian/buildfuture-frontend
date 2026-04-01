@@ -62,6 +62,113 @@ function MetricRow({ label, value, sub, highlight }: {
   );
 }
 
+function PositionMetrics({ inst, fmt, hint, currency }: {
+  inst: InstrumentData;
+  fmt: (usd: number) => string;
+  hint: (usd: number) => string;
+  currency: "USD" | "ARS";
+}) {
+  const isFCI   = inst.asset_type === "FCI";
+  const isLETRA = inst.asset_type === "LETRA";
+  const isCEDEAR = inst.asset_type === "CEDEAR";
+
+  // Para FCI: current_price_usd = vcp / mep → vcp_ars = current_price_usd * mep
+  const vcp_ars = isFCI ? inst.current_price_usd * inst.mep : null;
+  // Para FCI: ppc_ars es el VCP al momento de la compra
+  const vcp_compra_ars = isFCI ? inst.ppc_ars : null;
+  // Tenencia valorizada en ARS = cuotapartes × VCP actual
+  const tenencia_ars = isFCI && vcp_ars ? inst.quantity * vcp_ars : null;
+
+  // Para LETRA: IOL cotiza per 100 nominales
+  const ppc_unitario = isLETRA
+    ? `$${(inst.ppc_ars / 100).toLocaleString("es-AR", { maximumFractionDigits: 4 })} c/u`
+    : null;
+
+  if (isFCI) {
+    return (
+      <>
+        <MetricRow
+          label="Cuotapartes"
+          value={inst.quantity.toLocaleString("es-AR", { maximumFractionDigits: 6 })}
+        />
+        <MetricRow
+          label="VCP actual"
+          value={`$${vcp_ars!.toLocaleString("es-AR", { maximumFractionDigits: 4 })} ARS`}
+          sub={`MEP actual: $${inst.mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`}
+        />
+        <MetricRow
+          label="VCP de compra"
+          value={`$${vcp_compra_ars!.toLocaleString("es-AR", { maximumFractionDigits: 4 })} ARS`}
+          sub={`MEP compra: $${inst.purchase_fx_rate.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`}
+        />
+        <MetricRow
+          label="Tenencia valorizada"
+          value={`🇦🇷 ${formatARS(tenencia_ars!)}`}
+          sub={`≈ ${FLAG[currency]} ${fmt(inst.current_value_usd)}`}
+        />
+        <MetricRow
+          label="Costo base"
+          value={`${FLAG[currency]} ${fmt(inst.cost_basis_usd)}`}
+          sub={hint(inst.cost_basis_usd)}
+        />
+        <MetricRow
+          label="Renta mensual estimada"
+          value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
+          sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(1)}%`}
+          highlight={inst.monthly_return_usd > 0 ? "green" : null}
+        />
+      </>
+    );
+  }
+
+  // CEDEAR, LETRA, BOND, CRYPTO, ETF
+  return (
+    <>
+      <MetricRow
+        label="Cantidad"
+        value={`${inst.quantity.toLocaleString("es-AR", { maximumFractionDigits: 6 })} u.`}
+      />
+      {inst.ppc_ars > 0 ? (
+        <MetricRow
+          label={isLETRA ? "PPC (por 100 nominales)" : "PPC"}
+          value={`$${inst.ppc_ars.toLocaleString("es-AR", { maximumFractionDigits: 2 })} ARS`}
+          sub={isLETRA && ppc_unitario
+            ? `${ppc_unitario} · MEP compra: $${inst.purchase_fx_rate.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`
+            : isCEDEAR
+            ? `MEP compra: $${inst.purchase_fx_rate.toLocaleString("es-AR", { maximumFractionDigits: 0 })} → USD ${formatUSD(inst.ppc_ars / inst.purchase_fx_rate)}`
+            : undefined
+          }
+        />
+      ) : (
+        <MetricRow
+          label="Precio de compra"
+          value={`${FLAG.USD} ${formatUSD(inst.avg_purchase_price_usd)}`}
+        />
+      )}
+      <MetricRow
+        label="Costo base"
+        value={`${FLAG[currency]} ${fmt(inst.cost_basis_usd)}`}
+        sub={hint(inst.cost_basis_usd)}
+      />
+      <MetricRow
+        label="Precio actual"
+        value={`${FLAG[currency]} ${fmt(inst.current_price_usd)}`}
+      />
+      <MetricRow
+        label="Tenencia valorizada"
+        value={`${FLAG[currency]} ${fmt(inst.current_value_usd)}`}
+        sub={hint(inst.current_value_usd)}
+      />
+      <MetricRow
+        label="Renta mensual estimada"
+        value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
+        sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(1)}%`}
+        highlight={inst.monthly_return_usd > 0 ? "green" : null}
+      />
+    </>
+  );
+}
+
 export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentData }) {
   const { currency } = useCurrency();
 
@@ -71,7 +178,13 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
     : `≈ ${FLAG.USD} ${formatUSD(usd)}`;
 
   const positive = inst.performance_pct >= 0;
-  const pnlSign = inst.pnl_usd >= 0;
+  const pnlSign  = inst.pnl_usd >= 0;
+
+  const pnlLabel = inst.asset_type === "FCI"
+    ? "Ganancia / Pérdida vs VCP compra"
+    : inst.asset_type === "CEDEAR"
+    ? "Ganancia / Pérdida vs PPC (ARS/MEP)"
+    : "Ganancia / Pérdida vs precio compra";
 
   return (
     <div className="space-y-4">
@@ -102,14 +215,14 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
           <div className="flex items-center gap-2">
             {pnlSign ? <TrendingUp size={16} className="text-emerald-400" /> : <TrendingDown size={16} className="text-red-400" />}
             <div>
-              <p className="text-[10px] text-slate-500">Ganancia / Pérdida vs PPC</p>
+              <p className="text-[10px] text-slate-500">{pnlLabel}</p>
               <p className={`text-sm font-bold ${pnlSign ? "text-emerald-400" : "text-red-400"}`}>
                 {pnlSign ? "+" : ""}{FLAG[currency]} {fmt(inst.pnl_usd)}
               </p>
             </div>
           </div>
-          <div className={`text-right`}>
-            <p className="text-[10px] text-slate-500">Rendimiento</p>
+          <div>
+            <p className="text-[10px] text-slate-500 text-right">Rendimiento</p>
             <p className={`text-sm font-bold ${positive ? "text-emerald-400" : "text-red-400"}`}>
               {formatPct(inst.performance_pct, 2, true)}
             </p>
@@ -117,40 +230,10 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         </div>
       </div>
 
-      {/* Position metrics */}
+      {/* Position metrics — layout según tipo */}
       <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4">
         <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Mi posición</p>
-        <div>
-          <MetricRow
-            label="Cantidad"
-            value={`${inst.quantity.toLocaleString("es-AR", { maximumFractionDigits: 6 })} u.`}
-          />
-          <MetricRow
-            label="PPC (precio de compra)"
-            value={`$${inst.ppc_ars.toLocaleString("es-AR", { maximumFractionDigits: 2 })}`}
-            sub={`MEP compra: $${inst.purchase_fx_rate.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`}
-          />
-          <MetricRow
-            label="Costo base"
-            value={`${FLAG[currency]} ${fmt(inst.cost_basis_usd)}`}
-            sub={hint(inst.cost_basis_usd)}
-          />
-          <MetricRow
-            label="Precio actual"
-            value={`${FLAG[currency]} ${fmt(inst.current_price_usd)}`}
-          />
-          <MetricRow
-            label="Valor actual"
-            value={`${FLAG[currency]} ${fmt(inst.current_value_usd)}`}
-            sub={hint(inst.current_value_usd)}
-          />
-          <MetricRow
-            label="Renta mensual estimada"
-            value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
-            sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(1)}%`}
-            highlight={inst.monthly_return_usd > 0 ? "green" : null}
-          />
-        </div>
+        <PositionMetrics inst={inst} fmt={fmt} hint={hint} currency={currency} />
       </div>
 
       {/* Asset context */}
@@ -177,7 +260,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         </div>
       </div>
 
-      {/* MEP / FX context */}
+      {/* MEP footer */}
       <div className="bg-slate-900/50 rounded-2xl border border-slate-800 p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Shield size={13} className="text-slate-500" />
