@@ -32,11 +32,11 @@ export function ConnectCocosForm({ onSuccess }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [totpSecret, setTotpSecret] = useState("");
+  const [showTotpSecret, setShowTotpSecret] = useState(false);
 
   // Paso 2
   const [code, setCode] = useState("");
-  const [totpSecret, setTotpSecret] = useState("");
-  const [showTotpSecret, setShowTotpSecret] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,6 +48,28 @@ export function ConnectCocosForm({ onSuccess }: Props) {
     setError(""); setSuccess("");
   }
 
+  async function handleSaveCredentials(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const res = await authFetch("/integrations/cocos/save-credentials", {
+        method: "POST",
+        body: JSON.stringify({ email, password, totp_secret: totpSecret }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.detail || "Error al guardar las credenciales");
+        return;
+      }
+      setStep("code");
+    } catch {
+      setError("No se pudo conectar con el servidor");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleConnect(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -56,12 +78,13 @@ export function ConnectCocosForm({ onSuccess }: Props) {
     try {
       const res = await authFetch("/integrations/cocos/connect", {
         method: "POST",
-        body: JSON.stringify({ email, password, code, totp_secret: totpSecret }),
+        body: JSON.stringify({ code }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.detail || "Error al conectar con Cocos");
+        setError(data.detail || "Código incorrecto o expirado. Ingresá un código nuevo.");
+        setCode("");
         return;
       }
 
@@ -115,7 +138,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
       </div>
 
       {step === "credentials" && (
-        <form onSubmit={(e) => { e.preventDefault(); setStep("code"); }} className="space-y-3">
+        <form onSubmit={handleSaveCredentials} className="space-y-3">
           <div>
             <label className="text-xs text-slate-400 mb-1 block">Email Cocos</label>
             <input
@@ -149,45 +172,8 @@ export function ConnectCocosForm({ onSuccess }: Props) {
               </button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => { setOpen(false); reset(); }}
-              className="flex-1 py-2.5 rounded-xl text-sm text-slate-400 bg-slate-800 hover:bg-slate-700 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={!email || !password}
-              className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-orange-600 hover:bg-orange-500 disabled:opacity-50 transition-colors"
-            >
-              Siguiente
-            </button>
-          </div>
-        </form>
-      )}
 
-      {step === "code" && (
-        <form onSubmit={handleConnect} className="space-y-3">
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">
-              Código de Google Authenticator
-            </label>
-            <input
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="123456"
-              autoComplete="one-time-code"
-              inputMode="numeric"
-              maxLength={6}
-              required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors tracking-widest font-mono"
-            />
-          </div>
-
-          {/* TOTP secret — opcional */}
+          {/* TOTP secret — opcional, va junto a las credenciales */}
           <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -231,6 +217,56 @@ export function ConnectCocosForm({ onSuccess }: Props) {
               {error}
             </div>
           )}
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => { setOpen(false); reset(); }}
+              className="flex-1 py-2.5 rounded-xl text-sm text-slate-400 bg-slate-800 hover:bg-slate-700 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !email || !password}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium bg-orange-600 hover:bg-orange-500 disabled:opacity-50 transition-colors"
+            >
+              {loading && <Loader2 size={14} className="animate-spin" />}
+              {loading ? "Guardando..." : "Siguiente"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {step === "code" && (
+        <form onSubmit={handleConnect} className="space-y-3">
+          <div>
+            <label className="text-xs text-slate-400 mb-1 block">
+              Código de Google Authenticator
+            </label>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="123456"
+              autoComplete="one-time-code"
+              inputMode="numeric"
+              maxLength={6}
+              autoFocus
+              required
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors tracking-widest font-mono"
+            />
+            <p className="text-[10px] text-slate-600 mt-1">
+              Si el código expiró, abrí Google Authenticator y copiá el nuevo código de 6 dígitos.
+            </p>
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 text-xs text-red-400 bg-red-950/30 border border-red-900 rounded-lg px-3 py-2">
+              <AlertCircle size={13} />
+              {error}
+            </div>
+          )}
           {success && (
             <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/30 border border-emerald-900 rounded-lg px-3 py-2">
               <CheckCircle2 size={13} />
@@ -241,7 +277,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => { setStep("credentials"); setError(""); }}
+              onClick={() => { setStep("credentials"); setError(""); setCode(""); }}
               className="flex-1 py-2.5 rounded-xl text-sm text-slate-400 bg-slate-800 hover:bg-slate-700 transition-colors"
             >
               Atrás
@@ -283,6 +319,7 @@ export function CocosSyncModal({ onSync, onClose }: SyncModalProps) {
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al sincronizar");
+      setCode("");
     } finally {
       setLoading(false);
     }
