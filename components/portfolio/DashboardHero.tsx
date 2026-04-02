@@ -184,50 +184,33 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
   return (
     <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
 
-      {/* ── Top: números y toggle ─────────────────────────────── */}
-      <div className="p-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider">Tu portafolio trabaja por vos</p>
-          <CurrencyToggle />
-        </div>
+      {/* ── Encabezado global ─────────────────────────────────── */}
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <p className="text-[10px] text-slate-500 uppercase tracking-wider">Tu portafolio trabaja por vos</p>
+        <CurrencyToggle />
+      </div>
 
-        {/* Renta + Capital — fila unificada con divisor */}
-        <div className="flex items-stretch divide-x divide-slate-800">
-          {/* Renta — métrica primaria (izquierda) */}
-          <div className="flex-1 pr-4 space-y-0.5">
-            <p className="text-[9px] text-slate-500 uppercase tracking-wider">💰 Renta mensual</p>
-            <div className="flex items-end gap-1 leading-none">
-              <span
-                className="font-extrabold text-emerald-400 whitespace-nowrap"
-                style={{ fontSize: "clamp(1.35rem, 7.5vw, 2rem)" }}
-              >
-                +{fmt(monthlyReturn)}
-              </span>
-              <span className="text-xs text-slate-500 pb-0.5">/mes</span>
-            </div>
-            <p className="text-[9px] text-emerald-700">
-              {(coveragePct * 100).toFixed(0)}% de {fmt(monthlyExpenses)} cubierto
-            </p>
+      {/* ══════════════════════════════════════════════════════════
+          SECCIÓN RENTA
+          ══════════════════════════════════════════════════════════ */}
+      <div className="border-t border-slate-800/80">
+        {/* Header renta */}
+        <div className="flex items-center justify-between px-5 pt-3 pb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-3.5 bg-emerald-500 rounded-full" />
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Renta mensual</p>
           </div>
-
-          {/* Capital — métrica secundaria (derecha) */}
-          <div className="flex-1 pl-4 space-y-0.5">
-            <p className="text-[9px] text-slate-500 uppercase tracking-wider">📈 Capital acumulado</p>
-            <p
-              className="font-bold text-violet-300 whitespace-nowrap"
-              style={{ fontSize: "clamp(1rem, 5vw, 1.375rem)" }}
-            >
-              {fmt(capitalTotalUsd ?? portfolioTotal)}
-            </p>
-            <p className="text-[9px] text-slate-600">
-              portafolio total {fmtTotal(portfolioTotal)}
-            </p>
+          <div className="flex items-end gap-1 leading-none">
+            <span className="font-extrabold text-emerald-400" style={{ fontSize: "clamp(1.1rem, 6vw, 1.75rem)" }}>
+              +{fmt(monthlyReturn)}
+            </span>
+            <span className="text-xs text-slate-500 pb-0.5">/mes</span>
           </div>
         </div>
 
-        {/* Barra de progreso */}
-        <div className="space-y-1">
-          <div className="relative h-4 bg-slate-800 rounded-full overflow-hidden">
+        {/* Barra de cobertura */}
+        <div className="px-5 pb-2 space-y-1">
+          <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{
@@ -249,59 +232,74 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
           </div>
           <div className="flex justify-between text-[9px] text-slate-600">
             <span>$0</span>
-            <span className="text-slate-500">{coveredCount}/{covers.length} metas</span>
+            <span className="text-emerald-700 font-medium">{coveredCount}/{covers.length} categorías cubiertas</span>
             <span>{fmt(monthlyExpenses)}/mes</span>
           </div>
         </div>
-      </div>
 
-      {/* ── Divisor ───────────────────────────────────────────── */}
-      <div className="border-t border-slate-800/80" />
+        {/* Categorías de gasto */}
+        <div className="divide-y divide-slate-800/60">
+          {visibleCovers.map((c, i) => (
+            <GoalRow key={i} item={c} fmt={fmt} />
+          ))}
+        </div>
 
-      {/* ── Lista de metas ────────────────────────────────────── */}
-      <div className="divide-y divide-slate-800/60">
-        {visibleCovers.map((c, i) => (
-          <GoalRow key={i} item={c} fmt={fmt} />
-        ))}
-      </div>
+        {/* Expandir / colapsar */}
+        {covers.length > VISIBLE_DEFAULT && (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] text-slate-500 hover:text-slate-300 transition-colors border-t border-slate-800/60"
+          >
+            {expanded ? (
+              <><ChevronUp size={13} /> Mostrar menos</>
+            ) : (
+              <><ChevronDown size={13} /> Ver {hiddenCount} más</>
+            )}
+          </button>
+        )}
 
-      {/* ── Expandir / colapsar ───────────────────────────────── */}
-      {covers.length > VISIBLE_DEFAULT && (
-        <button
-          onClick={() => setExpanded((v) => !v)}
-          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors border-t border-slate-800/60"
-        >
-          {expanded ? (
-            <><ChevronUp size={13} /> Mostrar menos</>
-          ) : (
-            <><ChevronDown size={13} /> Ver {hiddenCount} metas más</>
-          )}
-        </button>
-      )}
-
-      {/* ── Próximo a desbloquear ─────────────────────────────── */}
-      {nextTarget && (
-        <div className="border-t border-slate-800/80 mx-4 mb-4 mt-1">
-          <div className="bg-blue-950/20 border border-blue-900/30 rounded-xl px-3 py-2.5 mt-3 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] text-blue-400 font-medium">
-                Próximo: {nextTarget.icon} {nextTarget.name}
-              </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Faltan{" "}
-                <span className="text-white font-semibold">{fmt(amountNeeded)}/mes</span>{" "}
-                de rendimiento
-              </p>
+        {/* Próximo a desbloquear */}
+        {nextTarget && (
+          <div className="mx-4 mb-3 mt-1 border-t border-slate-800/60 pt-2">
+            <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl px-3 py-2 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-emerald-600 font-medium">
+                  Próximo: {nextTarget.icon} {nextTarget.name}
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Faltan <span className="text-white font-semibold">{fmt(amountNeeded)}/mes</span> de renta
+                </p>
+              </div>
+              <Link href="/budget" className="text-[10px] text-emerald-500 hover:text-emerald-400 shrink-0 ml-3">
+                Presupuesto →
+              </Link>
             </div>
-            <Link href="/goals" className="text-[10px] text-blue-400 hover:text-blue-300 shrink-0 ml-3">
-              Ver metas →
-            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════
+          SECCIÓN CAPITAL
+          ══════════════════════════════════════════════════════════ */}
+      <div className="border-t-2 border-slate-700/60">
+        {/* Header capital */}
+        <div className="flex items-center justify-between px-5 pt-3 pb-1">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-3.5 bg-violet-500 rounded-full" />
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Capital acumulado</p>
+          </div>
+          <div className="text-right">
+            <p className="font-bold text-violet-300 whitespace-nowrap" style={{ fontSize: "clamp(1rem, 5vw, 1.375rem)" }}>
+              {fmt(capitalTotalUsd ?? portfolioTotal)}
+            </p>
+            <p className="text-[9px] text-slate-600">total {fmtTotal(portfolioTotal)}</p>
           </div>
         </div>
-      )}
 
-      {/* ── Metas de capital (largo plazo) ────────────────────── */}
-      <CapitalGoalsMini />
+        {/* Metas de largo plazo */}
+        <CapitalGoalsMini />
+      </div>
+
     </div>
   );
 }
