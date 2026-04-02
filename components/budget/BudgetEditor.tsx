@@ -61,7 +61,7 @@ const fmt = (n: number) => (n > 0 ? Math.round(n).toLocaleString("es-AR") : "");
 // Extrae sólo dígitos y convierte a número
 const parse = (s: string) => parseInt(s.replace(/\D/g, ""), 10) || 0;
 
-export function BudgetEditor({ initial }: { initial: Budget }) {
+export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: () => void }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
   const [useBruto, setUseBruto] = useState(true);
   const [bruto, setBruto] = useState(Math.round(initial.income_monthly_ars / (1 - DESCUENTOS_AFIP)));
@@ -77,6 +77,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
 
   useEffect(() => {
     refreshFx();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -111,7 +112,6 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
   const savingsPct = Math.max(0, 1 - totalAllocated);
   const savingsARS = income * savingsPct;
   const savingsUSD = savingsARS / fxRate;
-  const remainingPct = 1 - totalAllocated; // puede ser negativo si se pasa de 100%
 
   function maxForCat(idx: number) {
     const otherAllocated = totalAllocated - categories[idx].percentage;
@@ -148,7 +148,7 @@ export function BudgetEditor({ initial }: { initial: Budget }) {
       });
       setSaved(true);
       setFxDirty(false);
-      setTimeout(() => setSaved(false), 2000);
+      setTimeout(() => { setSaved(false); onSaved?.(); }, 1500);
     } finally {
       setSaving(false);
     }

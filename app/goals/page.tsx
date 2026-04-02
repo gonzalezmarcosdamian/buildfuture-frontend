@@ -52,6 +52,7 @@ export default async function Goals() {
         covers={covers}
         unlockRoadmap={unlockRoadmap}
         budgetSavingsUSD={budgetSavingsUSD}
+        budget={budget}
       />
     </div>
   );
