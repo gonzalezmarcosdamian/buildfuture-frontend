@@ -1,7 +1,6 @@
 import { fetchPortfolio, fetchPortfolioHistory, fetchBudget, fetchIntegrations } from "@/lib/api-server";
 import { PortfolioHeader } from "@/components/portfolio/PortfolioHeader";
 import { PortfolioClient } from "@/components/portfolio/PortfolioClient";
-import { SyncButton } from "@/components/portfolio/SyncButton";
 import { Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -27,13 +26,10 @@ export default async function Portfolio() {
     <div className="px-4 pt-8 pb-24 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-slate-100">Portafolio</h1>
-        <div className="flex items-center gap-2">
-          {connectedALYCs.length > 0 && <SyncButton connectedProviders={connectedALYCs} />}
-          <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-slate-800/50 border border-slate-800 rounded-xl text-slate-600 cursor-not-allowed opacity-50">
-            <Plus size={12} />
-            Agregar manual
-          </span>
-        </div>
+        <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-slate-800/50 border border-slate-800 rounded-xl text-slate-600 cursor-not-allowed opacity-50">
+          <Plus size={12} />
+          Agregar manual
+        </span>
       </div>
 
       <PortfolioHeader
@@ -52,6 +48,7 @@ export default async function Portfolio() {
         totalUsd={summary.total_usd}
         mep={mep}
         history={history}
+        connectedProviders={connectedALYCs}
       />
     </div>
   );

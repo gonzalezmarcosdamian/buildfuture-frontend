@@ -30,6 +30,7 @@ interface Props {
   mep: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   history: { period: "daily" | "monthly" | "annual"; points: any[]; has_data: boolean };
+  connectedProviders?: string[];
 }
 
 const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: string[] }> = {
@@ -55,7 +56,7 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
   },
 };
 
-export function PortfolioClient({ positions, totalUsd, mep, history }: Props) {
+export function PortfolioClient({ positions, totalUsd, mep, history, connectedProviders = [] }: Props) {
   const [mode, setMode] = useState<ViewMode>("composicion");
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
 
@@ -114,7 +115,7 @@ export function PortfolioClient({ positions, totalUsd, mep, history }: Props) {
       <PerformanceChart initialData={history} mep={mep} chartMode={chartMode} />
 
       {/* Assets list — tab controlled externally */}
-      <PortfolioTabs positions={positions} totalUsd={totalUsd} mep={mep} activeTab={mode} />
+      <PortfolioTabs positions={positions} totalUsd={totalUsd} mep={mep} activeTab={mode} connectedProviders={connectedProviders} />
 
       {/* Agregar posición manual — próximamente */}
       <div className="w-full flex items-center gap-3 p-4 bg-slate-900/30 border border-dashed border-slate-800 rounded-2xl opacity-50 cursor-not-allowed">

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { TrendingUp, TrendingDown, ChevronRight, ChevronDown } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
+import { SyncButton } from "@/components/portfolio/SyncButton";
 
 interface Position {
   id: number;
@@ -35,6 +36,7 @@ interface Props {
   totalUsd: number;
   mep: number;
   activeTab: TabMode;
+  connectedProviders?: string[];
 }
 
 // Propósito de cada tipo de activo: renta (flujo mensual) | capital (apreciación)
@@ -146,7 +148,7 @@ function SourceGroupHeader({
   );
 }
 
-export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
+export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedProviders = [] }: Props) {
   const tab = activeTab;
   const { currency } = useCurrency();
   const router = useRouter();
@@ -275,16 +277,24 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
             {Object.entries(bySource).map(([source, sourcePositions]) => {
               const collapsed  = !!collapsedSources[source];
               const groupTotal = sourcePositions.reduce((s, p) => s + p.current_value_usd, 0);
+              const isConnected = connectedProviders.includes(source);
               return (
                 <div key={source}>
-                  <SourceGroupHeader
-                    source={source}
-                    collapsed={collapsed}
-                    groupTotal={groupTotal}
-                    fmt={fmt}
-                    currency={currency as "USD" | "ARS"}
-                    onToggle={() => toggleSource(source)}
-                  />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <SourceGroupHeader
+                        source={source}
+                        collapsed={collapsed}
+                        groupTotal={groupTotal}
+                        fmt={fmt}
+                        currency={currency as "USD" | "ARS"}
+                        onToggle={() => toggleSource(source)}
+                      />
+                    </div>
+                    {isConnected && (
+                      <SyncButton connectedProviders={[source]} />
+                    )}
+                  </div>
 
                   {!collapsed && (
                     <div className="space-y-0.5 mt-1">

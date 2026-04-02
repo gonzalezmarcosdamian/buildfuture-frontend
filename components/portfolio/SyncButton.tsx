@@ -63,7 +63,10 @@ function SingleSyncButton({ provider }: { provider: string }) {
         } disabled:opacity-50`}
       >
         <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
-        {syncing ? "Sync..." : ok ? "Listo" : `Sync ${provider}`}
+        {syncing ? "Sync..." : ok ? "Listo" : "Sync"}
+        {!syncing && !ok && (
+          <span className="text-[9px] text-slate-600 font-medium">{provider}</span>
+        )}
       </button>
       {error && <p className="text-[10px] text-red-400">{error}</p>}
     </div>
