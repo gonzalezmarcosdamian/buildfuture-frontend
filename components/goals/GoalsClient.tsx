@@ -229,9 +229,6 @@ export function GoalsClient({
 
   return (
     <div className="space-y-4">
-      {/* Presupuesto — siempre visible, fuente de verdad */}
-      <BudgetSection budget={budget} mep={mep} />
-
       {/* Tab switcher */}
       <div className="flex bg-slate-800/60 rounded-xl p-1 gap-1">
         <button
@@ -259,6 +256,9 @@ export function GoalsClient({
       {/* ── RENTA TAB ─────────────────────────────────────────── */}
       {tab === "renta" && (
         <div className="space-y-4">
+          {/* Presupuesto — fuente de verdad para ahorro mensual */}
+          <BudgetSection budget={budget} mep={mep} />
+
           <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold text-slate-300">Categorías desbloqueadas</p>
