@@ -18,6 +18,8 @@ interface Position {
   current_value_usd: number;
   cost_basis_usd: number;
   performance_pct: number;
+  performance_ars_pct: number;
+  ppc_ars: number;
   annual_yield_pct: number;
   current_price_usd: number;
   avg_purchase_price_usd: number;

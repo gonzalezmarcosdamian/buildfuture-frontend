@@ -16,11 +16,17 @@ interface Position {
   current_value_usd: number;
   cost_basis_usd: number;
   performance_pct: number;
+  performance_ars_pct: number;
+  ppc_ars: number;
   annual_yield_pct: number;
   current_price_usd: number;
   avg_purchase_price_usd: number;
   snapshot_date?: string | null;
 }
+
+// Instrumentos ARS: su rendimiento nativo (ARS vs VCP) es siempre correcto,
+// independientemente del MEP histórico de compra.
+const ARS_DENOMINATED = new Set(["FCI", "LETRA", "ON"]);
 
 export type TabMode = "composicion" | "rendimientos";
 
@@ -360,9 +366,14 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                 {!collapsed && (
                   <div className="space-y-3 mt-2">
                     {sourcePositions.map((p) => {
-                      const positive = p.performance_pct >= 0;
+                      // Para instrumentos ARS (FCI, LETRA, ON): usar rendimiento en ARS.
+                      // Es siempre preciso — no depende del MEP al momento de compra.
+                      // Para instrumentos USD (CEDEAR, ETF, CRYPTO): rendimiento en USD.
+                      const useArs = ARS_DENOMINATED.has(p.asset_type) && p.ppc_ars > 0;
+                      const perfPct = useArs ? p.performance_ars_pct : p.performance_pct;
+                      const positive = perfPct >= 0;
                       const pnlUsd   = p.current_value_usd - p.cost_basis_usd;
-                      const barPct   = Math.min(Math.abs(p.performance_pct) * 100, 100);
+                      const barPct   = Math.min(Math.abs(perfPct) * 100, 100);
                       return (
                         <button
                           key={p.id}
@@ -378,7 +389,10 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                               <div className="text-right">
                                 <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
                                   {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                                  <span className="font-semibold">{formatPct(p.performance_pct, 1, true)}</span>
+                                  <span className="font-semibold">{formatPct(perfPct, 1, true)}</span>
+                                  {useArs && (
+                                    <span className="text-[9px] text-slate-500 ml-0.5">ARS</span>
+                                  )}
                                 </div>
                                 <p className={`text-[10px] ${positive ? "text-emerald-600" : "text-red-600"}`}>
                                   {positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)}
