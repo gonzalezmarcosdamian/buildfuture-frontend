@@ -114,6 +114,7 @@ export default async function Dashboard() {
         portfolioTotal={score.portfolio_total_usd}
         portfolioTotalArs={portfolio?.summary?.total_ars ?? null}
         mep={mep}
+        capitalTotalUsd={score.capital_total_usd ?? null}
       />
 
       {/* 2 — Presupuesto */}

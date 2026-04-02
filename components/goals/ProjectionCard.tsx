@@ -276,7 +276,7 @@ export function ProjectionCard() {
     async function load() {
       try {
         const token = await getToken();
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
         const [projRes, goalsRes] = await Promise.all([
           fetch(`${API_URL}/portfolio/projection`, { headers }),
           fetch(`${API_URL}/portfolio/capital-goals`, { headers }),

@@ -21,11 +21,12 @@ interface Props {
   portfolioTotal: number;
   portfolioTotalArs?: number | null;
   mep: number;
+  capitalTotalUsd?: number | null;
 }
 
 const VISIBLE_DEFAULT = 3;
 
-export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfolioTotal, portfolioTotalArs, mep }: Props) {
+export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfolioTotal, portfolioTotalArs, mep, capitalTotalUsd }: Props) {
   const { currency } = useCurrency();
   const [expanded, setExpanded] = useState(false);
 
@@ -58,39 +59,50 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
       {/* ── Top: números y toggle ─────────────────────────────── */}
       <div className="p-5 space-y-4">
         <div className="flex items-start justify-between">
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-              Tu portafolio trabaja por vos
-            </p>
-            <div className="flex items-end gap-1.5">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+            Tu portafolio trabaja por vos
+          </p>
+          <CurrencyToggle />
+        </div>
+
+        {/* Split renta / capital */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Bucket renta */}
+          <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl px-3 py-2.5">
+            <p className="text-[9px] text-emerald-600 uppercase tracking-wider font-medium mb-0.5">💰 Renta</p>
+            <div className="flex items-end gap-1">
               <span
-                className="font-extrabold text-emerald-400 whitespace-nowrap"
-                style={{ fontSize: "clamp(1.15rem, 6.5vw, 2.25rem)" }}
+                className="font-extrabold text-emerald-400 leading-none whitespace-nowrap"
+                style={{ fontSize: "clamp(1rem, 5.5vw, 1.5rem)" }}
               >
                 +{fmt(monthlyReturn)}
               </span>
-              <span className="text-sm text-slate-500 mb-1 shrink-0">/mes</span>
+              <span className="text-[10px] text-emerald-600 mb-0.5">/mes</span>
             </div>
-            <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-              de {fmt(monthlyExpenses)} en gastos ·{" "}
-              <span className="text-emerald-500 font-medium">
-                {(coveragePct * 100).toFixed(1)}% cubierto
-              </span>
+            <p className="text-[9px] text-emerald-700 mt-0.5">
+              {(coveragePct * 100).toFixed(0)}% de gastos cubierto
             </p>
           </div>
-          <div className="flex flex-col items-end gap-1.5 shrink-0 ml-2">
-            <CurrencyToggle />
-            <div className="text-right">
-              <p className="text-[9px] text-slate-600 uppercase tracking-wider">Portafolio</p>
-              <p
-                className="font-bold text-slate-300 whitespace-nowrap"
-                style={{ fontSize: "clamp(0.75rem, 3.5vw, 1.125rem)" }}
+
+          {/* Bucket capital */}
+          <div className="bg-violet-950/20 border border-violet-900/30 rounded-xl px-3 py-2.5">
+            <p className="text-[9px] text-violet-500 uppercase tracking-wider font-medium mb-0.5">📈 Capital</p>
+            <div className="flex items-end gap-1">
+              <span
+                className="font-extrabold text-violet-300 leading-none whitespace-nowrap"
+                style={{ fontSize: "clamp(1rem, 5.5vw, 1.5rem)" }}
               >
-                {fmtTotal(portfolioTotal)}
-              </p>
+                {fmt(capitalTotalUsd ?? portfolioTotal)}
+              </span>
             </div>
+            <p className="text-[9px] text-violet-700 mt-0.5">para tus metas de largo plazo</p>
           </div>
         </div>
+
+        <p className="text-[10px] text-slate-500 -mt-1">
+          de {fmt(monthlyExpenses)} en gastos ·{" "}
+          <span className="text-slate-400">portafolio total {fmtTotal(portfolioTotal)}</span>
+        </p>
 
         {/* Barra de progreso */}
         <div className="space-y-1">
@@ -128,7 +140,7 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
       {/* ── Lista de metas ────────────────────────────────────── */}
       <div className="divide-y divide-slate-800/60">
         {visibleCovers.map((c, i) => (
-          <GoalRow key={i} item={c} fmt={fmt} isFirst={i === 0} />
+          <GoalRow key={i} item={c} fmt={fmt} />
         ))}
       </div>
 
@@ -170,7 +182,7 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
   );
 }
 
-function GoalRow({ item, fmt, isFirst }: { item: CoverItem; fmt: (n: number) => string; isFirst: boolean }) {
+function GoalRow({ item, fmt }: { item: CoverItem; fmt: (n: number) => string }) {
   const isCovered = item.status === "covered";
   const isPartial = item.status === "partial";
   const isPending = item.status === "pending";
