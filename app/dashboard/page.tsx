@@ -20,7 +20,8 @@ export default async function Dashboard() {
   ]);
   const connectedALYCs: string[] = Array.isArray(integrations)
     ? integrations
-        .filter((i: { provider_type: string; is_connected: boolean }) => i.provider_type === "ALYC" && i.is_connected)
+        .filter((i: { provider_type: string; is_connected: boolean; auto_sync_enabled: boolean }) =>
+          i.provider_type === "ALYC" && i.is_connected && i.auto_sync_enabled)
         .map((i: { provider: string }) => i.provider)
     : [];
 

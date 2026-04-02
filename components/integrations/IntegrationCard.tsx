@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
-import { CheckCircle2, XCircle, RefreshCw, Loader2, Unplug, AlertTriangle } from "lucide-react";
+import { CheckCircle2, XCircle, RefreshCw, Loader2, Unplug, AlertTriangle, Zap } from "lucide-react";
 import { ConnectIOLForm } from "./ConnectIOLForm";
 import { ConnectPPIForm } from "./ConnectPPIForm";
+import { ConnectCocosForm, CocosSyncModal } from "./ConnectCocosForm";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -19,27 +20,55 @@ const providerMeta: Record<string, { label: string; description: string; color: 
     description: "Acciones, bonos, CEDEARs, FCI",
     color: "text-purple-400",
   },
+  COCOS: {
+    label: "Cocos Capital",
+    description: "Acciones, CEDEARs, bonos, FCI",
+    color: "text-orange-400",
+  },
 };
 
-export function IntegrationCard({ integration }: { integration: { id: number; provider: string; provider_type: string; is_active: boolean; is_connected: boolean; last_synced_at: string | null; last_error: string } }) {
+interface Integration {
+  id: number;
+  provider: string;
+  provider_type: string;
+  is_active: boolean;
+  is_connected: boolean;
+  auto_sync_enabled: boolean;
+  last_synced_at: string | null;
+  last_error: string;
+}
+
+export function IntegrationCard({ integration }: { integration: Integration }) {
   const meta = providerMeta[integration.provider];
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [connected, setConnected] = useState(integration.is_connected);
+  const [autoSync, setAutoSync] = useState(integration.auto_sync_enabled);
   const [lastSynced, setLastSynced] = useState(integration.last_synced_at);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [showCocosSyncModal, setShowCocosSyncModal] = useState(false);
   const router = useRouter();
+
+  async function authFetch(path: string, init: RequestInit = {}) {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return fetch(`${API_URL}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init.headers ?? {}),
+      },
+    });
+  }
 
   async function handleSync() {
     setSyncing(true);
     setSyncError(null);
     try {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      const res = await fetch(`${API_URL}/integrations/${integration.provider.toLowerCase()}/sync`, {
+      const res = await authFetch(`/integrations/${integration.provider.toLowerCase()}/sync`, {
         method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (res.ok) {
         setLastSynced(new Date().toISOString());
@@ -55,6 +84,19 @@ export function IntegrationCard({ integration }: { integration: { id: number; pr
     }
   }
 
+  async function handleCocosManualSync(code: string) {
+    const res = await authFetch("/integrations/cocos/sync", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      throw new Error(d.detail || `Error ${res.status}`);
+    }
+    setLastSynced(new Date().toISOString());
+    router.refresh();
+  }
+
   function handleConnected() {
     setConnected(true);
     router.refresh();
@@ -63,11 +105,9 @@ export function IntegrationCard({ integration }: { integration: { id: number; pr
   async function handleDisconnect() {
     setDisconnecting(true);
     try {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      const res = await fetch(
-        `${API_URL}/integrations/${integration.provider.toLowerCase()}/disconnect`,
-        { method: "POST", headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      const res = await authFetch(
+        `/integrations/${integration.provider.toLowerCase()}/disconnect`,
+        { method: "POST" }
       );
       if (res.ok) {
         setConnected(false);
@@ -86,9 +126,11 @@ export function IntegrationCard({ integration }: { integration: { id: number; pr
     }
   }
 
+  const isCocos = integration.provider === "COCOS";
+
   return (
     <>
-    {/* Modal de confirmación */}
+    {/* Modal desconectar */}
     {showDisconnectModal && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
         <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-full max-w-sm space-y-4">
@@ -121,6 +163,14 @@ export function IntegrationCard({ integration }: { integration: { id: number; pr
       </div>
     )}
 
+    {/* Modal sync manual Cocos */}
+    {showCocosSyncModal && (
+      <CocosSyncModal
+        onSync={handleCocosManualSync}
+        onClose={() => setShowCocosSyncModal(false)}
+      />
+    )}
+
     <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
       <div className="flex items-start justify-between">
         <div>
@@ -131,6 +181,14 @@ export function IntegrationCard({ integration }: { integration: { id: number; pr
             <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
               {integration.provider_type}
             </span>
+            {isCocos && connected && (
+              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex items-center gap-1 ${
+                autoSync ? "bg-yellow-900/40 text-yellow-400" : "bg-slate-700 text-slate-500"
+              }`}>
+                <Zap size={9} />
+                {autoSync ? "auto-sync" : "manual"}
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-500 mt-0.5">{meta?.description}</p>
         </div>
@@ -158,14 +216,25 @@ export function IntegrationCard({ integration }: { integration: { id: number; pr
                   <Unplug size={11} />
                   Desconectar
                 </button>
-                <button
-                  onClick={handleSync}
-                  disabled={syncing}
-                  className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors"
-                >
-                  {syncing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-                  {syncing ? "Sincronizando..." : "Sync"}
-                </button>
+                {isCocos && !autoSync ? (
+                  <button
+                    onClick={() => setShowCocosSyncModal(true)}
+                    disabled={syncing}
+                    className="flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 disabled:opacity-50 transition-colors"
+                  >
+                    <RefreshCw size={12} />
+                    Sync manual
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSync}
+                    disabled={syncing}
+                    className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors"
+                  >
+                    {syncing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                    {syncing ? "Sincronizando..." : "Sync"}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -173,6 +242,8 @@ export function IntegrationCard({ integration }: { integration: { id: number; pr
           <ConnectIOLForm onSuccess={handleConnected} />
         ) : integration.provider === "PPI" ? (
           <ConnectPPIForm onSuccess={handleConnected} />
+        ) : isCocos ? (
+          <ConnectCocosForm onSuccess={() => { handleConnected(); setAutoSync(integration.auto_sync_enabled); }} />
         ) : (
           <p className="text-xs text-slate-600 italic">Próximamente</p>
         )}

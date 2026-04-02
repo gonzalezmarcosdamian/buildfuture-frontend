@@ -57,7 +57,7 @@ export default async function SettingsPage() {
 
         <div className="space-y-3">
           <p className="text-[10px] text-slate-500 uppercase tracking-wider">Disponibles</p>
-          {integrations.map((integration: { id: number; provider: string; provider_type: string; is_active: boolean; is_connected: boolean; last_synced_at: string | null; last_error: string }) => (
+          {integrations.map((integration: { id: number; provider: string; provider_type: string; is_active: boolean; is_connected: boolean; auto_sync_enabled: boolean; last_synced_at: string | null; last_error: string }) => (
             <IntegrationCard key={integration.id} integration={integration} />
           ))}
         </div>

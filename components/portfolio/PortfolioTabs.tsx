@@ -73,12 +73,14 @@ const ASSET_BADGES: Record<string, string> = {
 const SOURCE_BADGES: Record<string, string> = {
   IOL:    "bg-blue-900/60 text-blue-400",
   PPI:    "bg-purple-900/60 text-purple-400",
+  COCOS:  "bg-orange-900/60 text-orange-400",
   MANUAL: "bg-slate-700/60 text-slate-400",
 };
 
 const SOURCE_LABELS: Record<string, string> = {
   IOL:    "InvertirOnline",
   PPI:    "Portfolio Personal",
+  COCOS:  "Cocos Capital",
   MANUAL: "Manual",
 };
 
