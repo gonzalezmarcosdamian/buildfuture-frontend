@@ -2,14 +2,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BarChart2, Wallet, Target, Settings, Home } from "lucide-react";
+import { Wallet, Target, Settings, Home } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", icon: Home, label: "Inicio" },
-  { href: "/portfolio", icon: Wallet, label: "Portafolio" },
-  { href: "/budget", icon: BarChart2, label: "Presupuesto" },
-  { href: "/goals", icon: Target, label: "Metas" },
-  { href: "/settings", icon: Settings, label: "Config" },
+  { href: "/dashboard", icon: Home,    label: "Inicio" },
+  { href: "/portfolio", icon: Wallet,  label: "Portafolio" },
+  { href: "/goals",     icon: Target,  label: "Metas" },
+  { href: "/settings",  icon: Settings, label: "Config" },
 ];
 
 export function BottomNav() {
