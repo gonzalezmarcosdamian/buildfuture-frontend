@@ -57,52 +57,45 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
     <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
 
       {/* ── Top: números y toggle ─────────────────────────────── */}
-      <div className="p-5 space-y-4">
-        <div className="flex items-start justify-between">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider">
-            Tu portafolio trabaja por vos
-          </p>
+      <div className="p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider">Tu portafolio trabaja por vos</p>
           <CurrencyToggle />
         </div>
 
-        {/* Split renta / capital */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Bucket renta */}
-          <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl px-3 py-2.5">
-            <p className="text-[9px] text-emerald-600 uppercase tracking-wider font-medium mb-0.5">💰 Renta</p>
-            <div className="flex items-end gap-1">
+        {/* Renta + Capital — fila unificada con divisor */}
+        <div className="flex items-stretch divide-x divide-slate-800">
+          {/* Renta — métrica primaria (izquierda) */}
+          <div className="flex-1 pr-4 space-y-0.5">
+            <p className="text-[9px] text-slate-500 uppercase tracking-wider">💰 Renta mensual</p>
+            <div className="flex items-end gap-1 leading-none">
               <span
-                className="font-extrabold text-emerald-400 leading-none whitespace-nowrap"
-                style={{ fontSize: "clamp(1rem, 5.5vw, 1.5rem)" }}
+                className="font-extrabold text-emerald-400 whitespace-nowrap"
+                style={{ fontSize: "clamp(1.35rem, 7.5vw, 2rem)" }}
               >
                 +{fmt(monthlyReturn)}
               </span>
-              <span className="text-[10px] text-emerald-600 mb-0.5">/mes</span>
+              <span className="text-xs text-slate-500 pb-0.5">/mes</span>
             </div>
-            <p className="text-[9px] text-emerald-700 mt-0.5">
-              {(coveragePct * 100).toFixed(0)}% de gastos cubierto
+            <p className="text-[9px] text-emerald-700">
+              {(coveragePct * 100).toFixed(0)}% de {fmt(monthlyExpenses)} cubierto
             </p>
           </div>
 
-          {/* Bucket capital */}
-          <div className="bg-violet-950/20 border border-violet-900/30 rounded-xl px-3 py-2.5">
-            <p className="text-[9px] text-violet-500 uppercase tracking-wider font-medium mb-0.5">📈 Capital</p>
-            <div className="flex items-end gap-1">
-              <span
-                className="font-extrabold text-violet-300 leading-none whitespace-nowrap"
-                style={{ fontSize: "clamp(1rem, 5.5vw, 1.5rem)" }}
-              >
-                {fmt(capitalTotalUsd ?? portfolioTotal)}
-              </span>
-            </div>
-            <p className="text-[9px] text-violet-700 mt-0.5">para tus metas de largo plazo</p>
+          {/* Capital — métrica secundaria (derecha) */}
+          <div className="flex-1 pl-4 space-y-0.5">
+            <p className="text-[9px] text-slate-500 uppercase tracking-wider">📈 Capital acumulado</p>
+            <p
+              className="font-bold text-violet-300 whitespace-nowrap"
+              style={{ fontSize: "clamp(1rem, 5vw, 1.375rem)" }}
+            >
+              {fmt(capitalTotalUsd ?? portfolioTotal)}
+            </p>
+            <p className="text-[9px] text-slate-600">
+              portafolio total {fmtTotal(portfolioTotal)}
+            </p>
           </div>
         </div>
-
-        <p className="text-[10px] text-slate-500 -mt-1">
-          de {fmt(monthlyExpenses)} en gastos ·{" "}
-          <span className="text-slate-400">portafolio total {fmtTotal(portfolioTotal)}</span>
-        </p>
 
         {/* Barra de progreso */}
         <div className="space-y-1">
