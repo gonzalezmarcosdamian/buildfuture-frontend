@@ -42,7 +42,7 @@ export async function fetchGamification() {
 
 export async function fetchPortfolioHistory(period: "daily" | "monthly" | "annual" = "daily") {
   const res = await serverFetch(`/portfolio/history?period=${period}`);
-  if (!res.ok) throw new Error("Failed to fetch portfolio history");
+  if (!res.ok) return null;
   return res.json();
 }
 

@@ -31,6 +31,26 @@ interface Props {
   activeTab: TabMode;
 }
 
+// Propósito de cada tipo de activo: renta (flujo mensual) | capital (apreciación)
+const ASSET_JOB: Record<string, "renta" | "capital" | "ambos"> = {
+  LETRA:  "renta",
+  FCI:    "renta",
+  ON:     "renta",
+  BOND:   "ambos",
+  CEDEAR: "capital",
+  STOCK:  "capital",
+  ETF:    "capital",
+  CRYPTO: "capital",
+  CASH:   "renta",
+};
+
+function jobIcon(asset_type: string): string {
+  const job = ASSET_JOB[asset_type] ?? "renta";
+  if (job === "capital") return "📈";
+  if (job === "ambos")   return "⚖️";
+  return "💰";
+}
+
 const ASSET_COLORS: Record<string, string> = {
   CEDEAR: "#3b82f6",
   BOND:   "#a855f7",
@@ -138,6 +158,11 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
     return acc;
   }, {});
 
+  // Subtotales renta vs capital
+  const rentaTotal   = positions.filter(p => (ASSET_JOB[p.asset_type] ?? "renta") !== "capital").reduce((s, p) => s + p.current_value_usd, 0);
+  const capitalTotal = positions.filter(p => ASSET_JOB[p.asset_type] === "capital").reduce((s, p) => s + p.current_value_usd, 0);
+  const rentaMonthly = positions.filter(p => (ASSET_JOB[p.asset_type] ?? "renta") !== "capital" && p.asset_type !== "CASH").reduce((s, p) => s + (p.current_value_usd * (p.annual_yield_pct ?? 0) / 12), 0);
+
   // Agrupar por fuente — NEXO se agrupa igual pero sin label ALYC especial
   const bySource = positions.reduce((acc: Record<string, Position[]>, p) => {
     const src = p.source ?? "MANUAL";
@@ -171,6 +196,34 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                 }}
               />
             ))}
+          </div>
+
+          {/* Subtotales renta vs capital */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-1 mb-0.5">
+                <span className="text-sm leading-none">💰</span>
+                <p className="text-[10px] text-emerald-400 font-medium">Renta mensual</p>
+              </div>
+              <p className="text-xs font-semibold text-slate-200">
+                +{FLAG[currency]} {fmt(rentaMonthly)}/mes
+              </p>
+              <p className="text-[10px] text-slate-500">
+                {totalUsd > 0 ? ((rentaTotal / totalUsd) * 100).toFixed(0) : 0}% del portafolio
+              </p>
+            </div>
+            <div className="bg-blue-950/20 border border-blue-900/30 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-1 mb-0.5">
+                <span className="text-sm leading-none">📈</span>
+                <p className="text-[10px] text-blue-400 font-medium">Capital USD</p>
+              </div>
+              <p className="text-xs font-semibold text-slate-200">
+                {FLAG[currency]} {fmt(capitalTotal)}
+              </p>
+              <p className="text-[10px] text-slate-500">
+                {totalUsd > 0 ? ((capitalTotal / totalUsd) * 100).toFixed(0) : 0}% del portafolio
+              </p>
+            </div>
           </div>
 
           {/* By-type legend */}
@@ -256,6 +309,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                           >
                             <div>
                               <div className="flex items-center gap-1.5">
+                                <span className="text-xs leading-none">{jobIcon(p.asset_type)}</span>
                                 <span className="text-xs font-semibold text-slate-200">{p.ticker}</span>
                                 <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-slate-700 text-slate-300"}`}>
                                   {p.asset_type}

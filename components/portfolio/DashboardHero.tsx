@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lock, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { useCurrency } from "@/lib/currency-context";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { formatUSD, formatARS } from "@/lib/formatters";
+import { supabase } from "@/lib/supabase";
 
 interface CoverItem {
   name: string;
@@ -21,11 +22,139 @@ interface Props {
   portfolioTotal: number;
   portfolioTotalArs?: number | null;
   mep: number;
+  capitalTotalUsd?: number | null;
 }
 
 const VISIBLE_DEFAULT = 3;
 
-export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfolioTotal, portfolioTotalArs, mep }: Props) {
+// ── Capital Goals Mini (inline en el hero) ────────────────────────────────────
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
+
+interface CapitalGoalData {
+  id: number;
+  name: string;
+  emoji: string;
+  target_usd: number;
+  target_years: number;
+  portfolio_usd: number;
+  progress_pct: number;
+  months_to_goal: number | null;
+  monthly_savings_usd: number;
+}
+
+type GoalStatus = "achieved" | "on_track" | "delayed" | "no_savings";
+
+function goalStatus(g: CapitalGoalData): GoalStatus {
+  if (g.progress_pct >= 100) return "achieved";
+  if (!g.monthly_savings_usd || g.months_to_goal === null) return "no_savings";
+  return g.months_to_goal <= g.target_years * 12 ? "on_track" : "delayed";
+}
+
+const STATUS_LABEL: Record<GoalStatus, string> = {
+  achieved:   "¡Llegaste!",
+  on_track:   "En camino",
+  delayed:    "Con retraso",
+  no_savings: "Sin datos",
+};
+const STATUS_COLOR: Record<GoalStatus, string> = {
+  achieved:   "text-emerald-400",
+  on_track:   "text-blue-400",
+  delayed:    "text-yellow-400",
+  no_savings: "text-slate-500",
+};
+const BAR_COLOR: Record<GoalStatus, string> = {
+  achieved:   "bg-emerald-500",
+  on_track:   "bg-blue-500",
+  delayed:    "bg-yellow-500",
+  no_savings: "bg-slate-600",
+};
+function fmtK(usd: number): string {
+  if (usd >= 1_000_000) return `$${(usd / 1_000_000).toFixed(1)}M`;
+  if (usd >= 1_000) return `$${(usd / 1_000).toFixed(0)}K`;
+  return `$${usd.toFixed(0)}`;
+}
+
+function CapitalGoalsMini() {
+  const [goals, setGoals] = useState<CapitalGoalData[]>([]);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`${API_URL}/portfolio/capital-goals`, { headers });
+        if (res.ok) setGoals(await res.json());
+      } finally {
+        setReady(true);
+      }
+    }
+    load();
+  }, []);
+
+  if (!ready) return (
+    <div className="px-5 pb-4 pt-3 border-t border-slate-800/80 space-y-2">
+      <div className="h-3 w-28 bg-slate-800 rounded animate-pulse" />
+      <div className="h-8 bg-slate-800/60 rounded-lg animate-pulse" />
+    </div>
+  );
+
+  return (
+    <div className="border-t border-slate-800/80">
+      <div className="flex items-center justify-between px-5 pt-3 pb-1">
+        <p className="text-[9px] text-slate-500 uppercase tracking-wider">📈 Metas de capital</p>
+        <Link href="/goals" className="text-[10px] text-violet-400 hover:text-violet-300">
+          {goals.length > 0 ? "Ver todas →" : "Agregar →"}
+        </Link>
+      </div>
+
+      {goals.length === 0 ? (
+        <div className="px-5 pb-4 flex items-center gap-2">
+          <span className="text-slate-600 text-sm">🎯</span>
+          <p className="text-[11px] text-slate-500">
+            Sin metas todavía —{" "}
+            <Link href="/goals" className="text-violet-400 hover:text-violet-300 underline">
+              agregá tu primera meta
+            </Link>
+          </p>
+        </div>
+      ) : (
+        <div className="px-5 pb-4 space-y-2">
+          {goals.map((g) => {
+            const st = goalStatus(g);
+            return (
+              <div key={g.id} className="flex items-center gap-2.5">
+                <span className="text-sm shrink-0">{g.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-[11px] text-slate-300 truncate font-medium">{g.name}</p>
+                    <span className={`text-[9px] font-semibold shrink-0 ml-2 ${STATUS_COLOR[st]}`}>
+                      {STATUS_LABEL[st]}
+                    </span>
+                  </div>
+                  <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${BAR_COLOR[st]}`}
+                      style={{ width: `${Math.max(2, Math.min(100, g.progress_pct))}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="shrink-0 text-right w-12">
+                  <p className={`text-[11px] font-bold leading-none ${STATUS_COLOR[st]}`}>{g.progress_pct}%</p>
+                  <p className="text-[9px] text-slate-600 mt-0.5">{fmtK(g.target_usd)}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfolioTotal, portfolioTotalArs, mep, capitalTotalUsd }: Props) {
   const { currency } = useCurrency();
   const [expanded, setExpanded] = useState(false);
 
@@ -55,46 +184,33 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
   return (
     <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
 
-      {/* ── Top: números y toggle ─────────────────────────────── */}
-      <div className="p-5 space-y-4">
-        <div className="flex items-start justify-between">
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-              Tu portafolio trabaja por vos
-            </p>
-            <div className="flex items-end gap-1.5">
-              <span
-                className="font-extrabold text-emerald-400 whitespace-nowrap"
-                style={{ fontSize: "clamp(1.15rem, 6.5vw, 2.25rem)" }}
-              >
-                +{fmt(monthlyReturn)}
-              </span>
-              <span className="text-sm text-slate-500 mb-1 shrink-0">/mes</span>
-            </div>
-            <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-              de {fmt(monthlyExpenses)} en gastos ·{" "}
-              <span className="text-emerald-500 font-medium">
-                {(coveragePct * 100).toFixed(1)}% cubierto
-              </span>
-            </p>
+      {/* ── Encabezado global ─────────────────────────────────── */}
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <p className="text-[10px] text-slate-500 uppercase tracking-wider">Tu portafolio trabaja por vos</p>
+        <CurrencyToggle />
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════
+          SECCIÓN RENTA
+          ══════════════════════════════════════════════════════════ */}
+      <div className="border-t border-slate-800/80">
+        {/* Header renta */}
+        <div className="flex items-center justify-between px-5 pt-3 pb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-3.5 bg-emerald-500 rounded-full" />
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Renta mensual</p>
           </div>
-          <div className="flex flex-col items-end gap-1.5 shrink-0 ml-2">
-            <CurrencyToggle />
-            <div className="text-right">
-              <p className="text-[9px] text-slate-600 uppercase tracking-wider">Portafolio</p>
-              <p
-                className="font-bold text-slate-300 whitespace-nowrap"
-                style={{ fontSize: "clamp(0.75rem, 3.5vw, 1.125rem)" }}
-              >
-                {fmtTotal(portfolioTotal)}
-              </p>
-            </div>
+          <div className="flex items-end gap-1 leading-none">
+            <span className="font-extrabold text-emerald-400" style={{ fontSize: "clamp(1.1rem, 6vw, 1.75rem)" }}>
+              +{fmt(monthlyReturn)}
+            </span>
+            <span className="text-xs text-slate-500 pb-0.5">/mes</span>
           </div>
         </div>
 
-        {/* Barra de progreso */}
-        <div className="space-y-1">
-          <div className="relative h-4 bg-slate-800 rounded-full overflow-hidden">
+        {/* Barra de cobertura */}
+        <div className="px-5 pb-2 space-y-1">
+          <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{
@@ -116,61 +232,79 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
           </div>
           <div className="flex justify-between text-[9px] text-slate-600">
             <span>$0</span>
-            <span className="text-slate-500">{coveredCount}/{covers.length} metas</span>
+            <span className="text-emerald-700 font-medium">{coveredCount}/{covers.length} categorías cubiertas</span>
             <span>{fmt(monthlyExpenses)}/mes</span>
           </div>
         </div>
-      </div>
 
-      {/* ── Divisor ───────────────────────────────────────────── */}
-      <div className="border-t border-slate-800/80" />
+        {/* Categorías de gasto */}
+        <div className="divide-y divide-slate-800/60">
+          {visibleCovers.map((c, i) => (
+            <GoalRow key={i} item={c} fmt={fmt} />
+          ))}
+        </div>
 
-      {/* ── Lista de metas ────────────────────────────────────── */}
-      <div className="divide-y divide-slate-800/60">
-        {visibleCovers.map((c, i) => (
-          <GoalRow key={i} item={c} fmt={fmt} isFirst={i === 0} />
-        ))}
-      </div>
+        {/* Expandir / colapsar */}
+        {covers.length > VISIBLE_DEFAULT && (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] text-slate-500 hover:text-slate-300 transition-colors border-t border-slate-800/60"
+          >
+            {expanded ? (
+              <><ChevronUp size={13} /> Mostrar menos</>
+            ) : (
+              <><ChevronDown size={13} /> Ver {hiddenCount} más</>
+            )}
+          </button>
+        )}
 
-      {/* ── Expandir / colapsar ───────────────────────────────── */}
-      {covers.length > VISIBLE_DEFAULT && (
-        <button
-          onClick={() => setExpanded((v) => !v)}
-          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors border-t border-slate-800/60"
-        >
-          {expanded ? (
-            <><ChevronUp size={13} /> Mostrar menos</>
-          ) : (
-            <><ChevronDown size={13} /> Ver {hiddenCount} metas más</>
-          )}
-        </button>
-      )}
-
-      {/* ── Próximo a desbloquear ─────────────────────────────── */}
-      {nextTarget && (
-        <div className="border-t border-slate-800/80 mx-4 mb-4 mt-1">
-          <div className="bg-blue-950/20 border border-blue-900/30 rounded-xl px-3 py-2.5 mt-3 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] text-blue-400 font-medium">
-                Próximo: {nextTarget.icon} {nextTarget.name}
-              </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Faltan{" "}
-                <span className="text-white font-semibold">{fmt(amountNeeded)}/mes</span>{" "}
-                de rendimiento
-              </p>
+        {/* Próximo a desbloquear */}
+        {nextTarget && (
+          <div className="mx-4 mb-3 mt-1 border-t border-slate-800/60 pt-2">
+            <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl px-3 py-2 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-emerald-600 font-medium">
+                  Próximo: {nextTarget.icon} {nextTarget.name}
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Faltan <span className="text-white font-semibold">{fmt(amountNeeded)}/mes</span> de renta
+                </p>
+              </div>
+              <Link href="/budget" className="text-[10px] text-emerald-500 hover:text-emerald-400 shrink-0 ml-3">
+                Presupuesto →
+              </Link>
             </div>
-            <Link href="/goals" className="text-[10px] text-blue-400 hover:text-blue-300 shrink-0 ml-3">
-              Ver metas →
-            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════
+          SECCIÓN CAPITAL
+          ══════════════════════════════════════════════════════════ */}
+      <div className="border-t-2 border-slate-700/60">
+        {/* Header capital */}
+        <div className="flex items-center justify-between px-5 pt-3 pb-1">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-3.5 bg-violet-500 rounded-full" />
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Capital acumulado</p>
+          </div>
+          <div className="text-right">
+            <p className="font-bold text-violet-300 whitespace-nowrap" style={{ fontSize: "clamp(1rem, 5vw, 1.375rem)" }}>
+              {fmt(capitalTotalUsd ?? portfolioTotal)}
+            </p>
+            <p className="text-[9px] text-slate-600">total {fmtTotal(portfolioTotal)}</p>
           </div>
         </div>
-      )}
+
+        {/* Metas de largo plazo */}
+        <CapitalGoalsMini />
+      </div>
+
     </div>
   );
 }
 
-function GoalRow({ item, fmt, isFirst }: { item: CoverItem; fmt: (n: number) => string; isFirst: boolean }) {
+function GoalRow({ item, fmt }: { item: CoverItem; fmt: (n: number) => string }) {
   const isCovered = item.status === "covered";
   const isPartial = item.status === "partial";
   const isPending = item.status === "pending";
