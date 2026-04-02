@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Info, X, TrendingUp, Shield, Repeat, DollarSign } from "lucide-react";
+import { Info, X, TrendingUp, Shield } from "lucide-react";
 import { useCurrency } from "@/lib/currency-context";
 import { formatUSD, formatARS } from "@/lib/formatters";
 
@@ -15,24 +15,13 @@ function RentaModal({ mep, onClose }: Props & { onClose: () => void }) {
 
   const fmt = (usd: number) =>
     `${FLAG[currency]} ${currency === "USD" ? formatUSD(usd) : formatARS(usd * mep)}`;
-  const fmtHint = (usd: number) =>
-    currency === "USD"
-      ? `≈ 🇦🇷 ${formatARS(usd * mep)}`
-      : `≈ 🇺🇸 ${formatUSD(usd)}`;
 
-  // Ejemplos didácticos fijos (no datos reales del usuario)
-  const letraCapital = 1_000_000; // ARS → USD
-  const letraCapitalUsd = letraCapital / mep;
-  const letraTNA = 0.68;
-  const letraMonthlyUsd = letraCapitalUsd * letraTNA / 12;
-
-  const fciCapitalUsd = 500;
-  const fciTNA = 0.08;
-  const fciMonthlyUsd = fciCapitalUsd * fciTNA / 12;
-
-  const cedearCapitalUsd = 1_000;
-  const cedearYield = 0.15;
-  const cedearMonthlyUsd = cedearCapitalUsd * cedearYield / 12;
+  // Ejemplos didácticos
+  const letraCapitalUsd = 1_000_000 / mep;
+  const letraMonthly    = letraCapitalUsd * Math.min(0.68, 0.15) / 12; // cap 15% USD
+  const fciCapitalUsd   = 500;
+  const fciMonthly      = fciCapitalUsd * 0.08 / 12;
+  const cedearUsd       = 5_000;
 
   return (
     <div
@@ -51,98 +40,110 @@ function RentaModal({ mep, onClose }: Props & { onClose: () => void }) {
           </button>
         </div>
 
-        {/* Intro */}
         <p className="text-[11px] text-slate-400 leading-relaxed">
-          El portafolio mezcla instrumentos que generan renta de formas distintas.
-          Los separamos en dos grupos: lo que es <span className="text-emerald-300 font-medium">predecible</span> y lo que es <span className="text-blue-300 font-medium">estimado</span>.
+          El portafolio se divide en dos carriles con lógicas distintas:
+          <span className="text-emerald-300 font-medium"> renta</span> (lo que genera por mes)
+          y <span className="text-violet-300 font-medium"> capital</span> (lo que acumula a largo plazo).
         </p>
 
-        {/* ── RENTA FIJA ─────────────────────────────────────────── */}
+        {/* ── RENTA ─────────────────────────────────────────────── */}
         <div className="space-y-2.5">
           <div className="flex items-center gap-2">
             <Shield size={14} className="text-emerald-400" />
-            <span className="text-xs font-bold text-emerald-300">Renta fija — predecible</span>
+            <span className="text-xs font-bold text-emerald-300">💰 Renta mensual — LECAP / FCI / Bonos</span>
           </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Son instrumentos que generan ingreso periódico predecible. Su rendimiento alimenta la{" "}
+            <span className="text-emerald-400">barra de cobertura de gastos</span>: cuántos de tus gastos mensuales cubre el portafolio hoy.
+          </p>
 
-          {/* LECAP */}
           <div className="bg-slate-800/50 rounded-xl p-3.5 space-y-2">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-bold text-yellow-400 bg-yellow-900/40 px-1.5 py-0.5 rounded">LECAP</span>
               <span className="text-[11px] text-slate-300 font-medium">Letras del Tesoro en ARS</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              Capitalizan diariamente a una TNA fija. La renta se acumula sola, como un plazo fijo que nunca para.
+              TNA nominal ~68% ARS. Para proyectar en USD lo convertimos a rendimiento real:
+              usamos un techo de <span className="text-emerald-400 font-medium">15% anual USD</span> para evitar que la inflación ARS infle el número.
             </p>
-            <div className="bg-slate-900 rounded-lg p-2.5 space-y-1 font-mono text-[10px]">
-              <div className="text-slate-500">Ejemplo: $1.000.000 ARS invertidos, TNA 68%</div>
+            <div className="bg-slate-900 rounded-lg p-2.5 font-mono text-[10px] space-y-1">
+              <div className="text-slate-500">$1.000.000 ARS → {fmt(letraCapitalUsd)} · cap 15% USD</div>
               <div className="text-slate-400">
-                {fmt(letraCapitalUsd)} × 68% ÷ 12 ={" "}
-                <span className="text-emerald-400 font-bold">{fmt(letraMonthlyUsd)}/mes</span>
+                {fmt(letraCapitalUsd)} × 15% ÷ 12 ={" "}
+                <span className="text-emerald-400 font-bold">{fmt(letraMonthly)}/mes</span>
               </div>
-              <div className="text-slate-600">{fmtHint(letraMonthlyUsd)}/mes</div>
             </div>
           </div>
 
-          {/* FCI */}
           <div className="bg-slate-800/50 rounded-xl p-3.5 space-y-2">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-bold text-teal-400 bg-teal-900/40 px-1.5 py-0.5 rounded">FCI</span>
-              <span className="text-[11px] text-slate-300 font-medium">Fondo Money Market</span>
+              <span className="text-[11px] text-slate-300 font-medium">Fondos Money Market / Renta Fija</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              El fondo invierte en cauciones y plazos fijos mayoristas. La cuotaparte sube todos los días. La tasa varía con la política del BCRA, pero sin sorpresas bruscas.
+              La cuotaparte sube todos los días. Rendimiento estable, alineado con la tasa del BCRA.
             </p>
-            <div className="bg-slate-900 rounded-lg p-2.5 space-y-1 font-mono text-[10px]">
-              <div className="text-slate-500">Ejemplo: {fmt(fciCapitalUsd)} en el fondo, TNA ~8%</div>
+            <div className="bg-slate-900 rounded-lg p-2.5 font-mono text-[10px] space-y-1">
+              <div className="text-slate-500">{fmt(fciCapitalUsd)} en el fondo, TNA ~8% USD</div>
               <div className="text-slate-400">
                 {fmt(fciCapitalUsd)} × 8% ÷ 12 ={" "}
-                <span className="text-emerald-400 font-bold">{fmt(fciMonthlyUsd)}/mes</span>
+                <span className="text-emerald-400 font-bold">{fmt(fciMonthly)}/mes</span>
               </div>
-              <div className="text-slate-600">{fmtHint(fciMonthlyUsd)}/mes</div>
             </div>
           </div>
         </div>
 
-        {/* ── RENTA VARIABLE ─────────────────────────────────────── */}
+        {/* ── CAPITAL ───────────────────────────────────────────── */}
         <div className="space-y-2.5">
           <div className="flex items-center gap-2">
-            <TrendingUp size={14} className="text-blue-400" />
-            <span className="text-xs font-bold text-blue-300">Apreciación estimada — variable</span>
+            <TrendingUp size={14} className="text-violet-400" />
+            <span className="text-xs font-bold text-violet-300">📈 Capital — CEDEAR / ETF / Crypto</span>
           </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            No generan renta mensual fija. Su valor <span className="text-violet-300">se acumula como capital</span> y alimenta la{" "}
+            <span className="text-violet-400">proyección a 10 años</span> y tus metas de largo plazo (casa, auto, viaje).
+          </p>
 
           <div className="bg-slate-800/50 rounded-xl p-3.5 space-y-2">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-bold text-blue-400 bg-blue-900/40 px-1.5 py-0.5 rounded">CEDEAR / ETF</span>
-              <span className="text-[11px] text-slate-300 font-medium">Acciones y ETFs USA</span>
+              <span className="text-[10px] font-bold text-violet-400 bg-violet-900/40 px-1.5 py-0.5 rounded">CEDEAR / ETF</span>
+              <span className="text-[11px] text-slate-300 font-medium">Acciones y fondos USA</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              No pagan cupón. Su &quot;renta&quot; es la suba de precio. Mostramos la apreciación histórica anualizada ÷ 12 como referencia — pero cada mes puede ser muy distinto.
+              Su retorno es apreciación de precio, no cupón. Aparecen en tu total de capital acumulado
+              y en la curva de proyección — no en la barra de renta mensual.
             </p>
-            <div className="bg-slate-900 rounded-lg p-2.5 space-y-1 font-mono text-[10px]">
-              <div className="text-slate-500">Ejemplo: {fmt(cedearCapitalUsd)} en QQQ, historial ~15%/año</div>
-              <div className="text-slate-400">
-                {fmt(cedearCapitalUsd)} × 15% ÷ 12 ={" "}
-                <span className="text-blue-400 font-bold">~{fmt(cedearMonthlyUsd)}/mes</span>
-              </div>
-              <div className="text-slate-600">{fmtHint(cedearMonthlyUsd)}/mes</div>
-              <div className="text-red-500/70 mt-1">⚠ En un mes malo puede ser −8% en vez de +1.25%</div>
+            <div className="bg-slate-900 rounded-lg p-2.5 font-mono text-[10px] space-y-1">
+              <div className="text-slate-500">{fmt(cedearUsd)} en QQQ/SPY → van al bucket capital</div>
+              <div className="text-violet-400 font-bold">{fmt(cedearUsd)} acumulado · crece con el tiempo</div>
+              <div className="text-slate-600 mt-1">Historial S&amp;P 500 ~10% anual USD → aparece en proyección</div>
             </div>
           </div>
         </div>
 
-        {/* ── ¿Por qué sumamos los dos? ───────────────────────── */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-3.5 space-y-1.5">
-          <p className="text-[11px] font-semibold text-slate-200">¿Por qué sumamos renta fija + estimada?</p>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
-            La renta fija es tu <span className="text-emerald-400">piso garantizado</span> — lo que llegás a fin de mes sin importar nada.
-            La apreciación variable es tu <span className="text-blue-400">potencial de crecimiento</span> a largo plazo.
-            Juntos te dan el número de libertad financiera real: cuánto trabaja el portafolio hoy,
-            y cuánto puede trabajar mañana.
-          </p>
+        {/* ── Resumen ─────────────────────────────────────────── */}
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-3.5 space-y-2">
+          <p className="text-[11px] font-semibold text-slate-200">Dos carriles, dos métricas</p>
+          <div className="space-y-1.5">
+            <div className="flex items-start gap-2">
+              <span className="text-emerald-500 mt-0.5">💰</span>
+              <p className="text-[11px] text-slate-400">
+                <span className="text-emerald-400 font-medium">Renta mensual</span>: lo que tu portafolio genera hoy.
+                Cubre gastos actuales. Aparece en la barra de libertad financiera.
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-violet-400 mt-0.5">📈</span>
+              <p className="text-[11px] text-slate-400">
+                <span className="text-violet-300 font-medium">Capital acumulado</span>: lo que creció y sigue creciendo.
+                Alimenta tus metas a largo plazo y la proyección de interés compuesto.
+              </p>
+            </div>
+          </div>
         </div>
 
         <p className="text-[10px] text-slate-600 text-center">
-          MEP usado: 🇦🇷 ${mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })} · Yields actualizados según IOL
+          MEP: 🇦🇷 ${mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })} · Yields actualizados según IOL
         </p>
       </div>
     </div>
