@@ -18,7 +18,7 @@ function RentaModal({ mep, onClose }: Props & { onClose: () => void }) {
 
   // Ejemplos didácticos
   const letraCapitalUsd = 1_000_000 / mep;
-  const letraMonthly    = letraCapitalUsd * Math.min(0.68, 0.15) / 12; // cap 15% USD
+  const letraMonthly    = letraCapitalUsd * 0.68 / 12; // TNA real del instrumento
   const fciCapitalUsd   = 500;
   const fciMonthly      = fciCapitalUsd * 0.08 / 12;
   const cedearUsd       = 5_000;
@@ -63,13 +63,13 @@ function RentaModal({ mep, onClose }: Props & { onClose: () => void }) {
               <span className="text-[11px] text-slate-300 font-medium">Letras del Tesoro en ARS</span>
             </div>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              TNA nominal ~68% ARS. Para proyectar en USD lo convertimos a rendimiento real:
-              usamos un techo de <span className="text-emerald-400 font-medium">15% anual USD</span> para evitar que la inflación ARS infle el número.
+              Cada LECAP tiene una TIR real calculada desde su precio actual y días hasta el vencimiento.
+              Usamos esa TNA directamente — sin topes artificiales.
             </p>
             <div className="bg-slate-900 rounded-lg p-2.5 font-mono text-[10px] space-y-1">
-              <div className="text-slate-500">$1.000.000 ARS → {fmt(letraCapitalUsd)} · cap 15% USD</div>
+              <div className="text-slate-500">$1.000.000 ARS → {fmt(letraCapitalUsd)} · TIR ~68% TNA</div>
               <div className="text-slate-400">
-                {fmt(letraCapitalUsd)} × 15% ÷ 12 ={" "}
+                {fmt(letraCapitalUsd)} × 68% ÷ 12 ={" "}
                 <span className="text-emerald-400 font-bold">{fmt(letraMonthly)}/mes</span>
               </div>
             </div>

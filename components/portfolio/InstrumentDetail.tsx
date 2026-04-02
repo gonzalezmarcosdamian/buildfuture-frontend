@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
 
@@ -22,6 +22,8 @@ interface InstrumentData {
   monthly_return_usd: number;
   last_updated: string | null;
   mep: number;
+  maturity_date: string | null;
+  days_to_maturity: number | null;
   context: {
     type_label: string;
     full_name: string;
@@ -128,6 +130,16 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   }
 
   // CEDEAR, LETRA, BOND, CRYPTO, ETF
+  const maturitySub = isLETRA && inst.maturity_date
+    ? `Vence ${new Date(inst.maturity_date + "T12:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })}${inst.days_to_maturity !== null ? ` · ${inst.days_to_maturity} días` : ""}`
+    : undefined;
+
+  const rentaSub = isLETRA
+    ? `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%${maturitySub ? ` · ${maturitySub}` : ""}`
+    : inst.asset_type === "BOND"
+    ? `YTM ${(inst.annual_yield_pct * 100).toFixed(2)}% · cupones semestrales`
+    : `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`;
+
   return (
     <>
       <MetricRow
@@ -174,7 +186,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
       <MetricRow
         label="Renta mensual estimada"
         value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
-        sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`}
+        sub={rentaSub}
         highlight={inst.monthly_return_usd > 0 ? "green" : null}
       />
     </>
@@ -209,6 +221,17 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
               <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[inst.asset_type] || "bg-slate-700 text-slate-300"}`}>
                 {inst.context.type_label}
               </span>
+              {inst.asset_type === "LETRA" && inst.days_to_maturity !== null && inst.days_to_maturity <= 60 && inst.days_to_maturity > 0 && (
+                <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium bg-amber-900/60 text-amber-300 border border-amber-700/40">
+                  <AlertTriangle size={9} />
+                  Rolleo en {inst.days_to_maturity}d
+                </span>
+              )}
+              {inst.asset_type === "LETRA" && inst.days_to_maturity !== null && inst.days_to_maturity <= 0 && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-red-900/60 text-red-300 border border-red-700/40">
+                  Vencida
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-400">{inst.description}</p>
           </div>
