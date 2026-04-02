@@ -6,7 +6,6 @@ import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
 import { InvestmentStreak } from "@/components/goals/InvestmentStreak";
 import { ProjectionCard } from "@/components/goals/ProjectionCard";
-import { GoalCompliance } from "@/components/goals/GoalCompliance";
 import { SyncButton } from "@/components/portfolio/SyncButton";
 
 export const dynamic = "force-dynamic";
@@ -142,10 +141,7 @@ export default async function Dashboard() {
       {/* 4 — Proyección interés compuesto */}
       <ProjectionCard />
 
-      {/* 5 — Cumplimiento de metas de capital */}
-      <GoalCompliance showEmptyState />
-
-      {/* 6 — Recomendaciones */}
+      {/* 5 — Recomendaciones */}
       <RecommendationList
         capitalArs={savingsARS > 0 ? Math.round(savingsARS) : 500000}
         userProfile={profile?.risk_profile ?? null}
