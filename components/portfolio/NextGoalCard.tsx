@@ -102,7 +102,7 @@ export function NextGoalCard({ data }: { data: NextGoalData }) {
           <div className="flex justify-between text-[10px] pt-1 border-t border-slate-700 mt-1">
             <span className="text-slate-500">Invertir en</span>
             <span className="text-yellow-400 font-medium">
-              {data.recommended_ticker} · {((data.recommended_yield_pct ?? 0) * 100).toFixed(0)}% TNA
+              {data.recommended_ticker} · {((data.recommended_yield_pct ?? 0) * 100).toFixed(2)}% TNA
             </span>
           </div>
         )}

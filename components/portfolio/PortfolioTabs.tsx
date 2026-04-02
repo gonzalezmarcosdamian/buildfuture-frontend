@@ -263,7 +263,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                       {FLAG[currency]} {fmt(value)}
                     </span>
                     <span className="text-[10px] text-slate-500 ml-1.5">
-                      {((value / totalUsd) * 100).toFixed(1)}%
+                      {((value / totalUsd) * 100).toFixed(2)}%
                     </span>
                   </div>
                 </div>
@@ -312,7 +312,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                                 </p>
                                 <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
                                 <p className="text-[10px] text-slate-500">
-                                  {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
+                                  {((p.current_value_usd / totalUsd) * 100).toFixed(2)}% del total
                                 </p>
                               </div>
                             </div>
@@ -341,7 +341,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
                                 </p>
                                 <p className="text-[10px] text-slate-600">{hint(p.current_value_usd)}</p>
                                 <p className="text-[10px] text-slate-500">
-                                  {((p.current_value_usd / totalUsd) * 100).toFixed(1)}% del total
+                                  {((p.current_value_usd / totalUsd) * 100).toFixed(2)}% del total
                                 </p>
                               </div>
                               <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />

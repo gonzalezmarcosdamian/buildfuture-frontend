@@ -110,7 +110,7 @@ export function RecommendationCarousel({ capitalArs = 500000, fxRate = 1320 }: {
             {/* Yield */}
             <div className="bg-slate-800 rounded-xl px-3 py-2">
               <p className="text-[10px] text-slate-500">Rendimiento anual est.</p>
-              <p className="text-lg font-bold text-emerald-400">{(rec.annual_yield_pct * 100).toFixed(0)}%</p>
+              <p className="text-lg font-bold text-emerald-400">{(rec.annual_yield_pct * 100).toFixed(2)}%</p>
               <p className="text-[10px] text-slate-500">{rec.currency === "USD" ? "en USD" : "en ARS"}</p>
             </div>
 
@@ -118,7 +118,7 @@ export function RecommendationCarousel({ capitalArs = 500000, fxRate = 1320 }: {
             <div className="space-y-1">
               <div className="flex justify-between text-[10px]">
                 <span className="text-slate-500">Monto sugerido</span>
-                <span className="text-slate-300">{(rec.allocation_pct * 100).toFixed(0)}%</span>
+                <span className="text-slate-300">{(rec.allocation_pct * 100).toFixed(2)}%</span>
               </div>
               <p className="text-xs font-medium text-slate-200">{formatARS(rec.amount_ars)}</p>
               <p className="text-[10px] text-slate-500">≈ USD {rec.amount_usd} → +${rec.monthly_return_usd}/mes</p>

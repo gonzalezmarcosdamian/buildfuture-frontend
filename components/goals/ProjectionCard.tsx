@@ -64,7 +64,7 @@ function CustomTooltip({ active, payload, label }: any) {
 // ── Bottom sheet educativo ────────────────────────────────────────────────────
 
 function InfoSheet({ data, onClose }: { data: ProjectionData; onClose: () => void }) {
-  const yieldPct = (data.annual_return_pct * 100).toFixed(0);
+  const yieldPct = (data.annual_return_pct * 100).toFixed(2);
   const monthly = data.monthly_savings_usd;
   const current = data.current_usd;
 
@@ -304,7 +304,7 @@ export function ProjectionCard() {
   const chartPoints = data.points.filter((p) => p.year <= horizon);
   const last = chartPoints[chartPoints.length - 1];
   const extra = last.with_savings_usd - last.without_savings_usd;
-  const yieldPct = (data.annual_return_pct * 100).toFixed(0);
+  const yieldPct = (data.annual_return_pct * 100).toFixed(2);
 
   const maxChartValue = last.with_savings_usd;
   const visibleGoals = goals.filter(

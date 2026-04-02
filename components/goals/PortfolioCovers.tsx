@@ -67,7 +67,7 @@ export function PortfolioCovers({
                     />
                   </div>
                   <p className="text-[9px] text-yellow-500 mt-0.5">
-                    {(item.covered_pct * 100).toFixed(0)}% cubierto
+                    {(item.covered_pct * 100).toFixed(2)}% cubierto
                   </p>
                 </div>
               )}

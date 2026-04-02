@@ -2,8 +2,8 @@ export function formatUSD(value: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
 }
 
@@ -11,12 +11,12 @@ export function formatARS(value: number): string {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
 }
 
-export function formatPct(value: number, decimals = 1, signed = false): string {
+export function formatPct(value: number, decimals = 2, signed = false): string {
   const prefix = signed && value >= 0 ? "+" : "";
   return `${prefix}${(value * 100).toFixed(decimals)}%`;
 }

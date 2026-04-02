@@ -120,7 +120,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
         <MetricRow
           label="Renta mensual estimada"
           value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
-          sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(1)}%`}
+          sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`}
           highlight={inst.monthly_return_usd > 0 ? "green" : null}
         />
       </>
@@ -174,7 +174,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
       <MetricRow
         label="Renta mensual estimada"
         value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
-        sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(1)}%`}
+        sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`}
         highlight={inst.monthly_return_usd > 0 ? "green" : null}
       />
     </>

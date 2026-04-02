@@ -104,7 +104,7 @@ export function PortfolioHeader({
             </span>
             {annualReturnPct > 0 && (
               <span className="text-[9px] text-slate-600">
-                · yield portafolio {(annualReturnPct * 100).toFixed(1)}% anual
+                · yield portafolio {(annualReturnPct * 100).toFixed(2)}% anual
               </span>
             )}
           </div>

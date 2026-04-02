@@ -16,7 +16,7 @@ export function FreedomBar({
 }: FreedomBarProps) {
   const pct = Math.min(freedomPct, 1);
   const color = freedomColor(freedomPct);
-  const displayPct = (freedomPct * 100).toFixed(1);
+  const displayPct = (freedomPct * 100).toFixed(2);
 
   const milestones = [0.25, 0.5, 0.75, 1.0];
 

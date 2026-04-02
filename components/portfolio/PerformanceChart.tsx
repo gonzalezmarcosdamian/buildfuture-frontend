@@ -142,7 +142,7 @@ function TenenciaTooltip({ active, payload, currency, mep }: {
             <span className={`font-medium ${gain ? "text-emerald-400" : "text-red-400"}`}>
               {fmtFull(p.delta_usd, currency, usedMep, true)}
               {prevTotal > 0 && (
-                <span className="ml-1 text-[9px] opacity-60">({pct.toFixed(1)}%)</span>
+                <span className="ml-1 text-[9px] opacity-60">({pct.toFixed(2)}%)</span>
               )}
             </span>
           </div>

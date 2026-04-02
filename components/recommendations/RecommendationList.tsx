@@ -83,7 +83,7 @@ function convictionBar(conviction: number) {
 
 function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
   if (typeof document === "undefined") return null;
-  const yieldPct  = (rec.annual_yield_pct * 100).toFixed(0);
+  const yieldPct  = (rec.annual_yield_pct * 100).toFixed(2);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
   const jobMeta    = JOB_META[rec.job] ?? JOB_META.renta;
   const isCapital  = rec.job === "capital";
@@ -154,7 +154,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
               <>
                 <p className="text-[10px] text-slate-500">Genera</p>
                 <p className="text-sm font-semibold text-emerald-400">
-                  +${rec.monthly_return_usd.toFixed(1)} USD/mes
+                  +${rec.monthly_return_usd.toFixed(2)} USD/mes
                 </p>
               </>
             )}
@@ -190,7 +190,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
 }
 
 function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
-  const yieldPct   = (rec.annual_yield_pct * 100).toFixed(0);
+  const yieldPct   = (rec.annual_yield_pct * 100).toFixed(2);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
   const isCapital  = rec.job === "capital";
 
@@ -254,7 +254,7 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
               <>
                 <p className="text-[9px] text-slate-500">Retorno</p>
                 <p className="text-[11px] font-semibold text-emerald-400">
-                  +${rec.monthly_return_usd.toFixed(1)}/mes
+                  +${rec.monthly_return_usd.toFixed(2)}/mes
                 </p>
               </>
             )}

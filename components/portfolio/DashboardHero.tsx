@@ -363,7 +363,7 @@ function GoalRow({ item, fmt }: { item: CoverItem; fmt: (n: number) => string })
               />
             </div>
             <span className="text-[9px] text-yellow-500 shrink-0">
-              {((item.covered_pct ?? 0) * 100).toFixed(0)}%
+              {((item.covered_pct ?? 0) * 100).toFixed(2)}%
             </span>
           </div>
         )}

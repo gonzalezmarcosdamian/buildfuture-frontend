@@ -93,7 +93,7 @@ export function GoalEditor({ budgetSavingsUSD }: { budgetSavingsUSD?: number | n
                   ? `$${Math.round(effectiveSavings).toLocaleString("es-AR")} USD/mes`
                   : "Sin configurar"}
               </p>
-              <p className="text-[11px] text-slate-500">{displayedYieldOpt.label} · {(savedYield * 100).toFixed(0)}% anual</p>
+              <p className="text-[11px] text-slate-500">{displayedYieldOpt.label} · {(savedYield * 100).toFixed(2)}% anual</p>
             </div>
           </div>
         </div>
