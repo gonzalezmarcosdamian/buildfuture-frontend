@@ -3,7 +3,7 @@
  * Página de selección de usuario mock — solo accesible con NEXT_PUBLIC_MOCK_AUTH=true.
  * Lee el query param ?user=alias, lo guarda en localStorage, y redirige a /dashboard.
  */
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { setMockUser } from "@/lib/api";
 
@@ -25,7 +25,7 @@ const COLOR_MAP: Record<string, string> = {
   rose:    "border-rose-700 bg-rose-950/30 hover:bg-rose-900/30 text-rose-300",
 };
 
-export default function MockLoginPage() {
+function MockLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [active, setActive] = useState<string | null>(null);
@@ -95,5 +95,13 @@ export default function MockLoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function MockLoginPage() {
+  return (
+    <Suspense>
+      <MockLoginContent />
+    </Suspense>
   );
 }
