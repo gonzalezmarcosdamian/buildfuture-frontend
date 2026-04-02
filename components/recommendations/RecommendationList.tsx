@@ -15,6 +15,7 @@ interface Rec {
   ticker: string;
   name: string;
   asset_type: string;
+  job: string;          // "renta" | "capital" | "ambos"
   rationale: string;
   why_now: string;
   annual_yield_pct: number;
@@ -61,15 +62,19 @@ const assetBg: Record<string, string> = {
   FCI:    "bg-indigo-950/50 border-indigo-800/40 text-indigo-300",
 };
 
+// Metadatos por propósito
+const JOB_META: Record<string, { icon: string; label: string; sublabel: string; color: string }> = {
+  renta:   { icon: "💰", label: "Para renta mensual",   sublabel: "Generan flujo en los próximos 30 días", color: "text-emerald-400" },
+  capital: { icon: "📈", label: "Para acumular capital", sublabel: "Crecimiento dolarizado a largo plazo",  color: "text-blue-400"    },
+  ambos:   { icon: "⚖️", label: "Renta + capital",       sublabel: "Cupón mensual y apreciación en USD",   color: "text-violet-400"  },
+};
+
 function convictionBar(conviction: number) {
   const pct = Math.round(conviction * 100);
   return (
     <div className="flex items-center gap-1.5">
       <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-blue-500 rounded-full"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${pct}%` }} />
       </div>
       <span className="text-[9px] text-slate-500 w-6 text-right">{pct}%</span>
     </div>
@@ -78,8 +83,10 @@ function convictionBar(conviction: number) {
 
 function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
   if (typeof document === "undefined") return null;
-  const yieldPct = (rec.annual_yield_pct * 100).toFixed(0);
+  const yieldPct  = (rec.annual_yield_pct * 100).toFixed(0);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
+  const jobMeta    = JOB_META[rec.job] ?? JOB_META.renta;
+  const isCapital  = rec.job === "capital";
 
   const modal = (
     <div
@@ -96,6 +103,9 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
             <div className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold ${assetStyle}`}>
               {rec.asset_type}
             </div>
+            <span className={`text-[9px] font-medium ${jobMeta.color}`}>
+              {jobMeta.icon} {jobMeta.label}
+            </span>
             {rec.is_hero && (
               <span className="text-[9px] bg-blue-600 text-white font-semibold px-1.5 py-0.5 rounded-full">
                 top pick
@@ -124,7 +134,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
           </div>
         </div>
 
-        {/* Capital → retorno */}
+        {/* Capital → retorno — diferenciado por job */}
         <div className="flex items-center justify-between bg-slate-800/50 rounded-xl px-3 py-2.5">
           <div>
             <p className="text-[10px] text-slate-500">Invertir</p>
@@ -133,10 +143,21 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-slate-500">Genera</p>
-            <p className="text-sm font-semibold text-emerald-400">
-              +${rec.monthly_return_usd.toFixed(1)} USD/mes
-            </p>
+            {isCapital ? (
+              <>
+                <p className="text-[10px] text-slate-500">Apreciación estimada</p>
+                <p className="text-sm font-semibold text-blue-400">
+                  +{yieldPct}% USD/año
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-[10px] text-slate-500">Genera</p>
+                <p className="text-sm font-semibold text-emerald-400">
+                  +${rec.monthly_return_usd.toFixed(1)} USD/mes
+                </p>
+              </>
+            )}
           </div>
         </div>
 
@@ -154,9 +175,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
             </p>
             {rec.agents_agreed.map((a) => (
               <div key={a.agent} className="space-y-0.5">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-medium text-slate-300">{a.agent}</p>
-                </div>
+                <p className="text-[11px] font-medium text-slate-300">{a.agent}</p>
                 {convictionBar(a.conviction)}
                 <p className="text-[10px] text-slate-500 leading-snug">{a.signal}</p>
               </div>
@@ -171,8 +190,9 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
 }
 
 function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
-  const yieldPct = (rec.annual_yield_pct * 100).toFixed(0);
+  const yieldPct   = (rec.annual_yield_pct * 100).toFixed(0);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
+  const isCapital  = rec.job === "capital";
 
   return (
     <div
@@ -183,7 +203,7 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
       }`}
     >
       <div className="p-3 flex flex-col gap-2.5">
-        {/* Top: badge + info button */}
+        {/* Top: badge + info */}
         <div className="flex items-center justify-between">
           <div className={`px-1.5 py-0.5 rounded-md border text-[9px] font-bold tracking-wide ${assetStyle}`}>
             {rec.asset_type}
@@ -205,7 +225,9 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
 
         {/* Yield */}
         <div className="flex items-end gap-1.5">
-          <p className="text-2xl font-bold text-emerald-400 leading-none">{yieldPct}%</p>
+          <p className={`text-2xl font-bold leading-none ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
+            {yieldPct}%
+          </p>
           <div className="pb-0.5">
             <p className="text-[9px] text-slate-600 leading-none">{rec.currency}/año</p>
             <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit mt-0.5 ${riskColor[rec.risk_level]}`}>
@@ -214,7 +236,7 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
           </div>
         </div>
 
-        {/* Capital → retorno */}
+        {/* Capital → retorno — diferenciado por job */}
         <div className="bg-slate-800/50 rounded-lg px-2.5 py-2 space-y-1">
           <div className="flex items-center justify-between">
             <p className="text-[9px] text-slate-500">Invertir</p>
@@ -223,13 +245,80 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
             </p>
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-[9px] text-slate-500">Retorno</p>
-            <p className="text-[11px] font-semibold text-emerald-400">
-              +${rec.monthly_return_usd.toFixed(1)}/mes
-            </p>
+            {isCapital ? (
+              <>
+                <p className="text-[9px] text-slate-500">Apreciación</p>
+                <p className="text-[11px] font-semibold text-blue-400">+{yieldPct}%/año</p>
+              </>
+            ) : (
+              <>
+                <p className="text-[9px] text-slate-500">Retorno</p>
+                <p className="text-[11px] font-semibold text-emerald-400">
+                  +${rec.monthly_return_usd.toFixed(1)}/mes
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function RecSection({
+  job,
+  recs,
+  onInfo,
+  refreshing,
+}: {
+  job: "renta" | "capital" | "ambos";
+  recs: Rec[];
+  onInfo: (rec: Rec) => void;
+  refreshing: boolean;
+}) {
+  if (recs.length === 0) return null;
+  const meta = JOB_META[job];
+
+  return (
+    <div className="space-y-2">
+      {/* Section header */}
+      <div className="flex items-center gap-2">
+        <span className="text-base leading-none">{meta.icon}</span>
+        <div>
+          <p className={`text-xs font-semibold ${meta.color}`}>{meta.label}</p>
+          <p className="text-[10px] text-slate-600">{meta.sublabel}</p>
+        </div>
+      </div>
+
+      {/* Carousel */}
+      {refreshing ? (
+        <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="shrink-0 w-[58vw] max-w-[210px] rounded-2xl border border-slate-800 bg-slate-900 p-3 space-y-3 animate-pulse"
+            >
+              <div className="flex items-center justify-between">
+                <div className="h-4 w-12 bg-slate-800 rounded-md" />
+                <div className="h-4 w-4 bg-slate-800 rounded-full" />
+              </div>
+              <div className="h-4 w-16 bg-slate-800 rounded" />
+              <div className="h-8 w-20 bg-slate-800 rounded" />
+              <div className="h-14 bg-slate-800/50 rounded-lg" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          className="flex overflow-x-auto snap-x snap-mandatory gap-3 -mx-4 px-4 pb-1"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+        >
+          {recs.map((rec) => (
+            <RecCard key={rec.ticker} rec={rec} onInfo={() => onInfo(rec)} />
+          ))}
+          <div className="shrink-0 w-2" />
+        </div>
+      )}
     </div>
   );
 }
@@ -247,7 +336,7 @@ export function RecommendationList({
   const [refreshing, setRefreshing] = useState(false);
   const [riskProfile, setRiskProfile] = useState(userProfile || "moderado");
   const [modalRec, setModalRec] = useState<Rec | null>(null);
-  // Normaliza inglés → español (valores legacy del FTU) y fallback a "moderado"
+
   const PROFILE_MAP: Record<string, string> = {
     conservative: "conservador",
     moderate: "moderado",
@@ -287,13 +376,22 @@ export function RecommendationList({
 
   if (!data) return null;
 
-  const sorted = [...data.recommendations].sort((a, b) => (b.is_hero ? 1 : 0) - (a.is_hero ? 1 : 0));
+  // Separar por job — hero siempre primero dentro de su sección
+  const byJob = (job: string) =>
+    [...data.recommendations]
+      .filter((r) => r.job === job || (job === "renta" && !r.job))
+      .sort((a, b) => (b.is_hero ? 1 : 0) - (a.is_hero ? 1 : 0));
+
+  const rentaRecs   = byJob("renta");
+  const capitalRecs = [...data.recommendations]
+    .filter((r) => r.job === "capital" || r.job === "ambos")
+    .sort((a, b) => (b.is_hero ? 1 : 0) - (a.is_hero ? 1 : 0));
 
   return (
     <>
       {modalRec && <RecModal rec={modalRec} onClose={() => setModalRec(null)} />}
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-100">Dónde invertir</h2>
@@ -336,38 +434,26 @@ export function RecommendationList({
           })}
         </div>
 
-        {/* Carousel — skeleton al cambiar perfil */}
-        {refreshing ? (
-          <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="shrink-0 w-[58vw] max-w-[210px] rounded-2xl border border-slate-800 bg-slate-900 p-3 space-y-3 animate-pulse"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="h-4 w-12 bg-slate-800 rounded-md" />
-                  <div className="h-4 w-4 bg-slate-800 rounded-full" />
-                </div>
-                <div className="space-y-1.5">
-                  <div className="h-4 w-16 bg-slate-800 rounded" />
-                  <div className="h-3 w-24 bg-slate-800/60 rounded" />
-                </div>
-                <div className="h-8 w-20 bg-slate-800 rounded" />
-                <div className="h-14 bg-slate-800/50 rounded-lg" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div
-            className="flex overflow-x-auto snap-x snap-mandatory gap-3 -mx-4 px-4 pb-1"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-          >
-            {sorted.map((rec) => (
-              <RecCard key={rec.ticker} rec={rec} onInfo={() => setModalRec(rec)} />
-            ))}
-            <div className="shrink-0 w-2" />
-          </div>
+        {/* Sección renta */}
+        <RecSection
+          job="renta"
+          recs={rentaRecs}
+          onInfo={setModalRec}
+          refreshing={refreshing}
+        />
+
+        {/* Divider si hay ambas secciones */}
+        {rentaRecs.length > 0 && capitalRecs.length > 0 && (
+          <div className="border-t border-slate-800" />
         )}
+
+        {/* Sección capital */}
+        <RecSection
+          job="capital"
+          recs={capitalRecs}
+          onInfo={setModalRec}
+          refreshing={refreshing}
+        />
 
         <p className="text-[10px] text-slate-700 text-center">
           Datos en tiempo real · No es asesoramiento financiero

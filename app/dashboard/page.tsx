@@ -5,6 +5,8 @@ import { RecommendationList } from "@/components/recommendations/RecommendationL
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
 import { InvestmentStreak } from "@/components/goals/InvestmentStreak";
+import { ProjectionCard } from "@/components/goals/ProjectionCard";
+import { GoalCompliance } from "@/components/goals/GoalCompliance";
 import { SyncButton } from "@/components/portfolio/SyncButton";
 
 export const dynamic = "force-dynamic";
@@ -129,11 +131,20 @@ export default async function Dashboard() {
       {/* 3 — Racha */}
       {gamification.streak && (
         <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-          <InvestmentStreak streak={gamification.streak} />
+          <InvestmentStreak
+            streak={gamification.streak}
+            currentMonthInvested={gamification.current_month_invested ?? false}
+          />
         </div>
       )}
 
-      {/* 4 — Recomendaciones */}
+      {/* 4 — Proyección interés compuesto */}
+      <ProjectionCard />
+
+      {/* 5 — Cumplimiento de metas de capital */}
+      <GoalCompliance showEmptyState />
+
+      {/* 6 — Recomendaciones */}
       <RecommendationList
         capitalArs={savingsARS > 0 ? Math.round(savingsARS) : 500000}
         userProfile={profile?.risk_profile ?? null}

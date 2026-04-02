@@ -6,7 +6,13 @@ interface StreakData {
   calendar: { month: string; invested: boolean }[];
 }
 
+interface Props {
+  streak: StreakData;
+  currentMonthInvested?: boolean;
+}
+
 const MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+const MONTH_NAMES  = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
 function badge(months: number): { label: string; emoji: string } | null {
   if (months >= 12) return { label: "1 año", emoji: "🌳" };
@@ -15,15 +21,36 @@ function badge(months: number): { label: string; emoji: string } | null {
   return null;
 }
 
-export function InvestmentStreak({ streak }: { streak: StreakData }) {
+export function InvestmentStreak({ streak, currentMonthInvested = false }: Props) {
   const currentBadge = badge(streak.current);
   const longestBadge = badge(streak.longest);
+  const now          = new Date();
+  const monthName    = MONTH_NAMES[now.getMonth()];
 
   return (
     <div className="space-y-3">
       <p className="text-xs text-slate-500 uppercase tracking-wider">Racha de inversión</p>
 
-      {/* Stats */}
+      {/* Estado del mes actual — el feedback loop principal */}
+      <div className={`rounded-2xl border px-4 py-3 flex items-center justify-between ${
+        currentMonthInvested
+          ? "bg-emerald-950/30 border-emerald-800/60"
+          : "bg-slate-900 border-slate-700"
+      }`}>
+        <div>
+          <p className="text-xs font-semibold text-slate-200">{monthName}</p>
+          {currentMonthInvested ? (
+            <p className="text-[11px] text-emerald-400 mt-0.5">Invertiste este mes ✓</p>
+          ) : (
+            <p className="text-[11px] text-slate-500 mt-0.5">Todavía no invertiste este mes</p>
+          )}
+        </div>
+        <div className="text-2xl leading-none">
+          {currentMonthInvested ? "✅" : "⏳"}
+        </div>
+      </div>
+
+      {/* Stats racha */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
           <p className="text-2xl font-bold text-blue-400">{streak.current}</p>
@@ -47,17 +74,22 @@ export function InvestmentStreak({ streak }: { streak: StreakData }) {
           {streak.calendar.map((entry, i) => {
             const d = new Date(entry.month + "T00:00:00");
             const monthLabel = MONTH_LABELS[d.getMonth()];
+            const isCurrentMonth = d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
             return (
               <div key={i} className="flex flex-col items-center gap-1">
                 <div
                   className={`w-full aspect-square rounded-sm transition-colors ${
                     entry.invested
                       ? "bg-emerald-500"
+                      : isCurrentMonth
+                      ? "bg-slate-600 ring-1 ring-slate-400"
                       : "bg-slate-800"
                   }`}
                   title={`${monthLabel} ${d.getFullYear()}`}
                 />
-                <span className="text-[8px] text-slate-600">{monthLabel[0]}</span>
+                <span className={`text-[8px] ${isCurrentMonth ? "text-slate-400" : "text-slate-600"}`}>
+                  {monthLabel[0]}
+                </span>
               </div>
             );
           })}
@@ -71,7 +103,7 @@ export function InvestmentStreak({ streak }: { streak: StreakData }) {
           { months: 6, emoji: "🌿", label: "6 meses" },
           { months: 12, emoji: "🌳", label: "1 año" },
         ].map((b) => {
-          const reached = streak.longest >= b.months;
+          const reached    = streak.longest >= b.months;
           const inProgress = !reached && streak.current > 0 && streak.current < b.months;
           return (
             <div
@@ -89,9 +121,7 @@ export function InvestmentStreak({ streak }: { streak: StreakData }) {
                 {b.label}
               </p>
               {inProgress && (
-                <p className="text-[8px] text-blue-400 mt-0.5">
-                  {b.months - streak.current}m más
-                </p>
+                <p className="text-[8px] text-blue-400 mt-0.5">{b.months - streak.current}m más</p>
               )}
             </div>
           );

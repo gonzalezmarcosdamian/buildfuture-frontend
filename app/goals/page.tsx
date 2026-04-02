@@ -1,6 +1,7 @@
 import { fetchGamification, fetchFreedomScore, fetchBudget } from "@/lib/api-server";
 import { PortfolioCovers } from "@/components/goals/PortfolioCovers";
-import { SavingsGoalsTeaser } from "@/components/goals/SavingsGoalsTeaser";
+import { GoalCompliance } from "@/components/goals/GoalCompliance";
+import { CapitalGoals } from "@/components/goals/CapitalGoals";
 import { CurrencyValue } from "@/components/ui/CurrencyValue";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { Target, Lock, Zap } from "lucide-react";
@@ -17,7 +18,6 @@ export default async function Goals() {
   const mep = budget?.fx_rate ?? 1430;
   const covers: { status: "pending" | "covered" | "partial"; name: string; icon: string; amount_usd: number; covered_pct: number }[] = gamification.portfolio_covers;
   const covered = covers.filter((c) => c.status === "covered");
-  const pending = covers.filter((c) => c.status === "pending");
 
   const monthlyReturn = gamification.monthly_return_usd;
   const annualReturnPct = score.monthly_return_usd > 0
@@ -34,6 +34,11 @@ export default async function Goals() {
       return { ...c, monthly_needed: needed, capital_needed: capitalNeeded };
     });
 
+  // Aporte mensual del presupuesto (mismo cálculo que el dashboard)
+  const budgetSavingsUSD = budget && budget.fx_rate > 0
+    ? budget.savings_monthly_ars / budget.fx_rate
+    : null;
+
   return (
     <div className="px-4 pt-8 pb-24 space-y-5">
 
@@ -46,7 +51,7 @@ export default async function Goals() {
         <CurrencyToggle />
       </div>
 
-      {/* Resumen */}
+      {/* ── Resumen libertad financiera ── */}
       <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-semibold text-slate-300">Categorías desbloqueadas</p>
@@ -78,15 +83,12 @@ export default async function Goals() {
         </div>
       </div>
 
-      {/* Categorías */}
+      {/* ── Categorías (renta mensual) ── */}
       <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
         <PortfolioCovers monthly_return_usd={monthlyReturn} items={covers} mep={mep} />
       </div>
 
-      {/* Objetivos de capital — teaser */}
-      <SavingsGoalsTeaser />
-
-      {/* Roadmap */}
+      {/* ── Roadmap para desbloquear ── */}
       {unlockRoadmap.length > 0 && (
         <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
           <div className="flex items-center gap-2">
@@ -133,6 +135,12 @@ export default async function Goals() {
           ))}
         </div>
       )}
+
+      {/* ── Cumplimiento de metas (status + fecha proyectada) ── */}
+      <GoalCompliance />
+
+      {/* ── Objetivos de capital (CapitalGoals ABM) ── */}
+      <CapitalGoals budgetSavingsUSD={budgetSavingsUSD} />
 
     </div>
   );
