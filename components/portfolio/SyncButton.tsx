@@ -3,23 +3,18 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
 
 interface Props {
-  /** Providers ALYC conectados, ej: ["IOL", "PPI"]. Si hay uno solo, el label es específico. */
+  /** Providers ALYC conectados, ej: ["IOL", "PPI"]. Un botón por provider. */
   connectedProviders: string[];
 }
 
-export function SyncButton({ connectedProviders }: Props) {
+function SingleSyncButton({ provider }: { provider: string }) {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
   const router = useRouter();
-
-  const label = connectedProviders.length === 1
-    ? `Sync ${connectedProviders[0]}`
-    : "Sync todo";
 
   async function handleSync() {
     setSyncing(true);
@@ -28,29 +23,20 @@ export function SyncButton({ connectedProviders }: Props) {
     try {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
-      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+      const mockUser = typeof window !== "undefined" ? localStorage.getItem("bf_mock_user") : null;
+      const headers: HeadersInit = {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(mockUser ? { "X-Mock-User": mockUser } : {}),
+      };
 
-      // Sincronizar todos los proveedores en paralelo
-      const results = await Promise.allSettled(
-        connectedProviders.map((provider) =>
-          fetch(`${API_URL}/integrations/${provider.toLowerCase()}/sync`, {
-            method: "POST",
-            headers,
-          })
-        )
-      );
+      const res = await fetch(`${API_URL}/integrations/${provider.toLowerCase()}/sync`, {
+        method: "POST",
+        headers,
+      });
 
-      const anyError = results.find(
-        (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
-      );
-
-      if (anyError) {
-        if (anyError.status === "fulfilled") {
-          const d = await anyError.value.json().catch(() => ({}));
-          setError(d.detail || `Error ${anyError.value.status}`);
-        } else {
-          setError("No se pudo conectar con el servidor");
-        }
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setError(d.detail || `Error ${res.status}`);
         setTimeout(() => setError(null), 4000);
       } else {
         setOk(true);
@@ -77,9 +63,19 @@ export function SyncButton({ connectedProviders }: Props) {
         } disabled:opacity-50`}
       >
         <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
-        {syncing ? "Sincronizando..." : ok ? "Listo" : label}
+        {syncing ? "Sync..." : ok ? "Listo" : `Sync ${provider}`}
       </button>
       {error && <p className="text-[10px] text-red-400">{error}</p>}
+    </div>
+  );
+}
+
+export function SyncButton({ connectedProviders }: Props) {
+  return (
+    <div className="flex items-center gap-2">
+      {connectedProviders.map((p) => (
+        <SingleSyncButton key={p} provider={p} />
+      ))}
     </div>
   );
 }

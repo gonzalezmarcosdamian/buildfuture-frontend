@@ -181,11 +181,15 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 <span className="text-xs font-bold text-red-400">-{(descPct * 100).toFixed(0)}%</span>
               </div>
               <input
-                type="range" min={0.10} max={0.35} step={0.01} value={descPct}
+                type="range" min={0} max={0.40} step={0.01} value={descPct}
                 onChange={(e) => { const d = Number(e.target.value); setDescPct(d); setIncome(calcNeto(bruto, d)); }}
                 className="w-full accent-red-500"
               />
-              <div className="grid grid-cols-3 gap-1 text-[9px] text-slate-500 text-center">
+              <div className="flex justify-between text-[9px] text-slate-500">
+                <span>0%</span>
+                <span>40% (con Ganancias)</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1 text-[9px] text-slate-600 text-center mt-0.5">
                 <span>Jub. 11%</span>
                 <span>Obra social 3%</span>
                 <span>PAMI 3%</span>
@@ -193,6 +197,10 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
               <div className="flex items-center justify-between pt-1 border-t border-slate-700">
                 <span className="text-[10px] text-slate-400">Neto estimado</span>
                 <span className="text-sm font-bold text-emerald-400">{formatARS(income)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-500">→ Para invertir ({(savingsPct * 100).toFixed(0)}%)</span>
+                <span className="text-[10px] font-semibold text-emerald-500">{formatARS(savingsARS)}</span>
               </div>
             </div>
             <button

@@ -57,7 +57,7 @@ interface GoalFormState {
 }
 
 function emptyForm(): GoalFormState {
-  return { name: "", emoji: "🎯", target_amount: "", target_years: "5" };
+  return { name: "", emoji: "🎯", target_amount: "", target_years: "10" };
 }
 
 function formFromGoal(g: CapitalGoalData, currency: "USD" | "ARS", mep: number): GoalFormState {
@@ -94,7 +94,9 @@ function GoalForm({
     setForm((f) => ({ ...f, [key]: val }));
   }
 
-  const valid = form.name.trim().length > 0 && parseFloat(form.target_amount) > 0;
+  const yearsNum = parseInt(form.target_years, 10);
+  const yearsValid = !isNaN(yearsNum) && yearsNum >= 1 && yearsNum <= 60;
+  const valid = form.name.trim().length > 0 && parseFloat(form.target_amount) > 0 && yearsValid;
   const currencyLabel = currency === "USD" ? "Objetivo (USD)" : "Objetivo (ARS)";
   const currencySymbol = currency === "USD" ? "$" : "$";
   const currencyPlaceholder = currency === "USD" ? "80000" : "114000000";
@@ -167,15 +169,22 @@ function GoalForm({
         </div>
         <div>
           <label className="text-[10px] text-slate-500 mb-1 block">Horizonte (años)</label>
-          <select
+          <input
+            type="number"
+            min={1}
+            max={60}
             value={form.target_years}
             onChange={(e) => field("target_years", e.target.value)}
-            className="w-full bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
-          >
-            {[1, 2, 3, 5, 7, 10, 15, 20].map((y) => (
-              <option key={y} value={y}>{y} año{y > 1 ? "s" : ""}</option>
-            ))}
-          </select>
+            placeholder="10"
+            className={`w-full bg-slate-700 border rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none ${
+              form.target_years && !yearsValid
+                ? "border-red-600 focus:border-red-500"
+                : "border-slate-600 focus:border-blue-500"
+            }`}
+          />
+          {form.target_years && !yearsValid && (
+            <p className="text-[9px] text-red-400 mt-1 pl-1">1 a 60 años</p>
+          )}
         </div>
       </div>
 
