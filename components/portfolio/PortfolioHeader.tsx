@@ -4,10 +4,8 @@ import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { RentaInfoButton } from "@/components/portfolio/RentaModal";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 
-// Mismos buckets que el backend — yields capeados para consistencia
 const RENTA_TYPES = new Set(["LETRA", "FCI"]);
 const CAPITAL_TYPES = new Set(["CEDEAR", "ETF", "CRYPTO"]);
-const MAX_RENTA_YIELD = 0.15;
 
 interface Position {
   ticker: string;
@@ -39,14 +37,15 @@ export function PortfolioHeader({
 }: Props) {
   const { currency } = useCurrency();
 
-  // Renta fija: LETRA/FCI/BOND con yield capeado (sin inflación ARS nominal)
+  // Renta fija: LETRA/FCI/BOND con el yield real del instrumento (directo de IOL)
   const monthlyRentaFija = positions
     .filter((p) => RENTA_TYPES.has(p.asset_type) || p.asset_type === "BOND")
     .reduce((s, p) => {
-      const cappedYield = RENTA_TYPES.has(p.asset_type)
-        ? Math.min(p.annual_yield_pct, MAX_RENTA_YIELD)
-        : Math.min(p.annual_yield_pct, 0.12) * 0.5; // BOND: 50% va a renta
-      return s + (p.current_value_usd * cappedYield) / 12;
+      const y = p.annual_yield_pct;
+      const monthly = p.asset_type === "BOND"
+        ? (p.current_value_usd * y * 0.5) / 12   // BOND: 50% va a renta
+        : (p.current_value_usd * y) / 12;
+      return s + monthly;
     }, 0);
 
   // Capital: CEDEAR + ETF + CRYPTO (del prop o calculado inline)

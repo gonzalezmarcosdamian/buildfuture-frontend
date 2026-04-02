@@ -37,11 +37,6 @@ interface Props {
   activeTab: TabMode;
 }
 
-// Mismos caps que backend split_portfolio_buckets() y PortfolioHeader
-const MAX_RENTA_YIELD = 0.15;
-const MAX_BOND_YIELD  = 0.12;
-const RENTA_TYPES = new Set(["LETRA", "FCI"]);
-
 // Propósito de cada tipo de activo: renta (flujo mensual) | capital (apreciación)
 const ASSET_JOB: Record<string, "renta" | "capital" | "ambos"> = {
   LETRA:  "renta",
@@ -178,13 +173,11 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab }: Props) {
     .filter(p => (ASSET_JOB[p.asset_type] ?? "renta") !== "capital" && p.asset_type !== "CASH")
     .reduce((s, p) => {
       const y = p.annual_yield_pct ?? 0;
-      if (RENTA_TYPES.has(p.asset_type)) {
-        return s + (p.current_value_usd * Math.min(y, MAX_RENTA_YIELD)) / 12;
-      }
-      if (p.asset_type === "BOND") {
-        return s + (p.current_value_usd * Math.min(y, MAX_BOND_YIELD) * 0.5) / 12;
-      }
-      return s + (p.current_value_usd * y) / 12;
+      // BOND: 50% del valor va a renta (cupón), 50% a capital (apreciación)
+      const monthly = p.asset_type === "BOND"
+        ? (p.current_value_usd * y * 0.5) / 12
+        : (p.current_value_usd * y) / 12;
+      return s + monthly;
     }, 0);
 
   // Agrupar por fuente — NEXO se agrupa igual pero sin label ALYC especial
