@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Info, X, Plus } from "lucide-react";
 import { PerformanceChart } from "./PerformanceChart";
 import { PortfolioTabs } from "./PortfolioTabs";
@@ -59,7 +58,6 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
 export function PortfolioClient({ positions, totalUsd, mep, history }: Props) {
   const [mode, setMode] = useState<ViewMode>("composicion");
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
-  const router = useRouter();
 
   const chartMode = mode === "rendimientos" ? "rendimiento" : "tenencia";
   const activeInfoKey: NonNullable<InfoModal> = mode === "rendimientos" ? "rendimiento" : "tenencia";
