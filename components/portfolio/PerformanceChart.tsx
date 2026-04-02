@@ -228,7 +228,11 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
     }
   }
 
-  const chartData: HistoryPoint[] = data.points.map((p) => {
+  // Límites de visualización por período
+  const PERIOD_WINDOW: Record<Period, number> = { daily: 14, monthly: 12, annual: 5 };
+  const windowedPoints = data.points.slice(-PERIOD_WINDOW[period]);
+
+  const chartData: HistoryPoint[] = windowedPoints.map((p) => {
     const toDisplay = (v: number) => currency === "ARS" ? v * mep : v;
     return {
       ...p,

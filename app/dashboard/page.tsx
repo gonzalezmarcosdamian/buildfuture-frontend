@@ -1,30 +1,21 @@
 import Link from "next/link";
-import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile, fetchIntegrations } from "@/lib/api-server";
+import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile } from "@/lib/api-server";
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
 import { ValuePropsScreen } from "@/components/ftu/ValuePropsScreen";
 import { InvestmentStreak } from "@/components/goals/InvestmentStreak";
 import { ProjectionCard } from "@/components/goals/ProjectionCard";
-import { SyncButton } from "@/components/portfolio/SyncButton";
-
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  const [score, budget, gamification, portfolio, profile, integrations] = await Promise.all([
+  const [score, budget, gamification, portfolio, profile] = await Promise.all([
     fetchFreedomScore().catch(() => ({ portfolio_total_usd: 0, monthly_expenses_usd: 0 })),
     fetchBudget().catch(() => null),
     fetchGamification().catch(() => ({ monthly_return_usd: 0, portfolio_covers: 0 })),
     fetchPortfolio().catch(() => []),
     fetchProfile().catch(() => ({ risk_profile: null, available: false })),
-    fetchIntegrations().catch(() => []),
   ]);
-  const connectedALYCs: string[] = Array.isArray(integrations)
-    ? integrations
-        .filter((i: { provider_type: string; is_connected: boolean; auto_sync_enabled: boolean }) =>
-          i.provider_type === "ALYC" && i.is_connected && i.auto_sync_enabled)
-        .map((i: { provider: string }) => i.provider)
-    : [];
 
   const hasBudget = !!(budget && (budget.income_monthly_ars ?? 0) > 0);
   const hasPortfolio = !!(score.portfolio_total_usd > 0) ||
@@ -62,7 +53,6 @@ export default async function Dashboard() {
           <p className="text-xs text-slate-500">Tu camino a la libertad financiera</p>
         </div>
         <div className="flex items-center gap-2">
-          {connectedALYCs.length > 0 && <SyncButton connectedProviders={connectedALYCs} />}
           <Link href="/settings" className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white hover:bg-blue-500 transition-colors">
             M
           </Link>
