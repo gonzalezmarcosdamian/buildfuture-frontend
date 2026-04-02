@@ -77,21 +77,22 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
     }
   }
 
-  const allDone = hasBudget && hasPortfolio && riskSaved;
+  // Budget es opcional: no bloquea el dashboard ni cuenta en el progreso requerido
+  const allDone = hasPortfolio && riskSaved;
 
   return (
     <div className="px-4 pt-8 pb-24 space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-100">Bienvenido</h1>
+        <h1 className="text-xl font-bold text-slate-100">Casi listo</h1>
         <p className="text-sm text-slate-400 mt-1">
           Completá estos pasos para empezar a ver tu dashboard.
         </p>
       </div>
 
-      {/* Progress dots */}
+      {/* Progress dots — solo los pasos requeridos */}
       <div className="flex gap-2 items-center">
-        {[hasBudget, hasPortfolio, riskSaved].map((done, i) => (
+        {[hasPortfolio, riskSaved].map((done, i) => (
           <div
             key={i}
             className={`h-1.5 flex-1 rounded-full transition-colors ${
@@ -101,12 +102,13 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
         ))}
       </div>
 
-      {/* Budget card */}
+      {/* Budget card — opcional */}
       <SetupCard
         done={hasBudget}
+        optional
         icon={<BarChart2 size={18} />}
         title="Configurar presupuesto"
-        description="Ingresá tus ingresos y gastos mensuales para calcular cuánto podés invertir."
+        description="Ingresá tus ingresos y gastos para calcular cuánto podés invertir y proyectar tus metas."
         ctaLabel="Ir a presupuesto"
         onCta={() => router.push("/budget")}
       />
@@ -199,6 +201,7 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
 
 function SetupCard({
   done,
+  optional = false,
   icon,
   title,
   description,
@@ -206,6 +209,7 @@ function SetupCard({
   onCta,
 }: {
   done: boolean;
+  optional?: boolean;
   icon: React.ReactNode;
   title: string;
   description: string;
@@ -226,10 +230,17 @@ function SetupCard({
         >
           {icon}
         </div>
-        <div>
-          <p className={`text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-slate-100"}`}>
-            {title}
-          </p>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <p className={`text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-slate-100"}`}>
+              {title}
+            </p>
+            {optional && !done && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-400 font-medium">
+                Opcional
+              </span>
+            )}
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">{description}</p>
         </div>
       </div>

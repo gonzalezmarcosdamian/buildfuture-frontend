@@ -3,6 +3,7 @@ import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetc
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
+import { ValuePropsScreen } from "@/components/ftu/ValuePropsScreen";
 import { InvestmentStreak } from "@/components/goals/InvestmentStreak";
 import { ProjectionCard } from "@/components/goals/ProjectionCard";
 import { SyncButton } from "@/components/portfolio/SyncButton";
@@ -31,7 +32,14 @@ export default async function Dashboard() {
   const hasRiskProfile = !!(profile?.risk_profile);
   const blockOnRisk = profile.available && !hasRiskProfile;
 
-  if (!hasBudget || !hasPortfolio || blockOnRisk) {
+  // Usuario brand new: no tiene nada → value props antes del setup
+  if (!hasPortfolio && !hasRiskProfile) {
+    return <ValuePropsScreen />;
+  }
+
+  // Tiene portfolio pero falta perfil de riesgo → FTU abreviado
+  // Budget es opcional: no bloquea el acceso al dashboard
+  if (!hasPortfolio || blockOnRisk) {
     return (
       <FTUFlow
         hasBudget={hasBudget}

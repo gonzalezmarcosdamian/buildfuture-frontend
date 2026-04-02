@@ -8,6 +8,7 @@ import { CurrencyValue } from "@/components/ui/CurrencyValue";
 import { PortfolioCovers } from "@/components/goals/PortfolioCovers";
 import { GoalCompliance } from "@/components/goals/GoalCompliance";
 import { CapitalGoals } from "@/components/goals/CapitalGoals";
+import { GoalEditor } from "@/components/goals/GoalEditor";
 import { BudgetEditor } from "@/components/budget/BudgetEditor";
 
 type Tab = "renta" | "capital";
@@ -350,6 +351,8 @@ export function GoalsClient({
       {tab === "capital" && (
         <div className="space-y-4">
           <GoalCompliance />
+          {/* Meta de ahorro mensual — parámetro de la proyección */}
+          <GoalEditor budgetSavingsUSD={budgetSavingsUSD} />
           <CapitalGoals budgetSavingsUSD={budgetSavingsUSD} mep={mep} />
         </div>
       )}
