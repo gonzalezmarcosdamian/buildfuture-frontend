@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Zap, X, Pencil, Wallet } from "lucide-react";
-import { formatARS } from "@/lib/formatters";
+import { formatARS, formatUSD } from "@/lib/formatters";
+import { useCurrency } from "@/lib/currency-context";
 import { CurrencyValue } from "@/components/ui/CurrencyValue";
 import { PortfolioCovers } from "@/components/goals/PortfolioCovers";
 import { GoalCompliance } from "@/components/goals/GoalCompliance";
@@ -105,6 +106,11 @@ function BudgetDrawer({ budget, onClose, onSaved }: {
 function BudgetSection({ budget, mep }: { budget: Budget | null; mep: number }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
+  const { currency } = useCurrency();
+
+  function fmt(ars: number) {
+    return currency === "USD" ? formatUSD(ars / mep) : formatARS(ars);
+  }
 
   function handleSaved() {
     setEditing(false);
@@ -186,17 +192,17 @@ function BudgetSection({ budget, mep }: { budget: Budget | null; mep: number }) 
         <div className="grid grid-cols-3 gap-px bg-slate-800/50 border-t border-slate-800 mt-2">
           <div className="bg-slate-900 px-3 py-2.5 text-center">
             <p className="text-[9px] text-slate-500 mb-0.5">Ingreso neto</p>
-            <p className="text-xs font-semibold text-slate-200">{formatARS(budget.income_monthly_ars)}</p>
-            <p className="text-[9px] text-slate-600">USD {(budget.income_monthly_ars / mep).toFixed(0)}</p>
+            <p className="text-xs font-semibold text-slate-200">{fmt(budget.income_monthly_ars)}</p>
+            <p className="text-[9px] text-slate-600">{currency === "USD" ? formatARS(budget.income_monthly_ars) : `USD ${(budget.income_monthly_ars / mep).toFixed(0)}`}</p>
           </div>
           <div className="bg-slate-900 px-3 py-2.5 text-center">
             <p className="text-[9px] text-slate-500 mb-0.5">Gastos</p>
-            <p className="text-xs font-semibold text-red-400">{formatARS(expensesARS)}</p>
+            <p className="text-xs font-semibold text-red-400">{fmt(expensesARS)}</p>
             <p className="text-[9px] text-slate-600">{(budget.expenses_pct * 100).toFixed(0)}% del ingreso</p>
           </div>
           <div className="bg-emerald-950/30 px-3 py-2.5 text-center">
             <p className="text-[9px] text-emerald-600 mb-0.5">A invertir</p>
-            <p className="text-xs font-semibold text-emerald-400">{formatARS(savingsARS)}</p>
+            <p className="text-xs font-semibold text-emerald-400">{fmt(savingsARS)}</p>
             <p className="text-[9px] text-emerald-700">≈ USD {savingsUSD.toFixed(0)}/mes</p>
           </div>
         </div>
