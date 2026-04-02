@@ -5,6 +5,19 @@ import Link from "next/link";
 import { useCurrency } from "@/lib/currency-context";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { formatUSD, formatARS } from "@/lib/formatters";
+
+function fmtCompact(usd: number, currency: "USD" | "ARS", mep: number): string {
+  if (currency === "USD") {
+    if (usd >= 1_000_000) return `USD ${(usd / 1_000_000).toFixed(1)}M`;
+    if (usd >= 1_000) return `USD ${(usd / 1_000).toFixed(0)}K`;
+    return formatUSD(usd);
+  }
+  const ars = usd * mep;
+  if (ars >= 1_000_000_000) return `$${(ars / 1_000_000_000).toFixed(1)}B`;
+  if (ars >= 1_000_000) return `$${(ars / 1_000_000).toFixed(1)}M`;
+  if (ars >= 1_000) return `$${(ars / 1_000).toFixed(0)}K`;
+  return formatARS(ars);
+}
 import { supabase } from "@/lib/supabase";
 
 interface CoverItem {
@@ -69,13 +82,8 @@ const BAR_COLOR: Record<GoalStatus, string> = {
   delayed:    "bg-yellow-500",
   no_savings: "bg-slate-600",
 };
-function fmtK(usd: number): string {
-  if (usd >= 1_000_000) return `$${(usd / 1_000_000).toFixed(1)}M`;
-  if (usd >= 1_000) return `$${(usd / 1_000).toFixed(0)}K`;
-  return `$${usd.toFixed(0)}`;
-}
-
-function CapitalGoalsMini() {
+function CapitalGoalsMini({ mep }: { mep: number }) {
+  const { currency } = useCurrency();
   const [goals, setGoals] = useState<CapitalGoalData[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -143,7 +151,7 @@ function CapitalGoalsMini() {
                 </div>
                 <div className="shrink-0 text-right w-12">
                   <p className={`text-[11px] font-bold leading-none ${STATUS_COLOR[st]}`}>{g.progress_pct}%</p>
-                  <p className="text-[9px] text-slate-600 mt-0.5">{fmtK(g.target_usd)}</p>
+                  <p className="text-[9px] text-slate-600 mt-0.5">{fmtCompact(g.target_usd, currency, mep)}</p>
                 </div>
               </div>
             );
@@ -305,7 +313,7 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
         </div>
 
         {/* Metas de largo plazo */}
-        <CapitalGoalsMini />
+        <CapitalGoalsMini mep={mep} />
       </div>
 
     </div>

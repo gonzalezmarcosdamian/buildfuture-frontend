@@ -350,7 +350,7 @@ export function GoalsClient({
       {tab === "capital" && (
         <div className="space-y-4">
           <GoalCompliance />
-          <CapitalGoals budgetSavingsUSD={budgetSavingsUSD} />
+          <CapitalGoals budgetSavingsUSD={budgetSavingsUSD} mep={mep} />
         </div>
       )}
     </div>
