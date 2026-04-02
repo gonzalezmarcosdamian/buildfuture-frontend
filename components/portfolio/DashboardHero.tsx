@@ -186,7 +186,15 @@ export function DashboardHero({ monthlyReturn, monthlyExpenses, covers, portfoli
 
       {/* ── Encabezado global ─────────────────────────────────── */}
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider">Tu portafolio trabaja por vos</p>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[9px] font-semibold text-emerald-500 bg-emerald-950/60 border border-emerald-900/40 px-2 py-0.5 rounded-full">
+            💰 Renta / mes
+          </span>
+          <span className="text-slate-700 text-[9px]">·</span>
+          <span className="text-[9px] font-semibold text-violet-400 bg-violet-950/60 border border-violet-900/40 px-2 py-0.5 rounded-full">
+            📈 Capital largo plazo
+          </span>
+        </div>
         <CurrencyToggle />
       </div>
 
