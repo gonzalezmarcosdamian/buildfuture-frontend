@@ -2,7 +2,6 @@ import { fetchPortfolio, fetchPortfolioHistory, fetchBudget, fetchIntegrations }
 import { PortfolioHeader } from "@/components/portfolio/PortfolioHeader";
 import { PortfolioClient } from "@/components/portfolio/PortfolioClient";
 import { SyncButton } from "@/components/portfolio/SyncButton";
-import Link from "next/link";
 import { Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +43,7 @@ export default async function Portfolio() {
         freedomPct={summary.freedom_pct}
         mep={mep}
         positions={positions}
+        capitalTotalUsd={summary.capital_total_usd ?? null}
       />
 
       <PortfolioClient
