@@ -2,10 +2,24 @@ import { supabase } from "./supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+const MOCK_AUTH = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
+
 async function authHeaders(): Promise<HeadersInit> {
+  // Dev mock: usa X-Mock-User header en lugar de JWT
+  if (MOCK_AUTH && typeof window !== "undefined") {
+    const mockUser = localStorage.getItem("bf_mock_user");
+    return mockUser ? { "X-Mock-User": mockUser } : {};
+  }
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/** Solo para desarrollo — cambia la persona activa sin recargar */
+export function setMockUser(alias: string) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("bf_mock_user", alias);
+  }
 }
 
 async function apiFetch(path: string, opts: RequestInit = {}) {
