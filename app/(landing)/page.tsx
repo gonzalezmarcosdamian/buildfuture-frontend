@@ -1,5 +1,7 @@
+"use client";
 import Link from "next/link";
-import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronRight, ChevronDown } from "lucide-react";
 
 // ── Hero mockup — representación del dashboard ─────────────────────────────────
 
@@ -753,7 +755,140 @@ function SectionFounder() {
   );
 }
 
-// ── Página principal ───────────────────────────────────────────────────────────
+// ── SECCIÓN FAQ ────────────────────────────────────────────────────────────────
+
+const FAQS = [
+  { q: "¿BuildFuture puede comprar o vender por mí?", a: "No. Nunca. Solo tiene acceso de lectura a tus cuentas. No puede ejecutar órdenes ni mover fondos. Podés verificarlo revisando los permisos en tu broker en cualquier momento." },
+  { q: "¿Qué pasa con mis credenciales de IOL o Binance?", a: "Se almacenan encriptadas con AES-256. Nunca las vemos en texto plano. Podés revocarlas desde BuildFuture o directamente desde tu broker cuando quieras." },
+  { q: "¿Es gratis?", a: "Sí, durante la beta. El modelo de monetización se definirá con la comunidad de usuarios antes de lanzar cualquier cobro. Recibirás aviso con tiempo." },
+  { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si usás otro, anotate en la waitlist y contanos cuál — es la forma más directa de que lo prioricemos." },
+  { q: "¿Mis datos se venden a terceros?", a: "No. Nunca. Usamos proveedores de infraestructura (Supabase, Railway, Vercel) pero no compartimos ni vendemos información personal o financiera." },
+  { q: "¿Puedo ingresar posiciones manualmente?", a: "Sí. Si tenés activos fuera de los brokers conectados — cripto en una wallet, efectivo — podés cargarlos a mano desde la sección Portafolio." },
+  { q: "¿Las sugerencias son asesoramiento financiero?", a: "No. Son sugerencias algorítmicas con fines educativos, basadas en tu perfil de riesgo. No constituyen asesoramiento financiero personalizado bajo la Ley 26.831. Toda decisión es tuya." },
+];
+
+function SectionFAQ() {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <section className="py-24 border-t border-slate-800/60">
+      <div className="max-w-3xl mx-auto px-5 space-y-10">
+        <div className="space-y-3 text-center">
+          <p className="text-[11px] uppercase tracking-widest text-slate-600">Preguntas frecuentes</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">Respuestas antes de que preguntes.</h2>
+        </div>
+        <div className="space-y-2">
+          {FAQS.map((faq, i) => (
+            <div key={i} className={`border rounded-2xl overflow-hidden transition-colors ${open === i ? "border-emerald-800/60 bg-slate-900" : "border-slate-800 bg-slate-900/40 hover:border-slate-700"}`}>
+              <button className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left" onClick={() => setOpen(open === i ? null : i)}>
+                <span className="text-sm font-semibold text-slate-200">{faq.q}</span>
+                <ChevronDown size={16} className={`text-slate-500 shrink-0 transition-transform duration-200 ${open === i ? "rotate-180" : ""}`} />
+              </button>
+              {open === i && (
+                <div className="px-5 pb-5">
+                  <p className="text-[13px] text-slate-400 leading-relaxed">{faq.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── SECCIÓN WAITLIST ───────────────────────────────────────────────────────────
+
+function SectionWaitlist() {
+  const [email, setEmail]     = useState("");
+  const [accepted, setAccepted] = useState(false);
+  const [status, setStatus]   = useState<"idle" | "loading" | "ok" | "error">("idle");
+  const [msg, setMsg]         = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!accepted) { setMsg("Tenés que aceptar los términos para continuar."); return; }
+    setStatus("loading");
+    try {
+      const base = process.env.NEXT_PUBLIC_API_URL ?? "https://api-production-7ddd6.up.railway.app";
+      const res  = await fetch(`${base}/waitlist/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), source: "landing" }),
+      });
+      const data = await res.json();
+      if (res.ok) { setStatus("ok");    setMsg(data.message ?? "¡Te anotamos!"); }
+      else        { setStatus("error"); setMsg(data.detail  ?? "Algo salió mal. Intentá de nuevo."); }
+    } catch {
+      setStatus("error");
+      setMsg("No se pudo conectar. Intentá de nuevo más tarde.");
+    }
+  }
+
+  return (
+    <section className="py-24 bg-slate-900/40 border-t border-slate-800/60">
+      <div className="max-w-xl mx-auto px-5 space-y-8 text-center">
+        <div className="space-y-3">
+          <p className="text-[11px] uppercase tracking-widest text-slate-600">Waitlist</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">¿Tu broker todavía no está?</h2>
+          <p className="text-slate-400">Dejá tu mail y te avisamos cuando lo integremos.</p>
+        </div>
+
+        {status === "ok" ? (
+          <div className="bg-emerald-950/40 border border-emerald-800/50 rounded-2xl p-6 space-y-2">
+            <CheckCircle size={24} className="text-emerald-400 mx-auto" />
+            <p className="text-emerald-300 font-semibold">{msg}</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="email" required value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-600 transition-colors"
+              />
+              <button type="submit" disabled={status === "loading"}
+                className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold px-6 py-3 rounded-xl transition-colors text-sm whitespace-nowrap">
+                {status === "loading" ? "Enviando…" : "Anotarme →"}
+              </button>
+            </div>
+            <label className="flex items-start gap-3 text-left cursor-pointer">
+              <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-slate-600 accent-emerald-500 shrink-0" />
+              <span className="text-[12px] text-slate-500 leading-relaxed">
+                Acepto los <Link href="/legal" className="text-emerald-400 hover:underline">términos de uso</Link> y la{" "}
+                <Link href="/legal#privacidad" className="text-emerald-400 hover:underline">política de privacidad</Link>.
+              </span>
+            </label>
+            {msg && <p className={`text-[12px] ${status === "error" ? "text-red-400" : "text-slate-500"}`}>{msg}</p>}
+          </form>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ── SECCIÓN CTA FINAL ──────────────────────────────────────────────────────────
+
+function SectionCTAFinal() {
+  return (
+    <section className="py-28 border-t border-slate-800/60 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-950/10 to-transparent pointer-events-none" />
+      <div className="max-w-3xl mx-auto px-5 text-center space-y-8 relative">
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-100 leading-tight">
+          Tu libertad financiera<br />empieza con un número.
+        </h2>
+        <p className="text-xl text-emerald-400 font-semibold">BuildFuture te lo dice hoy.</p>
+        <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-10 py-4 rounded-2xl transition-colors text-lg">
+          Crear mi cuenta gratis <ArrowRight size={18} />
+        </Link>
+        <p className="text-[12px] text-slate-600">Sin tarjeta · Solo lectura · Podés irte cuando quieras</p>
+      </div>
+    </section>
+  );
+}
+
+// ── PÁGINA PRINCIPAL ───────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   return (
@@ -765,7 +900,9 @@ export default function LandingPage() {
       <SectionComoFunciona />
       <SectionVision />
       <SectionFounder />
-      <SectionCTAIntermedio />
+      <SectionFAQ />
+      <SectionWaitlist />
+      <SectionCTAFinal />
     </main>
   );
 }
