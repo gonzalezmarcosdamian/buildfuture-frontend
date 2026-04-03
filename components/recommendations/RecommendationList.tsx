@@ -95,19 +95,24 @@ function InstrumentLogo({ ticker, logoUrl }: { ticker: string; logoUrl?: string 
   );
 }
 
-// ── Conviction bar ─────────────────────────────────────────────────────────────
+// ── Educational content maps ───────────────────────────────────────────────────
 
-function convictionBar(conviction: number) {
-  const pct = Math.round(conviction * 100);
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
-        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-[9px] text-slate-500 w-6 text-right">{pct}%</span>
-    </div>
-  );
-}
+const ASSET_DESCRIPTION: Record<string, string> = {
+  LETRA:  "Letra del Tesoro Nacional. Deuda de corto plazo emitida por el Estado argentino en pesos, con tasa fija o ajustable. Ideal para estacionar pesos mientras el dinero trabaja a una tasa predecible.",
+  LECAP:  "Letra del Tesoro Nacional. Deuda de corto plazo emitida por el Estado argentino en pesos, con tasa fija o ajustable. Ideal para estacionar pesos mientras el dinero trabaja a una tasa predecible.",
+  FCI:    "Fondo Común de Inversión. Un vehículo colectivo que agrupa capital de muchos inversores para comprar instrumentos de renta fija. Lo gestiona un equipo profesional y podés entrar y salir con alta liquidez.",
+  CEDEAR: "Certificado de Depósito Argentino. Representan acciones de empresas extranjeras —como Apple, Google o MELI— que cotizan en pesos en el mercado local con precio referenciado al dólar MEP. Permiten invertir en las mejores empresas del mundo desde Argentina.",
+  ETF:    "Exchange Traded Fund cotizado como CEDEAR. Replica un índice o canasta de activos internacionales, ofreciendo diversificación global con precio en pesos referenciado al dólar.",
+  BOND:   "Bono soberano argentino. El Estado emite deuda y paga cupones periódicos en dólares. Tienen mayor riesgo que la deuda corporativa, pero también mayor potencial de apreciación según el contexto macro.",
+  ON:     "Obligación Negociable. Deuda emitida por empresas argentinas líderes que paga cupones en dólares hard. Ofrece flujo en USD con menor riesgo crediticio que los soberanos.",
+  CRYPTO: "Activo digital descentralizado. No depende de ningún Estado ni empresa. Su precio se rige por oferta y demanda global, lo que genera alta volatilidad pero también potencial de apreciación significativo.",
+};
+
+const RISK_DESCRIPTION: Record<string, string> = {
+  bajo:  "Riesgo controlado. La probabilidad de perder capital es baja y el instrumento tiene alta predictibilidad en sus flujos. Apto para cualquier perfil, especialmente si priorizás preservar valor por sobre maximizar rendimiento.",
+  medio: "Riesgo moderado. Puede haber volatilidad de precio en el corto plazo, pero el activo tiene fundamentos sólidos y horizonte de recuperación razonable. Requiere cierta tolerancia a las fluctuaciones del mercado.",
+  alto:  "Riesgo elevado. El precio puede oscilar significativamente. Requiere horizonte de inversión largo y tolerancia a la volatilidad. Solo para inversores que pueden mantener la posición sin necesitar el capital a corto plazo.",
+};
 
 // ── Modal de detalle ───────────────────────────────────────────────────────────
 
@@ -123,7 +128,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="bg-slate-900 border border-slate-700 rounded-t-2xl w-full max-w-lg p-5 pb-8 space-y-4"
+        className="bg-slate-900 border border-slate-700 rounded-t-2xl w-full max-w-lg p-5 pb-8 space-y-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -138,7 +143,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
               </span>
             ))}
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-300">
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-300 shrink-0">
             <X size={16} />
           </button>
         </div>
@@ -189,27 +194,30 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
           </div>
         </div>
 
-        {/* Por qué ahora */}
+        {/* ¿Qué es? */}
         <div className="space-y-1.5">
-          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Por qué ahora</p>
+          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">¿Qué es?</p>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {ASSET_DESCRIPTION[rec.asset_type] ?? `Instrumento financiero de tipo ${rec.asset_type}.`}
+          </p>
+        </div>
+
+        {/* ¿Por qué ahora? */}
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">¿Por qué ahora?</p>
           <p className="text-xs text-slate-300 leading-relaxed">{rec.why_now || rec.rationale}</p>
         </div>
 
-        {/* Agentes */}
-        {rec.agents_agreed && rec.agents_agreed.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-              Comité — {rec.agents_agreed.length} agente{rec.agents_agreed.length > 1 ? "s" : ""} de acuerdo
-            </p>
-            {rec.agents_agreed.map((a) => (
-              <div key={a.agent} className="space-y-0.5">
-                <p className="text-[11px] font-medium text-slate-300">{a.agent}</p>
-                {convictionBar(a.conviction)}
-                <p className="text-[10px] text-slate-500 leading-snug">{a.signal}</p>
-              </div>
-            ))}
+        {/* ¿Qué riesgo tiene? */}
+        <div className={`rounded-xl border px-3 py-2.5 space-y-1 ${riskColor[rec.risk_level] ?? "border-slate-700 bg-slate-800/40 text-slate-400"}`}>
+          <div className="flex items-center gap-1.5">
+            {riskIcon[rec.risk_level]}
+            <p className="text-[10px] font-semibold uppercase tracking-wider">¿Qué riesgo tiene?</p>
           </div>
-        )}
+          <p className="text-[11px] leading-relaxed opacity-90">
+            {RISK_DESCRIPTION[rec.risk_level] ?? "Consultá con un asesor financiero para evaluar si este instrumento es adecuado para tu perfil."}
+          </p>
+        </div>
       </div>
     </div>
   );

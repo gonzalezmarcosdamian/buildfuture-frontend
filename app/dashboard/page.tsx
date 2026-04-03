@@ -4,7 +4,6 @@ import { RecommendationList } from "@/components/recommendations/RecommendationL
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
 import { ValuePropsScreen } from "@/components/ftu/ValuePropsScreen";
-import { InvestmentStreak } from "@/components/goals/InvestmentStreak";
 import { ProjectionCard } from "@/components/goals/ProjectionCard";
 export const dynamic = "force-dynamic";
 
@@ -59,7 +58,7 @@ export default async function Dashboard() {
         </div>
       </div>
 
-      {/* 1 — Hero: renta + capital + metas */}
+      {/* 1 — Hero: renta + capital + metas + racha */}
       <DashboardHero
         monthlyReturn={gamification.monthly_return_usd}
         monthlyExpenses={score.monthly_expenses_usd}
@@ -67,27 +66,21 @@ export default async function Dashboard() {
         portfolioTotal={score.portfolio_total_usd}
         portfolioTotalArs={portfolio?.summary?.total_ars ?? null}
         mep={mep}
-        capitalTotalUsd={score.capital_total_usd ?? null}
+        capitalTotalUsd={portfolio?.summary?.capital_total_usd ?? score.capital_total_usd ?? null}
+        rentaTotalUsd={portfolio?.summary?.renta_total_usd ?? null}
+        cryptoTotalUsd={portfolio?.summary?.crypto_total_usd ?? null}
+        cedearTotalUsd={portfolio?.summary?.cedear_total_usd ?? null}
+        streak={gamification.streak ?? null}
       />
 
-      {/* 2 — Proyección DCA / interés compuesto */}
-      <ProjectionCard />
-
-      {/* 3 — Racha mensual */}
-      {gamification.streak && (
-        <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
-          <InvestmentStreak
-            streak={gamification.streak}
-            currentMonthInvested={gamification.current_month_invested ?? false}
-          />
-        </div>
-      )}
-
-      {/* 4 — Recomendaciones */}
+      {/* 2 — Recomendaciones */}
       <RecommendationList
         capitalArs={savingsARS > 0 ? Math.round(savingsARS) : 500000}
         userProfile={profile?.risk_profile ?? null}
       />
+
+      {/* 3 — Proyección DCA / interés compuesto (colapsada) */}
+      <ProjectionCard />
 
     </div>
   );

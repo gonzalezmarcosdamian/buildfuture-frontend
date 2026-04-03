@@ -5,7 +5,7 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceLine,
 } from "recharts";
-import { X, Info, TrendingUp, RefreshCw, Layers } from "lucide-react";
+import { X, Info, TrendingUp, RefreshCw, Layers, ChevronDown, ChevronUp } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
 
@@ -271,6 +271,7 @@ export function ProjectionCard() {
   const [loading, setLoading] = useState(true);
   const [horizon, setHorizon] = useState(10);
   const [showInfo, setShowInfo] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -311,12 +312,35 @@ export function ProjectionCard() {
     (g) => g.target_usd > data.current_usd && g.target_usd <= maxChartValue * 1.05
   );
 
+  const pt10full = data.points.find((p) => p.year === 10);
+  const val10 = pt10full?.with_savings_usd ?? 0;
+
   return (
     <>
-      <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-4">
+      <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+
+        {/* Accordion trigger — always visible */}
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-800/30 transition-colors"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="text-base leading-none">📈</span>
+            <div>
+              <p className="text-xs font-semibold text-slate-200">Proyección a 10 años</p>
+              <p className="text-[11px] text-emerald-400 font-medium">
+                {fmtK(val10)} con aportes mensuales
+              </p>
+            </div>
+          </div>
+          {expanded ? <ChevronUp size={14} className="text-slate-500 shrink-0" /> : <ChevronDown size={14} className="text-slate-500 shrink-0" />}
+        </button>
+
+        {/* Expandable content */}
+        {expanded && <div className="px-4 pb-4 space-y-4 border-t border-slate-800/60 pt-3">
+
         {/* Header */}
         <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Interés compuesto</p>
           <p className="text-sm font-semibold text-slate-100">
             Si seguís invirtiendo ${data.monthly_savings_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD/mes
           </p>
@@ -410,6 +434,7 @@ export function ProjectionCard() {
           </p>
           <Info size={14} className="text-slate-600 shrink-0" />
         </button>
+        </div>}
       </div>
 
       {/* Bottom sheet */}
