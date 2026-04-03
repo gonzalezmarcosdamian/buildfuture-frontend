@@ -234,7 +234,7 @@ export function AddManualPosition() {
                 : "Ej: SPY, QQQ, AAPL"
               }
               autoFocus
-              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
             />
             {assetType !== "FCI" && (
               <button

@@ -171,7 +171,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 value={fmt(bruto)}
                 placeholder="800.000"
                 onChange={(e) => { const b = parse(e.target.value); setBruto(b); setIncome(calcNeto(b, descPct)); }}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500"
                 style={INPUT_STYLE}
               />
             </div>
@@ -221,7 +221,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 value={fmt(income)}
                 placeholder="664.000"
                 onChange={(e) => setIncome(parse(e.target.value))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500"
                 style={INPUT_STYLE}
               />
             </div>
@@ -347,7 +347,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 type="text"
                 value={cat.name}
                 onChange={(e) => updateCat(i, "name", e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 min-w-0"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500 min-w-0"
                 style={INPUT_STYLE}
               />
             </div>

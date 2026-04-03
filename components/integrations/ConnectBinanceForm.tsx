@@ -90,7 +90,7 @@ export function ConnectBinanceForm({ onSuccess }: Props) {
           value={apiKey}
           onChange={e => setApiKey(e.target.value)}
           placeholder="N5XLPiPlZk..."
-          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-yellow-700"
+          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-[16px] leading-tight text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-yellow-700"
           autoComplete="off"
         />
       </div>
@@ -104,7 +104,7 @@ export function ConnectBinanceForm({ onSuccess }: Props) {
             value={secretKey}
             onChange={e => setSecretKey(e.target.value)}
             placeholder="••••••••••••••••"
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-9 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-yellow-700"
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-9 text-[16px] leading-tight text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-yellow-700"
             autoComplete="off"
           />
           <button

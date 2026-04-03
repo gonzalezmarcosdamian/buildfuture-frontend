@@ -148,7 +148,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
               placeholder="tu@email.com"
               autoComplete="off"
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
             />
           </div>
           <div>
@@ -161,7 +161,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
                 placeholder="••••••••"
                 autoComplete="new-password"
                 required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 pr-10 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
               />
               <button
                 type="button"
@@ -194,7 +194,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
                 onChange={(e) => setTotpSecret(e.target.value.trim())}
                 placeholder="BASE32SECRET (ej: JBSWY3DPEHPK3PXP)"
                 autoComplete="off"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-10 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-10 text-[16px] leading-tight text-slate-100 placeholder-slate-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
               />
               <button
                 type="button"
@@ -254,7 +254,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
               maxLength={6}
               autoFocus
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors tracking-widest font-mono"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors tracking-widest font-mono"
             />
             <p className="text-[10px] text-slate-600 mt-1">
               Si el código expiró, abrí Google Authenticator y copiá el nuevo código de 6 dígitos.

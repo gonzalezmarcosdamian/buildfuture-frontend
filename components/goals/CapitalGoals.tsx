@@ -125,7 +125,7 @@ function GoalForm({
           value={form.name}
           onChange={(e) => field("name", e.target.value)}
           maxLength={60}
-          className="flex-1 bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+          className="flex-1 bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-[16px] leading-tight text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
         />
       </div>
 
@@ -158,7 +158,7 @@ function GoalForm({
               placeholder={currencyPlaceholder}
               value={form.target_amount}
               onChange={(e) => field("target_amount", e.target.value)}
-              className="w-full bg-slate-700 border border-slate-600 rounded-xl pl-7 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-700 border border-slate-600 rounded-xl pl-7 pr-3 py-2 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500"
             />
           </div>
           {hintAmount && (
@@ -176,7 +176,7 @@ function GoalForm({
             value={form.target_years}
             onChange={(e) => field("target_years", e.target.value)}
             placeholder="10"
-            className={`w-full bg-slate-700 border rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none ${
+            className={`w-full bg-slate-700 border rounded-xl px-3 py-2 text-[16px] leading-tight text-slate-100 focus:outline-none ${
               form.target_years && !yearsValid
                 ? "border-red-600 focus:border-red-500"
                 : "border-slate-600 focus:border-blue-500"
