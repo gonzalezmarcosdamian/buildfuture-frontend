@@ -23,6 +23,7 @@ interface Props {
   mep: number;
   positions: Position[];
   capitalTotalUsd?: number | null;
+  cashTotalUsd?: number | null;
 }
 
 export function PortfolioHeader({
@@ -34,6 +35,7 @@ export function PortfolioHeader({
   mep,
   positions,
   capitalTotalUsd,
+  cashTotalUsd,
 }: Props) {
   const { currency } = useCurrency();
 
@@ -48,10 +50,14 @@ export function PortfolioHeader({
       return s + monthly;
     }, 0);
 
-  // Capital: CEDEAR + ETF + CRYPTO (del prop o calculado inline)
-  const capitalUsd = capitalTotalUsd ?? positions
+  // Capital: CEDEAR + ETF + CRYPTO + CASH (del prop o calculado inline)
+  const capitalBase = capitalTotalUsd ?? positions
     .filter((p) => CAPITAL_TYPES.has(p.asset_type))
     .reduce((s, p) => s + p.current_value_usd, 0);
+  const cashUsd = cashTotalUsd ?? positions
+    .filter((p) => p.asset_type === "CASH")
+    .reduce((s, p) => s + p.current_value_usd, 0);
+  const capitalUsd = capitalTotalUsd != null ? capitalBase : capitalBase + cashUsd;
 
   const totalArsDisplay = totalArs ?? totalUsd * mep;
   const fmt = (usd: number) =>
@@ -120,7 +126,7 @@ export function PortfolioHeader({
           </div>
           <div className="text-right">
             <p className="text-lg font-bold text-violet-300">{fmt(capitalUsd)}</p>
-            <p className="text-[9px] text-slate-600">CEDEARs · ETFs · Crypto</p>
+            <p className="text-[9px] text-slate-600">CEDEARs · ETFs · Crypto{cashUsd > 0 ? " · Cash" : ""}</p>
           </div>
         </div>
       </div>

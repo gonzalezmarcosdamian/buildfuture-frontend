@@ -41,6 +41,7 @@ export default async function Portfolio() {
         mep={mep}
         positions={positions}
         capitalTotalUsd={summary.capital_total_usd ?? null}
+        cashTotalUsd={summary.cash_total_usd ?? null}
       />
 
       <PortfolioClient
