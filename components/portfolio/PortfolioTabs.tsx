@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, ChevronRight, ChevronDown } from "lucide-reac
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
 import { SyncButton } from "@/components/portfolio/SyncButton";
+import type { PositionDelta } from "./PortfolioClient";
 
 interface Position {
   id: number;
@@ -31,12 +32,21 @@ const ARS_DENOMINATED = new Set(["FCI", "LETRA", "ON"]);
 
 export type TabMode = "composicion" | "rendimientos";
 
+const PERIOD_LABELS: Record<string, string> = {
+  daily: "hoy vs ayer",
+  monthly: "último mes",
+  annual: "último año",
+};
+
 interface Props {
   positions: Position[];
   totalUsd: number;
   mep: number;
   activeTab: TabMode;
   connectedProviders?: string[];
+  period?: string;
+  positionDeltas?: PositionDelta[];
+  deltasLoading?: boolean;
 }
 
 // Propósito de cada tipo de activo: renta (flujo mensual) | capital (apreciación)
@@ -149,7 +159,7 @@ function SourceGroupHeader({
   );
 }
 
-export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedProviders = [] }: Props) {
+export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedProviders = [], period = "daily", positionDeltas = [], deltasLoading = false }: Props) {
   const tab = activeTab;
   const { currency } = useCurrency();
   const router = useRouter();
@@ -374,9 +384,25 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
         </div>
       ) : (
         <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
+          {/* Period label — consistent with chart */}
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+              Variación · {PERIOD_LABELS[period] ?? period}
+            </p>
+            {deltasLoading && (
+              <span className="text-[9px] text-slate-600">Cargando…</span>
+            )}
+          </div>
+
           {Object.entries(bySourceRendimientos).map(([source, sourcePositions]) => {
             const collapsed  = !!collapsedSources[`r_${source}`];
             const groupTotal = sourcePositions.reduce((s, p) => s + p.current_value_usd, 0);
+
+            // Build delta lookup for this render
+            const deltaMap = Object.fromEntries(
+              positionDeltas.map((d) => [d.ticker, d])
+            );
+
             return (
               <div key={source}>
                 <SourceGroupHeader
@@ -391,14 +417,22 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                 {!collapsed && (
                   <div className="space-y-3 mt-2">
                     {sourcePositions.map((p) => {
-                      // Para instrumentos ARS (FCI, LETRA, ON): usar rendimiento en ARS.
-                      // Es siempre preciso — no depende del MEP al momento de compra.
-                      // Para instrumentos USD (CEDEAR, ETF, CRYPTO): rendimiento en USD.
-                      const useArs = ARS_DENOMINATED.has(p.asset_type) && p.ppc_ars > 0;
-                      const perfPct = useArs ? p.performance_ars_pct : p.performance_pct;
-                      const positive = perfPct >= 0;
-                      const pnlUsd   = p.current_value_usd - p.cost_basis_usd;
+                      const delta = deltaMap[p.ticker];
                       const weightPct = totalUsd > 0 ? (p.current_value_usd / totalUsd) * 100 : 0;
+
+                      // When period delta is available: use it
+                      // Fallback: desde-compra (performance_pct / pnlUsd)
+                      const hasDelta = !!delta && !deltasLoading;
+                      const useArs = !hasDelta && ARS_DENOMINATED.has(p.asset_type) && p.ppc_ars > 0;
+
+                      const perfPct  = hasDelta
+                        ? delta.delta_pct
+                        : (useArs ? p.performance_ars_pct : p.performance_pct);
+                      const pnlUsd   = hasDelta
+                        ? delta.delta_usd
+                        : (p.current_value_usd - p.cost_basis_usd);
+                      const positive = perfPct >= 0 || pnlUsd >= 0;
+
                       return (
                         <button
                           key={p.id}
@@ -415,8 +449,11 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                                 <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
                                   {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
                                   <span className="font-semibold">{formatPct(perfPct, 1, true)}</span>
-                                  {useArs && (
+                                  {!hasDelta && useArs && (
                                     <span className="text-[9px] text-slate-500 ml-0.5">ARS</span>
+                                  )}
+                                  {!hasDelta && (
+                                    <span className="text-[9px] text-slate-600 ml-0.5">compra</span>
                                   )}
                                 </div>
                                 <p className={`text-[10px] ${positive ? "text-emerald-600" : "text-red-600"}`}>
@@ -434,7 +471,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                           </div>
                           <div className="flex justify-between text-[9px] text-slate-600">
                             <span>{weightPct.toFixed(1)}% del portafolio</span>
-                            <span>{positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)} P&L</span>
+                            <span>{positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)} Δ</span>
                           </div>
                         </button>
                       );

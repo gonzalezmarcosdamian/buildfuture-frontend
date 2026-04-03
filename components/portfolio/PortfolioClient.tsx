@@ -1,11 +1,24 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Info, X, Plus } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { PerformanceChart } from "./PerformanceChart";
 import { PortfolioTabs } from "./PortfolioTabs";
 
 type ViewMode = "composicion" | "rendimientos";
 type InfoModal = "tenencia" | "rendimiento" | null;
+type Period = "daily" | "monthly" | "annual";
+
+export interface PositionDelta {
+  ticker: string;
+  asset_type: string;
+  source: string;
+  value_usd_now: number;
+  value_usd_prev: number;
+  delta_usd: number;
+  delta_pct: number;
+  from_date: string;
+}
 
 interface Position {
   id: number;
@@ -29,7 +42,7 @@ interface Props {
   totalUsd: number;
   mep: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  history: { period: "daily" | "monthly" | "annual"; points: any[]; has_data: boolean };
+  history: { period: Period; points: any[]; has_data: boolean };
   connectedProviders?: string[];
 }
 
@@ -45,24 +58,58 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
     ],
   },
   rendimiento: {
-    title: "¿Cómo se calcula el rendimiento del día?",
+    title: "¿Cómo se calcula el rendimiento del período?",
     items: [
-      "Diferencia entre la tenencia de hoy y la del día anterior.",
-      "Barra verde: el portafolio creció ese día. Roja: bajó.",
-      "LECAPs y FCI: acumulan interés diario (TNA ÷ 365) — casi siempre verde.",
-      "CEDEARs: refleja el movimiento del subyacente en USD (via precio IOL).",
+      "Diferencia de valor de cada posición respecto al inicio del período.",
+      "Diario: vs ayer · Mensual: vs hace 30 días · Anual: vs hace 365 días.",
+      "La barra gris muestra el peso de cada posición en el portafolio total.",
+      "Sin historial aún: la primera vez solo se muestra rendimiento desde compra.",
       "Podés ver los valores en USD 🇺🇸 o ARS 🇦🇷 con el selector de moneda.",
     ],
   },
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export function PortfolioClient({ positions, totalUsd, mep, history, connectedProviders = [] }: Props) {
   const [mode, setMode] = useState<ViewMode>("composicion");
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
+  const [period, setPeriod] = useState<Period>("daily");
+  const [positionDeltas, setPositionDeltas] = useState<PositionDelta[]>([]);
+  const [deltasLoading, setDeltasLoading] = useState(false);
 
   const chartMode = mode === "rendimientos" ? "rendimiento" : "tenencia";
   const activeInfoKey: NonNullable<InfoModal> = mode === "rendimientos" ? "rendimiento" : "tenencia";
   const info = INFO_CONTENT[activeInfoKey];
+
+  const fetchDeltas = useCallback(async (p: Period) => {
+    setDeltasLoading(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const tok = session.session?.access_token;
+      const res = await fetch(`${API_URL}/portfolio/positions/delta?period=${p}`, {
+        headers: tok ? { Authorization: `Bearer ${tok}` } : {},
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      setPositionDeltas(json.positions ?? []);
+    } catch {
+      // silencioso — fallback a desde-compra en PortfolioTabs
+    } finally {
+      setDeltasLoading(false);
+    }
+  }, []);
+
+  // Cargar deltas al entrar en rendimientos o cambiar período
+  useEffect(() => {
+    if (mode === "rendimientos") {
+      fetchDeltas(period);
+    }
+  }, [mode, period, fetchDeltas]);
+
+  function handlePeriodChange(p: Period) {
+    setPeriod(p);
+  }
 
   return (
     <div className="space-y-3">
@@ -111,11 +158,26 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
         </div>
       )}
 
-      {/* Chart — mode controlled externally */}
-      <PerformanceChart initialData={history} mep={mep} chartMode={chartMode} />
+      {/* Chart — period controlled from here */}
+      <PerformanceChart
+        initialData={history}
+        mep={mep}
+        chartMode={chartMode}
+        period={period}
+        onPeriodChange={handlePeriodChange}
+      />
 
-      {/* Assets list — tab controlled externally */}
-      <PortfolioTabs positions={positions} totalUsd={totalUsd} mep={mep} activeTab={mode} connectedProviders={connectedProviders} />
+      {/* Assets list */}
+      <PortfolioTabs
+        positions={positions}
+        totalUsd={totalUsd}
+        mep={mep}
+        activeTab={mode}
+        connectedProviders={connectedProviders}
+        period={period}
+        positionDeltas={positionDeltas}
+        deltasLoading={deltasLoading}
+      />
 
       {/* Agregar posición manual — próximamente */}
       <div className="w-full flex items-center gap-3 p-4 bg-slate-900/30 border border-dashed border-slate-800 rounded-2xl opacity-50 cursor-not-allowed">

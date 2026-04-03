@@ -42,6 +42,8 @@ interface Props {
   initialData: { period: Period; points: HistoryPoint[]; has_data: boolean };
   mep?: number;
   chartMode: ChartMode;
+  period?: Period;
+  onPeriodChange?: (p: Period) => void;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -206,7 +208,7 @@ function RendimientoTooltip({ active, payload, currency, mep }: {
   );
 }
 
-export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) {
+export function PerformanceChart({ initialData, mep = 1430, chartMode, period: periodProp, onPeriodChange }: Props) {
   const mode = chartMode;
   const [period, setPeriod] = useState<Period>(initialData.period);
   const [data, setData] = useState(initialData);
@@ -216,6 +218,7 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
   async function changePeriod(p: Period) {
     if (p === period) return;
     setPeriod(p);
+    onPeriodChange?.(p);
     setLoading(true);
     try {
       const { data: _s } = await supabase.auth.getSession();
@@ -228,9 +231,12 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
     }
   }
 
+  // activePeriod: prefer prop (parent-controlled) over internal state
+  const activePeriod = periodProp ?? period;
+
   // Límites de visualización por período
   const PERIOD_WINDOW: Record<Period, number> = { daily: 14, monthly: 12, annual: 5 };
-  const windowedPoints = data.points.slice(-PERIOD_WINDOW[period]);
+  const windowedPoints = data.points.slice(-PERIOD_WINDOW[activePeriod]);
 
   const chartData: HistoryPoint[] = windowedPoints.map((p) => {
     const toDisplay = (v: number) => currency === "ARS" ? v * mep : v;
@@ -278,7 +284,7 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode }: Props) 
             key={p}
             onClick={() => changePeriod(p)}
             className={`text-[10px] px-2 py-1 rounded-lg transition-colors ${
-              period === p
+              activePeriod === p
                 ? "bg-slate-700 text-slate-100"
                 : "text-slate-500 hover:text-slate-300"
             }`}
