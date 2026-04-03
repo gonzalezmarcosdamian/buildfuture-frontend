@@ -17,7 +17,7 @@ const PROPS = [
   },
   {
     icon: "🤖",
-    title: "Recomendaciones personalizadas",
+    title: "Sugerencias personalizadas",
     desc: "Comité de 4 agentes expertos (Carry, Dolarización, Renta Fija, Diversificación) adaptado a tu perfil de riesgo.",
     color: "border-blue-900/40 bg-blue-950/20",
   },

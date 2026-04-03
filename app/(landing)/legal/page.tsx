@@ -126,7 +126,7 @@ export default function LegalPage() {
       </section>
 
       {/* 4. Cookies */}
-      <section className="space-y-5">
+      <section id="cookies" className="space-y-5">
         <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
           <span className="w-7 h-7 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-sm">🍪</span>
           Política de cookies
@@ -134,6 +134,32 @@ export default function LegalPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 text-[13px] text-slate-400 leading-relaxed">
           <p><strong className="text-slate-200">Cookies funcionales (necesarias):</strong> Gestión de sesión de Supabase Auth. No requieren consentimiento.</p>
           <p><strong className="text-slate-200">Cookies analíticas (opcionales):</strong> Vercel Analytics para métricas de uso anónimas. Podés rechazarlas sin afectar la funcionalidad.</p>
+        </div>
+      </section>
+
+      {/* 5. Historial de versiones */}
+      <section className="space-y-5">
+        <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+          <span className="w-7 h-7 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-sm">📌</span>
+          Historial de versiones
+        </h2>
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+          <table className="w-full text-[12px]">
+            <thead>
+              <tr className="text-slate-500 border-b border-slate-800 text-left">
+                <th className="px-4 py-3">Versión</th>
+                <th className="px-4 py-3">Fecha</th>
+                <th className="px-4 py-3">Cambios</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="text-slate-400">
+                <td className="px-4 py-3 font-semibold text-emerald-400">v1.0 · actual</td>
+                <td className="px-4 py-3 whitespace-nowrap">Abril 2026</td>
+                <td className="px-4 py-3">Versión inicial — términos, privacidad, disclaimer CNV y política de cookies.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
