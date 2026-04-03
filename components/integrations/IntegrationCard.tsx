@@ -4,6 +4,7 @@ import { CheckCircle2, XCircle, RefreshCw, Loader2, Unplug, AlertTriangle, Zap }
 import { ConnectIOLForm } from "./ConnectIOLForm";
 import { ConnectPPIForm } from "./ConnectPPIForm";
 import { ConnectCocosForm, CocosSyncModal } from "./ConnectCocosForm";
+import { ConnectBinanceForm } from "./ConnectBinanceForm";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -24,6 +25,11 @@ const providerMeta: Record<string, { label: string; description: string; color: 
     label: "Cocos Capital",
     description: "Acciones, CEDEARs, bonos, FCI",
     color: "text-orange-400",
+  },
+  BINANCE: {
+    label: "Binance",
+    description: "Crypto spot (read-only)",
+    color: "text-yellow-400",
   },
 };
 
@@ -244,6 +250,8 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
           <ConnectPPIForm onSuccess={handleConnected} />
         ) : isCocos ? (
           <ConnectCocosForm onSuccess={() => { handleConnected(); setAutoSync(integration.auto_sync_enabled); }} />
+        ) : integration.provider === "BINANCE" ? (
+          <ConnectBinanceForm onSuccess={handleConnected} />
         ) : (
           <p className="text-xs text-slate-600 italic">Próximamente</p>
         )}

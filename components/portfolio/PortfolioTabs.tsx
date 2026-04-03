@@ -77,19 +77,20 @@ const ASSET_BADGES: Record<string, string> = {
   CASH:   "bg-slate-700 text-slate-300",
 };
 
-// Solo ALYCs regulados — NEXO es exchange crypto, distinto contexto
 const SOURCE_BADGES: Record<string, string> = {
-  IOL:    "bg-blue-900/60 text-blue-400",
-  PPI:    "bg-purple-900/60 text-purple-400",
-  COCOS:  "bg-orange-900/60 text-orange-400",
-  MANUAL: "bg-slate-700/60 text-slate-400",
+  IOL:     "bg-blue-900/60 text-blue-400",
+  PPI:     "bg-purple-900/60 text-purple-400",
+  COCOS:   "bg-orange-900/60 text-orange-400",
+  BINANCE: "bg-yellow-900/60 text-yellow-400",
+  MANUAL:  "bg-slate-700/60 text-slate-400",
 };
 
 const SOURCE_LABELS: Record<string, string> = {
-  IOL:    "InvertirOnline",
-  PPI:    "Portfolio Personal",
-  COCOS:  "Cocos Capital",
-  MANUAL: "Manual",
+  IOL:     "InvertirOnline",
+  PPI:     "Portfolio Personal",
+  COCOS:   "Cocos Capital",
+  BINANCE: "Binance",
+  MANUAL:  "Manual",
 };
 
 const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" };

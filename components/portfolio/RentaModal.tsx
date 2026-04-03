@@ -119,6 +119,20 @@ function RentaModal({ mep, onClose }: Props & { onClose: () => void }) {
               <div className="text-slate-600 mt-1">Historial S&amp;P 500 ~10% anual USD → aparece en proyección</div>
             </div>
           </div>
+
+          <div className="bg-slate-800/50 rounded-xl p-3.5 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold text-yellow-400 bg-yellow-900/40 px-1.5 py-0.5 rounded">CRYPTO</span>
+              <span className="text-[11px] text-slate-300 font-medium">Bitcoin, ETH y otros</span>
+            </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Activo especulativo de alto riesgo. No genera cupón ni cuotaparte — va al bucket capital.
+              <span className="text-yellow-500 font-medium"> No suma a la barra de libertad financiera.</span>
+            </p>
+            <div className="bg-slate-900 rounded-lg p-2.5 font-mono text-[10px] text-slate-500">
+              BTC, ETH → bucket capital · no afectan la barra de renta
+            </div>
+          </div>
         </div>
 
         {/* ── Resumen ─────────────────────────────────────────── */}
