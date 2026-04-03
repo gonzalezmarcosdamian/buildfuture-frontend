@@ -1,8 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// /auth/ cubre el callback PKCE y el formulario de reset-password
-const PUBLIC_PATHS = ["/login", "/auth/"];
+// Rutas públicas: landing (/), legal (/legal), auth (/login, /auth/)
+const PUBLIC_PATHS = ["/login", "/auth/", "/legal"];
+const PUBLIC_EXACT = ["/"];
+
+function isPublic(pathname: string): boolean {
+  if (PUBLIC_EXACT.includes(pathname)) return true;
+  return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+}
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -31,7 +37,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // If not logged in and trying to access protected route, redirect to login
-  if (!user && !PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+  if (!user && !isPublic(pathname)) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
