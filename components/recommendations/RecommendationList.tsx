@@ -24,6 +24,9 @@ interface Rec {
   rationale: string;
   why_now: string;
   annual_yield_pct: number;
+  yield_range_low?: number;
+  yield_range_high?: number;
+  yield_label?: string;
   risk_level: string;
   currency: string;
   amount_ars: number;
@@ -73,6 +76,17 @@ const JOB_META: Record<string, { icon: string; label: string; sublabel: string; 
   capital: { icon: "📈", label: "Para acumular capital", sublabel: "Crecimiento dolarizado a largo plazo", color: "text-blue-400"    },
 };
 
+// ── Yield range formatter ──────────────────────────────────────────────────────
+
+function fmtRange(low: number, high: number, label: string, isCapital: boolean): { range: string; label: string } {
+  const pct = (v: number) => `${Math.round(v * 100)}%`;
+  const prefix = isCapital && low > 0 ? "+" : "";
+  return {
+    range: `${prefix}${pct(low)} – ${prefix}${pct(high)}`,
+    label,
+  };
+}
+
 // ── Logo con fallback a iniciales ──────────────────────────────────────────────
 
 function InstrumentLogo({ ticker, logoUrl }: { ticker: string; logoUrl?: string }) {
@@ -118,9 +132,12 @@ const RISK_DESCRIPTION: Record<string, string> = {
 
 function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
   if (typeof document === "undefined") return null;
-  const yieldPct   = (rec.annual_yield_pct * 100).toFixed(2);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
   const isCapital  = rec.job === "capital";
+  const hasRange   = rec.yield_range_low !== undefined && rec.yield_range_high !== undefined;
+  const rangeData  = hasRange
+    ? fmtRange(rec.yield_range_low!, rec.yield_range_high!, rec.yield_label ?? "", isCapital)
+    : null;
 
   const modal = (
     <div
@@ -157,16 +174,24 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
           </div>
         </div>
 
-        {/* Yield + risk */}
+        {/* Yield / range + risk */}
         <div className="flex items-center gap-3">
-          <p className="text-3xl font-bold text-emerald-400">{yieldPct}%</p>
-          <div className="space-y-1">
-            <p className="text-[10px] text-slate-600">{rec.currency}/año</p>
-            <span className={`flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full border w-fit ${riskColor[rec.risk_level]}`}>
-              {riskIcon[rec.risk_level]}
-              <span className="ml-0.5 capitalize">{rec.risk_level}</span>
-            </span>
-          </div>
+          {rangeData ? (
+            <div>
+              <p className={`text-2xl font-bold leading-tight tabular-nums ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
+                {rangeData.range}
+              </p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{rangeData.label}</p>
+            </div>
+          ) : (
+            <p className="text-3xl font-bold text-emerald-400">
+              {(rec.annual_yield_pct * 100).toFixed(1)}%
+            </p>
+          )}
+          <span className={`flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full border w-fit ${riskColor[rec.risk_level]}`}>
+            {riskIcon[rec.risk_level]}
+            <span className="ml-0.5 capitalize">{rec.risk_level}</span>
+          </span>
         </div>
 
         {/* Capital → retorno */}
@@ -181,7 +206,9 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
             {isCapital ? (
               <>
                 <p className="text-[10px] text-slate-500">Apreciación estimada</p>
-                <p className="text-sm font-semibold text-blue-400">+{yieldPct}% USD/año</p>
+                <p className="text-sm font-semibold text-blue-400">
+                  {rangeData ? rangeData.range : `+${(rec.annual_yield_pct * 100).toFixed(1)}%`} USD/año
+                </p>
               </>
             ) : (
               <>
@@ -228,9 +255,12 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
 // ── Card ───────────────────────────────────────────────────────────────────────
 
 function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
-  const yieldPct   = (rec.annual_yield_pct * 100).toFixed(2);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
   const isCapital  = rec.job === "capital";
+  const hasRange   = rec.yield_range_low !== undefined && rec.yield_range_high !== undefined;
+  const rangeData  = hasRange
+    ? fmtRange(rec.yield_range_low!, rec.yield_range_high!, rec.yield_label ?? "", isCapital)
+    : null;
 
   return (
     <div className="snap-center shrink-0 w-[58vw] max-w-[210px] rounded-2xl border bg-slate-900 border-slate-800 flex flex-col">
@@ -259,17 +289,33 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
           </div>
         </div>
 
-        {/* Yield */}
-        <div className="flex items-end gap-1.5">
-          <p className={`text-2xl font-bold leading-none ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
-            {yieldPct}%
-          </p>
-          <div className="pb-0.5">
-            <p className="text-[9px] text-slate-600 leading-none">{rec.currency}/año</p>
-            <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit mt-0.5 ${riskColor[rec.risk_level]}`}>
-              {riskIcon[rec.risk_level]}
-            </span>
-          </div>
+        {/* Yield / range */}
+        <div className="space-y-0.5">
+          {rangeData ? (
+            <>
+              <p className={`text-base font-bold leading-tight tabular-nums ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
+                {rangeData.range}
+              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-[9px] text-slate-600 leading-none">{rangeData.label}</p>
+                <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit ${riskColor[rec.risk_level]}`}>
+                  {riskIcon[rec.risk_level]}
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-end gap-1.5">
+              <p className={`text-2xl font-bold leading-none ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
+                {(rec.annual_yield_pct * 100).toFixed(1)}%
+              </p>
+              <div className="pb-0.5">
+                <p className="text-[9px] text-slate-600 leading-none">{rec.currency}/año</p>
+                <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit mt-0.5 ${riskColor[rec.risk_level]}`}>
+                  {riskIcon[rec.risk_level]}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Retorno */}
@@ -284,7 +330,9 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
             {isCapital ? (
               <>
                 <p className="text-[9px] text-slate-500">Apreciación</p>
-                <p className="text-[11px] font-semibold text-blue-400">+{yieldPct}%/año</p>
+                <p className="text-[11px] font-semibold text-blue-400">
+                  {rangeData ? rangeData.range : `+${(rec.annual_yield_pct * 100).toFixed(1)}%`}/año
+                </p>
               </>
             ) : (
               <>
