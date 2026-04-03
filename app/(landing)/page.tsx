@@ -702,17 +702,7 @@ const METRICAS = [
 function SectionFounder() {
   return (
     <section className="py-24 bg-slate-900/40 border-t border-slate-800/60">
-      <div className="max-w-6xl mx-auto px-5 space-y-16">
-
-        {/* Métricas */}
-        <div className="grid grid-cols-3 gap-4 sm:gap-8">
-          {METRICAS.map((m) => (
-            <div key={m.label} className="text-center space-y-1">
-              <p className="text-2xl sm:text-4xl font-extrabold text-emerald-400 tabular-nums">{m.valor}</p>
-              <p className="text-[11px] sm:text-xs text-slate-500">{m.label}</p>
-            </div>
-          ))}
-        </div>
+      <div className="max-w-6xl mx-auto px-5">
 
         {/* Founder */}
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -726,7 +716,7 @@ function SectionFounder() {
                 <span className="text-emerald-400"> ¿cuándo puedo ser libre?</span>&rdquo;
               </p>
               <p className="text-slate-400 leading-relaxed">
-                Soy Marcos González. PM de productos financieros en Ualá, Ingeniero Industrial,
+                Soy Marcos Damian González. PM de productos financieros en Ualá, Ingeniero Industrial,
                 inversor activo desde hace 6 años en LECAPs, CEDEARs, bonos y cripto.
                 Trabajo en fintech de día y construyo BuildFuture de noche porque creo que
                 Argentina necesita esta herramienta.
