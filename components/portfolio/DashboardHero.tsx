@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Lock, CheckCircle2, ChevronDown, ChevronUp, Flame } from "lucide-react";
+import { Lock, CheckCircle2, ChevronDown, ChevronUp, Flame, ChevronRight, Info, X } from "lucide-react";
 import Link from "next/link";
 import { useCurrency } from "@/lib/currency-context";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
@@ -40,9 +40,6 @@ interface Props {
   portfolioTotal: number;
   portfolioTotalArs?: number | null;
   mep: number;
-  capitalTotalUsd?: number | null;
-  rentaTotalUsd?: number | null;
-  cryptoTotalUsd?: number | null;
   cedearTotalUsd?: number | null;
   streak?: StreakData | null;
 }
@@ -180,17 +177,96 @@ function GoalRow({ item, fmt }: { item: CoverItem; fmt: (n: number) => string })
   );
 }
 
+// ── HeroInfoSheet ──────────────────────────────────────────────────────────────
+
+function HeroInfoSheet({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
+      <div
+        className="bg-slate-950 rounded-t-3xl border-t border-slate-800 max-h-[85vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-slate-950 pt-3 pb-2 px-5 border-b border-slate-800/60">
+          <div className="w-10 h-1 bg-slate-700 rounded-full mx-auto mb-3" />
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-slate-100">¿Qué miden las barras?</p>
+            <button onClick={onClose} className="text-slate-500 hover:text-slate-300">
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="px-5 py-5 space-y-6 pb-10">
+
+          {/* Renta */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl bg-emerald-950/60 border border-emerald-900/50 flex items-center justify-center text-sm">💰</div>
+              <p className="text-sm font-semibold text-slate-200">Barra de Renta</p>
+            </div>
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Muestra qué porcentaje de tus gastos mensuales ya cubrís con los <span className="text-slate-200 font-medium">rendimientos de tus instrumentos de renta</span> (LECAPs, FCIs, Bonos, ONs).
+              </p>
+              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full w-3/5 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400" />
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Al llegar al <span className="text-emerald-400 font-semibold">100%</span>, tus rendimientos mensuales cubren todos tus gastos. Ese es el momento de libertad financiera por renta.
+              </p>
+              <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl px-3 py-2">
+                <p className="text-[10px] text-slate-400 leading-snug">
+                  💡 Configurá tu presupuesto en <span className="text-emerald-400">Metas →</span> para que la barra sea precisa.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Capital */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl bg-violet-950/60 border border-violet-900/50 flex items-center justify-center text-sm">📈</div>
+              <p className="text-sm font-semibold text-slate-200">Barra de Capital</p>
+            </div>
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Mide tus <span className="text-slate-200 font-medium">CEDEARs y ETFs</span> contra el objetivo de libertad financiera calculado con la <span className="text-slate-200 font-medium">Regla del 4%</span>.
+              </p>
+              <div className="bg-slate-800/60 rounded-xl px-3 py-2.5 space-y-1.5">
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider">Regla del 4%</p>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  Si acumulás <span className="text-violet-400 font-semibold">25 veces tus gastos anuales</span> en capital, podés retirar el 4% cada año indefinidamente sin agotar el fondo.
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  Objetivo = gastos/mes × 12 × 25
+                </p>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Solo cuentan CEDEARs/ETFs — activos de crecimiento dolarizado. Los bonos y ONs van a tu barra de Renta.
+              </p>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── SegmentedBar ───────────────────────────────────────────────────────────────
 
-function SegmentedBar({ pct, color, label, sublabel }: {
-  pct: number; color: string; label: string; sublabel: string;
+function SegmentedBar({ pct, color, label, sublabel, href }: {
+  pct: number; color: string; label: string; sublabel: string; href?: string;
 }) {
   const clamped = Math.min(Math.max(pct, 0), 100);
-  return (
-    <div className="space-y-1.5">
+  const inner = (
+    <div className={`space-y-1.5 ${href ? "group" : ""}`}>
       <div className="flex items-center justify-between">
-        <p className="text-[11px] text-slate-300 font-medium">{label}</p>
-        <p className="text-[11px] font-bold text-slate-200">{Math.round(clamped)}%</p>
+        <p className="text-[11px] text-slate-300 font-medium group-hover:text-slate-100 transition-colors">{label}</p>
+        <div className="flex items-center gap-1">
+          <p className="text-[11px] font-bold text-slate-200">{Math.round(clamped)}%</p>
+          {href && <ChevronRight size={11} className="text-slate-600 group-hover:text-slate-400 transition-colors" />}
+        </div>
       </div>
       <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${Math.max(clamped, 0.5)}%` }} />
@@ -198,17 +274,19 @@ function SegmentedBar({ pct, color, label, sublabel }: {
       <p className="text-[10px] text-slate-500">{sublabel}</p>
     </div>
   );
+  if (href) return <Link href={href} className="block">{inner}</Link>;
+  return inner;
 }
 
 // ── DashboardHero ──────────────────────────────────────────────────────────────
 
 export function DashboardHero({
   monthlyReturn, monthlyExpenses, covers, portfolioTotal,
-  portfolioTotalArs, mep, capitalTotalUsd, rentaTotalUsd,
-  cryptoTotalUsd, cedearTotalUsd, streak,
+  portfolioTotalArs, mep, cedearTotalUsd, streak,
 }: Props) {
   const { currency } = useCurrency();
   const [coversOpen, setCoversOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const fmt = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
   const fmtTotal = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(portfolioTotalArs ?? usd * mep);
@@ -222,11 +300,9 @@ export function DashboardHero({
   const freedomTarget = monthlyExpenses * 12 * 25;
   const capitalPct = freedomTarget > 0 ? (pureCapital / freedomTarget) * 100 : 0;
 
-  // Bonos/ONs = 50% del bucket capital que no son CEDEARs ni crypto
-  const bondCapital = Math.max(0, (capitalTotalUsd ?? 0) - pureCapital - (cryptoTotalUsd ?? 0));
-  const hasBuckets = (rentaTotalUsd ?? 0) > 0 || pureCapital > 0 || (cryptoTotalUsd ?? 0) > 0 || bondCapital > 0;
-
   return (
+    <>
+    {infoOpen && <HeroInfoSheet onClose={() => setInfoOpen(false)} />}
     <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
 
       {/* ── Total + streak ───────────────────────────────────────────────────── */}
@@ -245,7 +321,16 @@ export function DashboardHero({
             </div>
           )}
         </div>
-        <CurrencyToggle />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setInfoOpen(true)}
+            className="text-slate-600 hover:text-slate-400 transition-colors p-1"
+            aria-label="Explicación de las barras"
+          >
+            <Info size={15} />
+          </button>
+          <CurrencyToggle />
+        </div>
       </div>
 
       {/* ── Barras segmentadas ───────────────────────────────────────────────── */}
@@ -259,6 +344,7 @@ export function DashboardHero({
               ? `${coveredCount}/${covers.length} categorías cubiertas · meta ${fmt(monthlyExpenses)}/mes`
               : "Configurá tu presupuesto para ver el progreso"
           }
+          href="/budget"
         />
         <SegmentedBar
           pct={capitalPct}
@@ -269,38 +355,9 @@ export function DashboardHero({
               ? `Objetivo libertad: ${fmtCompact(freedomTarget, currency, mep)} (regla 4%)`
               : "Configurá tu presupuesto para calcular el objetivo"
           }
+          href="/goals"
         />
       </div>
-
-      {/* ── Breakdown de buckets ─────────────────────────────────────────────── */}
-      {hasBuckets && (
-        <div className="px-5 pb-3 flex flex-wrap gap-x-3 gap-y-1 border-t border-slate-800/40 pt-2.5">
-          {(rentaTotalUsd ?? 0) > 0 && (
-            <span className="text-[10px] text-slate-500">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 align-middle" />
-              Renta <span className="text-emerald-400 font-medium">{fmtCompact(rentaTotalUsd!, currency, mep)}</span>
-            </span>
-          )}
-          {pureCapital > 0 && (
-            <span className="text-[10px] text-slate-500">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-violet-500 mr-1 align-middle" />
-              CEDEARs <span className="text-violet-400 font-medium">{fmtCompact(pureCapital, currency, mep)}</span>
-            </span>
-          )}
-          {bondCapital > 0 && (
-            <span className="text-[10px] text-slate-500">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 mr-1 align-middle" />
-              Bonos/ONs <span className="text-orange-400 font-medium">{fmtCompact(bondCapital, currency, mep)}</span>
-            </span>
-          )}
-          {(cryptoTotalUsd ?? 0) > 0 && (
-            <span className="text-[10px] text-slate-500">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-yellow-500 mr-1 align-middle" />
-              Crypto <span className="text-yellow-400 font-medium">{fmtCompact(cryptoTotalUsd!, currency, mep)}</span>
-            </span>
-          )}
-        </div>
-      )}
 
       {/* ── Categorías de presupuesto: colapsadas ───────────────────────────── */}
       {covers.length > 0 && (
@@ -323,5 +380,6 @@ export function DashboardHero({
       {/* ── Metas de capital largo plazo ────────────────────────────────────── */}
       <CapitalGoalsMini mep={mep} />
     </div>
+    </>
   );
 }

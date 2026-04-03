@@ -66,9 +66,6 @@ export default async function Dashboard() {
         portfolioTotal={score.portfolio_total_usd}
         portfolioTotalArs={portfolio?.summary?.total_ars ?? null}
         mep={mep}
-        capitalTotalUsd={portfolio?.summary?.capital_total_usd ?? score.capital_total_usd ?? null}
-        rentaTotalUsd={portfolio?.summary?.renta_total_usd ?? null}
-        cryptoTotalUsd={portfolio?.summary?.crypto_total_usd ?? null}
         cedearTotalUsd={portfolio?.summary?.cedear_total_usd ?? null}
         streak={gamification.streak ?? null}
       />

@@ -44,6 +44,25 @@ function fmtFull(usd: number): string {
 const YEARS = [1, 3, 5, 10];
 const GOAL_COLORS = ["#a78bfa", "#f472b6", "#fb923c", "#34d399", "#60a5fa"];
 
+function computePoints(
+  current: number,
+  monthly: number,
+  annualRate: number,
+  maxYear: number,
+): ProjectionPoint[] {
+  const r = annualRate / 12;
+  const pts: ProjectionPoint[] = [];
+  for (let y = 1; y <= maxYear; y++) {
+    const n = y * 12;
+    const withSavings = r > 0
+      ? current * Math.pow(1 + r, n) + monthly * (Math.pow(1 + r, n) - 1) / r
+      : current + monthly * n;
+    const withoutSavings = r > 0 ? current * Math.pow(1 + r, n) : current;
+    pts.push({ year: y, with_savings_usd: withSavings, without_savings_usd: withoutSavings, label: `Año ${y}` });
+  }
+  return pts;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -272,6 +291,7 @@ export function ProjectionCard() {
   const [horizon, setHorizon] = useState(10);
   const [showInfo, setShowInfo] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [customRatePct, setCustomRatePct] = useState(8.0);
 
   useEffect(() => {
     async function load() {
@@ -302,18 +322,19 @@ export function ProjectionCard() {
     </div>
   );
 
-  const chartPoints = data.points.filter((p) => p.year <= horizon);
+  const allPoints = computePoints(data.current_usd, data.monthly_savings_usd, customRatePct / 100, 10);
+  const chartPoints = allPoints.filter((p) => p.year <= horizon);
   const last = chartPoints[chartPoints.length - 1];
   const extra = last.with_savings_usd - last.without_savings_usd;
-  const yieldPct = (data.annual_return_pct * 100).toFixed(2);
+  const yieldPct = customRatePct.toFixed(1);
 
   const maxChartValue = last.with_savings_usd;
   const visibleGoals = goals.filter(
     (g) => g.target_usd > data.current_usd && g.target_usd <= maxChartValue * 1.05
   );
 
-  const pt10full = data.points.find((p) => p.year === 10);
-  const val10 = pt10full?.with_savings_usd ?? 0;
+  const allPts10 = computePoints(data.current_usd, data.monthly_savings_usd, customRatePct / 100, 10);
+  const val10 = allPts10[allPts10.length - 1]?.with_savings_usd ?? 0;
 
   return (
     <>
@@ -340,15 +361,35 @@ export function ProjectionCard() {
         {expanded && <div className="px-4 pb-4 space-y-4 border-t border-slate-800/60 pt-3">
 
         {/* Header */}
-        <div>
-          <p className="text-sm font-semibold text-slate-100">
-            Si seguís invirtiendo ${data.monthly_savings_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD/mes
-          </p>
-          <p className="text-[11px] text-slate-500 mt-0.5">
-            En {horizon} años tenés{" "}
-            <span className="text-emerald-400 font-semibold">{fmtK(extra)} más</span>
-            {" "}que si no aportás nada
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-100">
+              Si seguís invirtiendo ${data.monthly_savings_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD/mes
+            </p>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              En {horizon} años tenés{" "}
+              <span className="text-emerald-400 font-semibold">{fmtK(extra)} más</span>
+              {" "}que si no aportás nada
+            </p>
+          </div>
+          {/* Tasa editable */}
+          <div className="flex flex-col items-end shrink-0">
+            <p className="text-[9px] text-slate-600 uppercase tracking-wider mb-1">Rendimiento</p>
+            <div className="flex items-center gap-0.5 bg-slate-800 rounded-lg px-1.5 py-1">
+              <button
+                onClick={() => setCustomRatePct((v) => Math.max(1, Math.round((v - 0.5) * 10) / 10))}
+                className="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors text-base leading-none"
+              >−</button>
+              <span className="text-[12px] font-bold text-blue-400 tabular-nums w-10 text-center">
+                {yieldPct}%
+              </span>
+              <button
+                onClick={() => setCustomRatePct((v) => Math.min(30, Math.round((v + 0.5) * 10) / 10))}
+                className="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors text-base leading-none"
+              >+</button>
+            </div>
+            <p className="text-[9px] text-slate-700 mt-0.5">anual USD</p>
+          </div>
         </div>
 
         {/* Selector de horizonte */}
