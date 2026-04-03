@@ -66,7 +66,7 @@ export function PortfolioHeader({
   const hint  = currency === "USD" ? `≈ ${formatARS(totalArsDisplay)}` : `≈ ${formatUSD(totalUsd)}`;
 
   return (
-    <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
+    <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden bf-card-elevated">
       {/* ── Total + toggle ─────────────────────────────── */}
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-1.5 mb-0.5">
@@ -86,7 +86,7 @@ export function PortfolioHeader({
             <RentaInfoButton mep={mep} />
           </div>
           <div className="flex items-end gap-1">
-            <span className="text-lg font-bold text-emerald-400">{fmt(monthlyReturnUsd)}</span>
+            <span className="text-lg font-bold text-bf-renta">{fmt(monthlyReturnUsd)}</span>
             <span className="text-[10px] text-bf-text-3 pb-0.5">/mes</span>
           </div>
         </div>
@@ -94,18 +94,18 @@ export function PortfolioHeader({
         <div className="px-5 pb-3 grid grid-cols-2 gap-3">
           <div className="bg-bf-surface-2/40 rounded-xl px-3 py-2 text-center">
             <p className="text-[9px] text-bf-text-3 mb-0.5">Renta / año</p>
-            <p className="text-sm font-semibold text-emerald-400">{fmt(monthlyReturnUsd * 12)}</p>
+            <p className="text-sm font-semibold text-bf-renta">{fmt(monthlyReturnUsd * 12)}</p>
           </div>
           <div className="bg-bf-surface-2/40 rounded-xl px-3 py-2 text-center">
             <p className="text-[9px] text-bf-text-3 mb-0.5">Cobertura gastos</p>
-            <p className="text-sm font-semibold text-blue-400">{formatPct(freedomPct)}</p>
+            <p className="text-sm font-semibold text-bf-capital">{formatPct(freedomPct)}</p>
           </div>
         </div>
 
         {/* Desglose fija vs estimada */}
         {monthlyRentaFija > 0.01 && (
           <div className="px-5 pb-3 flex gap-3">
-            <span className="text-[9px] text-emerald-700">
+            <span className="text-[9px] text-bf-renta/70">
               {fmt(monthlyRentaFija)} renta fija (LECAP/FCI)
             </span>
             {annualReturnPct > 0 && (
@@ -125,7 +125,7 @@ export function PortfolioHeader({
             <p className="text-[10px] text-bf-text-3 uppercase tracking-wider font-semibold">Capital acumulado</p>
           </div>
           <div className="text-right">
-            <p className="text-lg font-bold text-violet-300">{fmt(capitalUsd)}</p>
+            <p className="text-lg font-bold text-bf-capital">{fmt(capitalUsd)}</p>
             <p className="text-[9px] text-bf-text-4">CEDEARs · ETFs · Crypto{cashUsd > 0 ? " · Cash" : ""}</p>
           </div>
         </div>

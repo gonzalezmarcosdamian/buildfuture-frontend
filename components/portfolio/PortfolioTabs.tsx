@@ -79,20 +79,21 @@ const ASSET_COLORS: Record<string, string> = {
 };
 
 const ASSET_BADGES: Record<string, string> = {
-  CEDEAR: "bg-blue-900 text-blue-300",
-  BOND:   "bg-purple-900 text-purple-300",
-  LETRA:  "bg-yellow-900 text-yellow-300",
-  CRYPTO: "bg-orange-900 text-orange-300",
-  FCI:    "bg-green-900 text-green-300",
-  CASH:   "bg-bf-surface-3 text-bf-text-2",
+  CEDEAR: "bf-chip-cedear",
+  BOND:   "bf-chip-bond",
+  LETRA:  "bf-chip-letra",
+  CRYPTO: "bf-chip-crypto",
+  FCI:    "bf-chip-fci",
+  ETF:    "bf-chip-etf",
+  CASH:   "bf-chip-cash",
 };
 
 const SOURCE_BADGES: Record<string, string> = {
-  IOL:     "bg-blue-900/60 text-blue-400",
-  PPI:     "bg-purple-900/60 text-purple-400",
-  COCOS:   "bg-orange-900/60 text-orange-400",
-  BINANCE: "bg-yellow-900/60 text-yellow-400",
-  MANUAL:  "bg-bf-surface-3/60 text-bf-text-3",
+  IOL:     "bf-chip-iol",
+  PPI:     "bf-chip-ppi",
+  COCOS:   "bf-chip-cocos",
+  BINANCE: "bf-chip-binance",
+  MANUAL:  "bf-chip-manual",
 };
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -132,7 +133,7 @@ function SourceGroupHeader({
   currency: "USD" | "ARS";
   onToggle: () => void;
 }) {
-  const badgeCls = SOURCE_BADGES[source] ?? "bg-bf-surface-3/60 text-bf-text-3";
+  const badgeCls = SOURCE_BADGES[source] ?? "bf-chip-manual";
   const label    = SOURCE_LABELS[source] ?? source;
   const flag     = FLAG[currency];
   return (
@@ -235,24 +236,24 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
 
           {/* Subtotales renta vs capital */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl px-3 py-2">
+            <div className="bg-bf-gain-dim border border-bf-gain/20 rounded-xl px-3 py-2">
               <div className="flex items-center gap-1 mb-0.5">
                 <span className="text-sm leading-none">💰</span>
-                <p className="text-[10px] text-emerald-400 font-medium">Renta mensual</p>
+                <p className="text-[10px] text-bf-renta font-medium">Renta mensual</p>
               </div>
-              <p className="text-xs font-semibold text-bf-text-2">
+              <p className="text-xs font-semibold text-bf-text">
                 +{FLAG[currency]} {fmt(rentaMonthly)}/mes
               </p>
               <p className="text-[10px] text-bf-text-3">
                 {totalUsd > 0 ? ((rentaTotal / totalUsd) * 100).toFixed(0) : 0}% del portafolio
               </p>
             </div>
-            <div className="bg-blue-950/20 border border-blue-900/30 rounded-xl px-3 py-2">
+            <div className="bg-bf-surface-2 border border-bf-border rounded-xl px-3 py-2">
               <div className="flex items-center gap-1 mb-0.5">
                 <span className="text-sm leading-none">📈</span>
-                <p className="text-[10px] text-blue-400 font-medium">Capital USD</p>
+                <p className="text-[10px] text-bf-capital font-medium">Capital USD</p>
               </div>
-              <p className="text-xs font-semibold text-bf-text-2">
+              <p className="text-xs font-semibold text-bf-text">
                 {FLAG[currency]} {fmt(capitalTotal)}
               </p>
               <p className="text-[10px] text-bf-text-3">
@@ -272,7 +273,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                       className="w-2 h-2 rounded-full shrink-0"
                       style={{ backgroundColor: ASSET_COLORS[type] || "#64748b" }}
                     />
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[type] || "bg-bf-surface-3 text-bf-text-2"}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-normal ${ASSET_BADGES[type] || "bf-chip-cash"}`}>
                       {type}
                     </span>
                   </div>
@@ -446,7 +447,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                             </div>
                             <div className="flex items-center gap-1">
                               <div className="text-right">
-                                <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-emerald-400" : "text-red-400"}`}>
+                                <div className={`flex items-center gap-0.5 text-xs ${positive ? "text-bf-gain" : "text-bf-loss"}`}>
                                   {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
                                   <span className="font-semibold">{formatPct(perfPct, 1, true)}</span>
                                   {!hasDelta && useArs && (
