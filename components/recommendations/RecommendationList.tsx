@@ -1,8 +1,12 @@
 "use client";
 import { supabase } from "@/lib/supabase";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { RefreshCw, Shield, TrendingUp, Zap, X, Info } from "lucide-react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
+
+// ── Types ──────────────────────────────────────────────────────────────────────
 
 interface AgentSignal {
   agent: string;
@@ -11,36 +15,32 @@ interface AgentSignal {
 }
 
 interface Rec {
-  rank: number;
   ticker: string;
   name: string;
   asset_type: string;
-  job: string;          // "renta" | "capital" | "ambos"
+  job: string;               // "renta" | "capital" | "ambos"
+  recommended_for: string[]; // ["conservador", "moderado", ...]
+  logo_url: string;
   rationale: string;
   why_now: string;
   annual_yield_pct: number;
   risk_level: string;
   currency: string;
-  allocation_pct: number;
   amount_ars: number;
   amount_usd: number;
   monthly_return_usd: number;
-  is_hero: boolean;
+  score: number;
   agents_agreed?: AgentSignal[];
 }
 
-interface RecsData {
-  generated_at: string;
-  valid_until: string;
+interface SectionsData {
+  renta: Rec[];
+  capital: Rec[];
   context_summary: string;
-  recommendations: Rec[];
+  generated_at: string;
 }
 
-const RISK_PROFILES = [
-  { id: "conservador", label: "Conservador" },
-  { id: "moderado",    label: "Moderado"    },
-  { id: "agresivo",    label: "Agresivo"    },
-];
+// ── Visual maps ────────────────────────────────────────────────────────────────
 
 const riskIcon: Record<string, React.ReactNode> = {
   bajo:  <Shield size={9} />,
@@ -54,6 +54,12 @@ const riskColor: Record<string, string> = {
   alto:  "text-red-400 bg-red-950/40 border-red-900/60",
 };
 
+const profileColor: Record<string, string> = {
+  conservador: "text-emerald-400 border-emerald-800/50",
+  moderado:    "text-yellow-400 border-yellow-800/50",
+  agresivo:    "text-red-400 border-red-800/50",
+};
+
 const assetBg: Record<string, string> = {
   LETRA:  "bg-purple-950/50 border-purple-800/40 text-purple-300",
   CEDEAR: "bg-blue-950/50 border-blue-800/40 text-blue-300",
@@ -62,12 +68,34 @@ const assetBg: Record<string, string> = {
   FCI:    "bg-indigo-950/50 border-indigo-800/40 text-indigo-300",
 };
 
-// Metadatos por propósito
 const JOB_META: Record<string, { icon: string; label: string; sublabel: string; color: string }> = {
-  renta:   { icon: "💰", label: "Para renta mensual",   sublabel: "Generan flujo en los próximos 30 días", color: "text-emerald-400" },
-  capital: { icon: "📈", label: "Para acumular capital", sublabel: "Crecimiento dolarizado a largo plazo",  color: "text-blue-400"    },
-  ambos:   { icon: "⚖️", label: "Renta + capital",       sublabel: "Cupón mensual y apreciación en USD",   color: "text-violet-400"  },
+  renta:   { icon: "💰", label: "Para tu renta",        sublabel: "Flujo periódico en ARS o USD",          color: "text-emerald-400" },
+  capital: { icon: "📈", label: "Para acumular capital", sublabel: "Crecimiento dolarizado a largo plazo", color: "text-blue-400"    },
 };
+
+// ── Logo con fallback a iniciales ──────────────────────────────────────────────
+
+function InstrumentLogo({ ticker, logoUrl }: { ticker: string; logoUrl?: string }) {
+  const [err, setErr] = useState(false);
+  if (logoUrl && !err) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={logoUrl}
+        alt={ticker}
+        onError={() => setErr(true)}
+        className="w-8 h-8 rounded-full bg-slate-800 object-contain p-0.5 shrink-0"
+      />
+    );
+  }
+  return (
+    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 shrink-0">
+      {ticker.slice(0, 2)}
+    </div>
+  );
+}
+
+// ── Conviction bar ─────────────────────────────────────────────────────────────
 
 function convictionBar(conviction: number) {
   const pct = Math.round(conviction * 100);
@@ -81,11 +109,12 @@ function convictionBar(conviction: number) {
   );
 }
 
+// ── Modal de detalle ───────────────────────────────────────────────────────────
+
 function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
   if (typeof document === "undefined") return null;
-  const yieldPct  = (rec.annual_yield_pct * 100).toFixed(2);
+  const yieldPct   = (rec.annual_yield_pct * 100).toFixed(2);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
-  const jobMeta    = JOB_META[rec.job] ?? JOB_META.renta;
   const isCapital  = rec.job === "capital";
 
   const modal = (
@@ -99,27 +128,28 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
       >
         {/* Header */}
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className={`px-2 py-0.5 rounded-lg border text-[10px] font-bold ${assetStyle}`}>
               {rec.asset_type}
             </div>
-            <span className={`text-[9px] font-medium ${jobMeta.color}`}>
-              {jobMeta.icon} {jobMeta.label}
-            </span>
-            {rec.is_hero && (
-              <span className="text-[9px] bg-blue-600 text-white font-semibold px-1.5 py-0.5 rounded-full">
-                top pick
+            {rec.recommended_for.map((p) => (
+              <span key={p} className={`text-[9px] px-1.5 py-0.5 rounded-md border font-medium ${profileColor[p] ?? ""}`}>
+                {p}
               </span>
-            )}
+            ))}
           </div>
           <button onClick={onClose} className="text-slate-500 hover:text-slate-300">
             <X size={16} />
           </button>
         </div>
 
-        <div>
-          <p className="text-lg font-bold text-slate-100">{rec.ticker}</p>
-          <p className="text-xs text-slate-500">{rec.name}</p>
+        {/* Ticker + logo */}
+        <div className="flex items-center gap-3">
+          <InstrumentLogo ticker={rec.ticker} logoUrl={rec.logo_url} />
+          <div>
+            <p className="text-lg font-bold text-slate-100">{rec.ticker}</p>
+            <p className="text-xs text-slate-500">{rec.name}</p>
+          </div>
         </div>
 
         {/* Yield + risk */}
@@ -134,7 +164,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
           </div>
         </div>
 
-        {/* Capital → retorno — diferenciado por job */}
+        {/* Capital → retorno */}
         <div className="flex items-center justify-between bg-slate-800/50 rounded-xl px-3 py-2.5">
           <div>
             <p className="text-[10px] text-slate-500">Invertir</p>
@@ -146,9 +176,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
             {isCapital ? (
               <>
                 <p className="text-[10px] text-slate-500">Apreciación estimada</p>
-                <p className="text-sm font-semibold text-blue-400">
-                  +{yieldPct}% USD/año
-                </p>
+                <p className="text-sm font-semibold text-blue-400">+{yieldPct}% USD/año</p>
               </>
             ) : (
               <>
@@ -189,27 +217,24 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
   return createPortal(modal, document.body);
 }
 
+// ── Card ───────────────────────────────────────────────────────────────────────
+
 function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
   const yieldPct   = (rec.annual_yield_pct * 100).toFixed(2);
   const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
   const isCapital  = rec.job === "capital";
 
   return (
-    <div
-      className={`snap-center shrink-0 w-[58vw] max-w-[210px] rounded-2xl border flex flex-col ${
-        rec.is_hero
-          ? "bg-gradient-to-br from-blue-950/60 to-slate-900 border-blue-800/50"
-          : "bg-slate-900 border-slate-800"
-      }`}
-    >
+    <div className="snap-center shrink-0 w-[58vw] max-w-[210px] rounded-2xl border bg-slate-900 border-slate-800 flex flex-col">
       <div className="p-3 flex flex-col gap-2.5">
-        {/* Top: badge + info */}
+
+        {/* Top: asset badge + info button */}
         <div className="flex items-center justify-between">
           <div className={`px-1.5 py-0.5 rounded-md border text-[9px] font-bold tracking-wide ${assetStyle}`}>
             {rec.asset_type}
           </div>
           <button
-            onPointerDown={(e) => { e.stopPropagation(); }}
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onInfo(); }}
             className="text-slate-600 hover:text-slate-400 transition-colors p-1 -m-1"
           >
@@ -217,10 +242,13 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
           </button>
         </div>
 
-        {/* Ticker */}
-        <div>
-          <p className="text-sm font-bold text-slate-100 leading-tight">{rec.ticker}</p>
-          <p className="text-[10px] text-slate-500 leading-tight mt-0.5 line-clamp-1">{rec.name}</p>
+        {/* Logo + ticker */}
+        <div className="flex items-center gap-2">
+          <InstrumentLogo ticker={rec.ticker} logoUrl={rec.logo_url} />
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-slate-100 leading-tight">{rec.ticker}</p>
+            <p className="text-[10px] text-slate-500 leading-tight mt-0.5 truncate">{rec.name}</p>
+          </div>
         </div>
 
         {/* Yield */}
@@ -236,7 +264,7 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
           </div>
         </div>
 
-        {/* Capital → retorno — diferenciado por job */}
+        {/* Retorno */}
         <div className="bg-slate-800/50 rounded-lg px-2.5 py-2 space-y-1">
           <div className="flex items-center justify-between">
             <p className="text-[9px] text-slate-500">Invertir</p>
@@ -260,10 +288,21 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
             )}
           </div>
         </div>
+
+        {/* Profile pills */}
+        <div className="flex flex-wrap gap-1">
+          {(rec.recommended_for ?? []).map((p) => (
+            <span key={p} className={`text-[8px] px-1.5 py-0.5 rounded-md border font-medium ${profileColor[p] ?? "text-slate-400 border-slate-700"}`}>
+              {p}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+
+// ── Sección (renta o capital) ──────────────────────────────────────────────────
 
 function RecSection({
   job,
@@ -271,7 +310,7 @@ function RecSection({
   onInfo,
   refreshing,
 }: {
-  job: "renta" | "capital" | "ambos";
+  job: "renta" | "capital";
   recs: Rec[];
   onInfo: (rec: Rec) => void;
   refreshing: boolean;
@@ -281,7 +320,6 @@ function RecSection({
 
   return (
     <div className="space-y-2">
-      {/* Section header */}
       <div className="flex items-center gap-2">
         <span className="text-base leading-none">{meta.icon}</span>
         <div>
@@ -290,20 +328,25 @@ function RecSection({
         </div>
       </div>
 
-      {/* Carousel */}
       {refreshing ? (
         <div className="flex gap-3 -mx-4 px-4 overflow-hidden">
-          {[1, 2].map((i) => (
+          {[1, 2, 3].map((i) => (
             <div
               key={i}
               className="shrink-0 w-[58vw] max-w-[210px] rounded-2xl border border-slate-800 bg-slate-900 p-3 space-y-3 animate-pulse"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex justify-between">
                 <div className="h-4 w-12 bg-slate-800 rounded-md" />
                 <div className="h-4 w-4 bg-slate-800 rounded-full" />
               </div>
-              <div className="h-4 w-16 bg-slate-800 rounded" />
-              <div className="h-8 w-20 bg-slate-800 rounded" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-slate-800 rounded-full" />
+                <div className="space-y-1">
+                  <div className="h-3 w-14 bg-slate-800 rounded" />
+                  <div className="h-2 w-20 bg-slate-800 rounded" />
+                </div>
+              </div>
+              <div className="h-7 w-20 bg-slate-800 rounded" />
               <div className="h-14 bg-slate-800/50 rounded-lg" />
             </div>
           ))}
@@ -323,69 +366,53 @@ function RecSection({
   );
 }
 
+// ── Componente principal ───────────────────────────────────────────────────────
+
 export function RecommendationList({
   capitalArs = 500000,
-  userProfile,
 }: {
   capitalArs?: number;
-  userProfile?: string | null;
+  userProfile?: string | null; // mantenido para retrocompatibilidad, no usado
 }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
-  const [data, setData] = useState<RecsData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData]         = useState<SectionsData | null>(null);
+  const [loading, setLoading]   = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [riskProfile, setRiskProfile] = useState(userProfile || "moderado");
   const [modalRec, setModalRec] = useState<Rec | null>(null);
 
-  const PROFILE_MAP: Record<string, string> = {
-    conservative: "conservador",
-    moderate: "moderado",
-    aggressive: "agresivo",
-  };
-  const normalized = userProfile ? (PROFILE_MAP[userProfile] ?? userProfile) : null;
-  const effectiveUserProfile = normalized || "moderado";
-
-  async function load(force = false, profile = riskProfile) {
-    force ? setRefreshing(true) : setLoading(true);
+  const load = useCallback(async (force = false) => {
+    if (force) { setRefreshing(true); } else { setLoading(true); }
     try {
       const { data: s } = await supabase.auth.getSession();
       const token = s.session?.access_token;
-      const url = `${API_URL}/portfolio/recommendations?capital_ars=${capitalArs}&risk_profile=${profile}${force ? "&force_refresh=true" : ""}`;
+      const url = `${API_URL}/portfolio/recommendations/sections?capital_ars=${capitalArs}`;
       const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
       if (res.ok) setData(await res.json());
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
+  }, [capitalArs]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {["renta", "capital"].map((s) => (
+          <div key={s} className="space-y-2">
+            <div className="h-4 w-32 bg-slate-800 rounded animate-pulse" />
+            <div className="flex gap-3 overflow-hidden">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="shrink-0 w-[58vw] max-w-[210px] h-52 bg-slate-800/60 rounded-2xl animate-pulse" />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
-
-  useEffect(() => { load(); }, [capitalArs]);
-
-  function changeProfile(profile: string) {
-    setRiskProfile(profile);
-    load(true, profile);
-  }
-
-  if (loading) return (
-    <div className="flex gap-3 overflow-hidden">
-      {[1, 2, 3].map(i => (
-        <div key={i} className="shrink-0 w-[58vw] max-w-[210px] h-44 bg-slate-800/60 rounded-2xl animate-pulse" />
-      ))}
-    </div>
-  );
 
   if (!data) return null;
-
-  // Separar por job — hero siempre primero dentro de su sección
-  const byJob = (job: string) =>
-    [...data.recommendations]
-      .filter((r) => r.job === job || (job === "renta" && !r.job))
-      .sort((a, b) => (b.is_hero ? 1 : 0) - (a.is_hero ? 1 : 0));
-
-  const rentaRecs   = byJob("renta");
-  const capitalRecs = [...data.recommendations]
-    .filter((r) => r.job === "capital" || r.job === "ambos")
-    .sort((a, b) => (b.is_hero ? 1 : 0) - (a.is_hero ? 1 : 0));
 
   return (
     <>
@@ -404,56 +431,15 @@ export function RecommendationList({
           </button>
         </div>
 
-        {/* Risk profile tabs */}
-        <div className="flex bg-slate-900 border border-slate-800 rounded-xl p-1 gap-1">
-          {RISK_PROFILES.map((p) => {
-            const isSelected = riskProfile === p.id;
-            const isUser = effectiveUserProfile === p.id;
-            return (
-              <button
-                key={p.id}
-                onClick={() => changeProfile(p.id)}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all flex flex-col items-center gap-0.5
-                  ${isSelected && isUser
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
-                    : isSelected
-                    ? "bg-slate-700 text-slate-100"
-                    : isUser
-                    ? "bg-blue-950/60 border border-blue-700/70 text-blue-300"
-                    : "text-slate-500 hover:text-slate-300"
-                  }`}
-              >
-                <span>{p.label}</span>
-                {isUser && (
-                  <span className={`text-[8px] font-bold leading-none ${isSelected ? "text-blue-100" : "text-blue-400"}`}>
-                    para vos ✦
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
         {/* Sección renta */}
-        <RecSection
-          job="renta"
-          recs={rentaRecs}
-          onInfo={setModalRec}
-          refreshing={refreshing}
-        />
+        <RecSection job="renta" recs={data.renta} onInfo={setModalRec} refreshing={refreshing} />
 
-        {/* Divider si hay ambas secciones */}
-        {rentaRecs.length > 0 && capitalRecs.length > 0 && (
+        {data.renta.length > 0 && data.capital.length > 0 && (
           <div className="border-t border-slate-800" />
         )}
 
         {/* Sección capital */}
-        <RecSection
-          job="capital"
-          recs={capitalRecs}
-          onInfo={setModalRec}
-          refreshing={refreshing}
-        />
+        <RecSection job="capital" recs={data.capital} onInfo={setModalRec} refreshing={refreshing} />
 
         <p className="text-[10px] text-slate-700 text-center">
           Datos en tiempo real · No es asesoramiento financiero
