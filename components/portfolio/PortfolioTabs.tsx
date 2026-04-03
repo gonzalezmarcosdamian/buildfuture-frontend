@@ -398,7 +398,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                       const perfPct = useArs ? p.performance_ars_pct : p.performance_pct;
                       const positive = perfPct >= 0;
                       const pnlUsd   = p.current_value_usd - p.cost_basis_usd;
-                      const barPct   = Math.min(Math.abs(perfPct) * 100, 100);
+                      const weightPct = totalUsd > 0 ? (p.current_value_usd / totalUsd) * 100 : 0;
                       return (
                         <button
                           key={p.id}
@@ -426,15 +426,15 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                               <ChevronRight size={12} className="text-slate-600 shrink-0 ml-1" />
                             </div>
                           </div>
-                          <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                          <div className="h-1 bg-slate-800/60 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full transition-all ${positive ? "bg-emerald-500" : "bg-red-500"}`}
-                              style={{ width: `${barPct}%` }}
+                              className="h-full rounded-full bg-slate-600 transition-all"
+                              style={{ width: `${weightPct}%` }}
                             />
                           </div>
                           <div className="flex justify-between text-[9px] text-slate-600">
-                            <span>Costo {FLAG[currency]} {fmt(p.cost_basis_usd)}</span>
-                            <span>Actual {FLAG[currency]} {fmt(p.current_value_usd)}</span>
+                            <span>{weightPct.toFixed(1)}% del portafolio</span>
+                            <span>{positive ? "+" : ""}{FLAG[currency]} {fmt(pnlUsd)} P&L</span>
                           </div>
                         </button>
                       );

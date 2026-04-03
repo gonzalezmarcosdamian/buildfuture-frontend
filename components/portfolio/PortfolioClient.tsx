@@ -72,7 +72,7 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
           {(["composicion", "rendimientos"] as ViewMode[]).map((m) => (
             <button
               key={m}
-              onClick={() => setMode(m)}
+              onClick={() => { setMode(m); setInfoModal(null); }}
               className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors ${
                 mode === m ? "bg-slate-700 text-slate-100" : "text-slate-500 hover:text-slate-300"
               }`}
