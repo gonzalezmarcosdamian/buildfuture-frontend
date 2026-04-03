@@ -29,7 +29,7 @@ export function CurrencyValue({ usd, mep, className, hint, noFlag }: Props) {
       )}
       {primary}
       {hint && (
-        <span className="text-[10px] text-slate-500 ml-1 font-normal">
+        <span className="text-[10px] text-bf-text-3 ml-1 font-normal">
           ≈ {FLAG[currency === "USD" ? "ARS" : "USD"]} {secondary}
         </span>
       )}

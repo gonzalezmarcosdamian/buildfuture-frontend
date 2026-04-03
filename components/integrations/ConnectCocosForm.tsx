@@ -114,7 +114,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
 
   return (
     <div className="mt-3 space-y-3">
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-bf-text-3">
         Usamos tus credenciales solo para leer tu portafolio. Nunca operamos en tu nombre.
       </p>
 
@@ -125,14 +125,14 @@ export function ConnectCocosForm({ onSuccess }: Props) {
             <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
               step === s ? "bg-orange-600 text-white" :
               (step === "code" && s === "credentials") ? "bg-emerald-700 text-white" :
-              "bg-slate-700 text-slate-500"
+              "bg-bf-surface-3 text-bf-text-3"
             }`}>
               {step === "code" && s === "credentials" ? "✓" : i + 1}
             </div>
-            <span className={`text-[10px] ${step === s ? "text-slate-300" : "text-slate-600"}`}>
+            <span className={`text-[10px] ${step === s ? "text-bf-text-2" : "text-bf-text-4"}`}>
               {s === "credentials" ? "Credenciales" : "Verificar 2FA"}
             </span>
-            {i === 0 && <div className="w-4 h-px bg-slate-700" />}
+            {i === 0 && <div className="w-4 h-px bg-bf-surface-3" />}
           </div>
         ))}
       </div>
@@ -140,7 +140,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
       {step === "credentials" && (
         <form onSubmit={handleSaveCredentials} className="space-y-3">
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Email Cocos</label>
+            <label className="text-xs text-bf-text-3 mb-1 block">Email Cocos</label>
             <input
               type="email"
               value={email}
@@ -148,11 +148,11 @@ export function ConnectCocosForm({ onSuccess }: Props) {
               placeholder="tu@email.com"
               autoComplete="off"
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Password</label>
+            <label className="text-xs text-bf-text-3 mb-1 block">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -161,12 +161,12 @@ export function ConnectCocosForm({ onSuccess }: Props) {
                 placeholder="••••••••"
                 autoComplete="new-password"
                 required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 pr-10 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 pr-10 text-[16px] leading-tight text-bf-text placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 hover:text-bf-text-2"
               >
                 {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -174,15 +174,15 @@ export function ConnectCocosForm({ onSuccess }: Props) {
           </div>
 
           {/* TOTP secret — opcional, va junto a las credenciales */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3 space-y-2">
+          <div className="bg-bf-surface-2/50 border border-bf-border-2/50 rounded-xl p-3 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Zap size={12} className={totpSecret ? "text-yellow-400" : "text-slate-500"} />
-                <span className="text-[11px] font-medium text-slate-300">Auto-sync</span>
-                <span className="text-[10px] text-slate-500">(opcional)</span>
+                <Zap size={12} className={totpSecret ? "text-yellow-400" : "text-bf-text-3"} />
+                <span className="text-[11px] font-medium text-bf-text-2">Auto-sync</span>
+                <span className="text-[10px] text-bf-text-3">(opcional)</span>
               </div>
               <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                totpSecret ? "bg-yellow-900/40 text-yellow-400" : "bg-slate-700 text-slate-500"
+                totpSecret ? "bg-yellow-900/40 text-yellow-400" : "bg-bf-surface-3 text-bf-text-3"
               }`}>
                 {totpSecret ? "habilitado" : "manual"}
               </span>
@@ -194,19 +194,19 @@ export function ConnectCocosForm({ onSuccess }: Props) {
                 onChange={(e) => setTotpSecret(e.target.value.trim())}
                 placeholder="BASE32SECRET (ej: JBSWY3DPEHPK3PXP)"
                 autoComplete="off"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-10 text-[16px] leading-tight text-slate-100 placeholder-slate-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 pr-10 text-[16px] leading-tight text-bf-text placeholder-slate-600 focus:outline-none focus:border-orange-500 transition-colors font-mono"
               />
               <button
                 type="button"
                 onClick={() => setShowTotpSecret(!showTotpSecret)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 hover:text-bf-text-2"
               >
                 {showTotpSecret ? <EyeOff size={13} /> : <Eye size={13} />}
               </button>
             </div>
-            <p className="text-[10px] text-slate-600 leading-relaxed">
+            <p className="text-[10px] text-bf-text-4 leading-relaxed">
               Lo obtenés reescaneando el QR en{" "}
-              <span className="text-slate-400">Cocos → Seguridad → Autenticación en 2 pasos</span>.
+              <span className="text-bf-text-3">Cocos → Seguridad → Autenticación en 2 pasos</span>.
               Sin esto, vas a necesitar ingresar el código manualmente cada vez que sincronices.
             </p>
           </div>
@@ -222,7 +222,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
             <button
               type="button"
               onClick={() => { setOpen(false); reset(); }}
-              className="flex-1 py-2.5 rounded-xl text-sm text-slate-400 bg-slate-800 hover:bg-slate-700 transition-colors"
+              className="flex-1 py-2.5 rounded-xl text-sm text-bf-text-3 bg-bf-surface-2 hover:bg-bf-surface-3 transition-colors"
             >
               Cancelar
             </button>
@@ -241,7 +241,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
       {step === "code" && (
         <form onSubmit={handleConnect} className="space-y-3">
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">
+            <label className="text-xs text-bf-text-3 mb-1 block">
               Código de Google Authenticator
             </label>
             <input
@@ -254,9 +254,9 @@ export function ConnectCocosForm({ onSuccess }: Props) {
               maxLength={6}
               autoFocus
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors tracking-widest font-mono"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors tracking-widest font-mono"
             />
-            <p className="text-[10px] text-slate-600 mt-1">
+            <p className="text-[10px] text-bf-text-4 mt-1">
               Si el código expiró, abrí Google Authenticator y copiá el nuevo código de 6 dígitos.
             </p>
           </div>
@@ -278,7 +278,7 @@ export function ConnectCocosForm({ onSuccess }: Props) {
             <button
               type="button"
               onClick={() => { setStep("credentials"); setError(""); setCode(""); }}
-              className="flex-1 py-2.5 rounded-xl text-sm text-slate-400 bg-slate-800 hover:bg-slate-700 transition-colors"
+              className="flex-1 py-2.5 rounded-xl text-sm text-bf-text-3 bg-bf-surface-2 hover:bg-bf-surface-3 transition-colors"
             >
               Atrás
             </button>
@@ -327,14 +327,14 @@ export function CocosSyncModal({ onSync, onClose }: SyncModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-full max-w-sm space-y-4">
+      <div className="bg-bf-surface border border-bf-border-2 rounded-2xl p-5 w-full max-w-sm space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-orange-950/50 border border-orange-900 flex items-center justify-center shrink-0">
             <RefreshCw size={18} className="text-orange-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-100">Sincronizar Cocos</p>
-            <p className="text-xs text-slate-500 mt-0.5">Ingresá el código de Google Authenticator</p>
+            <p className="text-sm font-semibold text-bf-text">Sincronizar Cocos</p>
+            <p className="text-xs text-bf-text-3 mt-0.5">Ingresá el código de Google Authenticator</p>
           </div>
         </div>
 
@@ -349,7 +349,7 @@ export function CocosSyncModal({ onSync, onClose }: SyncModalProps) {
             maxLength={6}
             autoFocus
             required
-            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-orange-500 tracking-widest transition-colors"
+            className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl px-4 py-3 text-center text-xl font-mono text-bf-text placeholder-slate-600 focus:outline-none focus:border-orange-500 tracking-widest transition-colors"
           />
 
           {error && (
@@ -360,7 +360,7 @@ export function CocosSyncModal({ onSync, onClose }: SyncModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl text-sm text-slate-400 bg-slate-800 hover:bg-slate-700 transition-colors"
+              className="flex-1 py-2.5 rounded-xl text-sm text-bf-text-3 bg-bf-surface-2 hover:bg-bf-surface-3 transition-colors"
             >
               Cancelar
             </button>

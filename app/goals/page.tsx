@@ -40,7 +40,7 @@ export default async function Goals() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Target size={20} className="text-blue-400" />
-          <h1 className="text-xl font-bold text-slate-100">Metas</h1>
+          <h1 className="text-xl font-bold text-bf-text">Metas</h1>
         </div>
         <CurrencyToggle />
       </div>

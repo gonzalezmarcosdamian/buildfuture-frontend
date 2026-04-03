@@ -76,33 +76,33 @@ function LoginForm() {
   }
 
   if (splash) return (
-    <div className="fixed inset-0 z-[999] bg-slate-950 flex flex-col items-center justify-center gap-5 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[999] bg-bf-page flex flex-col items-center justify-center gap-5 animate-in fade-in duration-300">
       <div className="space-y-1 text-center">
-        <h1 className="text-3xl font-bold text-slate-100 tracking-tight">BuildFuture</h1>
-        <p className="text-slate-500 text-sm">Preparando tu portafolio…</p>
+        <h1 className="text-3xl font-bold text-bf-text tracking-tight">BuildFuture</h1>
+        <p className="text-bf-text-3 text-sm">Preparando tu portafolio…</p>
       </div>
-      <div className="w-48 h-0.5 bg-slate-800 rounded-full overflow-hidden">
+      <div className="w-48 h-0.5 bg-bf-surface-2 rounded-full overflow-hidden">
         <div className="h-full bg-blue-500 rounded-full animate-[progress_1.2s_ease-out_forwards]" />
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-bf-page flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-100">BuildFuture</h1>
-          <p className="text-slate-500 text-sm mt-1">Tu portafolio de libertad financiera</p>
+          <h1 className="text-2xl font-bold text-bf-text">BuildFuture</h1>
+          <p className="text-bf-text-3 text-sm mt-1">Tu portafolio de libertad financiera</p>
         </div>
 
         {/* Tab switcher — solo en login/register */}
         {mode !== "forgot" && (
-          <div className="flex bg-slate-800 rounded-xl p-1 mb-4 gap-1">
+          <div className="flex bg-bf-surface-2 rounded-xl p-1 mb-4 gap-1">
             <button
               onClick={() => changeMode("login")}
               className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                mode === "login" ? "bg-slate-700 text-slate-100" : "text-slate-400 hover:text-slate-300"
+                mode === "login" ? "bg-bf-surface-3 text-bf-text" : "text-bf-text-3 hover:text-bf-text-2"
               }`}
             >
               Ingresar
@@ -110,7 +110,7 @@ function LoginForm() {
             <button
               onClick={() => changeMode("register")}
               className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                mode === "register" ? "bg-slate-700 text-slate-100" : "text-slate-400 hover:text-slate-300"
+                mode === "register" ? "bg-bf-surface-3 text-bf-text" : "text-bf-text-3 hover:text-bf-text-2"
               }`}
             >
               Registrarse
@@ -121,15 +121,15 @@ function LoginForm() {
         {/* Form card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-slate-900 rounded-2xl p-6 border border-slate-800 space-y-4"
+          className="bg-bf-surface rounded-2xl p-6 border border-bf-border space-y-4"
         >
           {mode === "forgot" && (
-            <p className="text-sm text-slate-300 font-medium">Recuperar contraseña</p>
+            <p className="text-sm text-bf-text-2 font-medium">Recuperar contraseña</p>
           )}
 
           {/* Email */}
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Email</label>
+            <label className="text-xs text-bf-text-3 mb-1 block">Email</label>
             <input
               type="email"
               value={email}
@@ -137,14 +137,14 @@ function LoginForm() {
               required
               autoComplete="email"
               placeholder="tu@email.com"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
 
           {/* Password — solo en login y register */}
           {mode !== "forgot" && (
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Contraseña</label>
+              <label className="text-xs text-bf-text-3 mb-1 block">Contraseña</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -153,12 +153,12 @@ function LoginForm() {
                   required
                   autoComplete={mode === "login" ? "current-password" : "new-password"}
                   placeholder="••••••••"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-10 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 pr-10 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 hover:text-bf-text-2"
                 >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
@@ -169,7 +169,7 @@ function LoginForm() {
           {/* Confirmar password — solo en register */}
           {mode === "register" && (
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Confirmar contraseña</label>
+              <label className="text-xs text-bf-text-3 mb-1 block">Confirmar contraseña</label>
               <input
                 type={showPassword ? "text" : "password"}
                 value={confirmPassword}
@@ -177,7 +177,7 @@ function LoginForm() {
                 required
                 autoComplete="new-password"
                 placeholder="••••••••"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
           )}
@@ -215,7 +215,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => changeMode("forgot")}
-              className="w-full text-xs text-slate-500 hover:text-slate-400 text-center transition-colors"
+              className="w-full text-xs text-bf-text-3 hover:text-bf-text-3 text-center transition-colors"
             >
               ¿Olvidaste tu contraseña?
             </button>
@@ -225,7 +225,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => changeMode("login")}
-              className="w-full text-xs text-slate-500 hover:text-slate-400 text-center transition-colors"
+              className="w-full text-xs text-bf-text-3 hover:text-bf-text-3 text-center transition-colors"
             >
               Volver a ingresar
             </button>

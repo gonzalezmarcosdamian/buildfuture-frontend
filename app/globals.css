@@ -5,6 +5,28 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* BuildFuture semantic colors — usables como bg-bf-surface, text-bf-text, etc. */
+  --color-bf-page:       var(--bf-page);
+  --color-bf-surface:    var(--bf-surface);
+  --color-bf-surface-2:  var(--bf-surface-2);
+  --color-bf-surface-3:  var(--bf-surface-3);
+  --color-bf-border:     var(--bf-border);
+  --color-bf-border-2:   var(--bf-border-2);
+  --color-bf-text:       var(--bf-text);
+  --color-bf-text-2:     var(--bf-text-2);
+  --color-bf-text-3:     var(--bf-text-3);
+  --color-bf-text-4:     var(--bf-text-4);
+  --color-bf-text-5:     var(--bf-text-5);
+  --color-bf-gain:       var(--bf-gain);
+  --color-bf-gain-dim:   var(--bf-gain-dim);
+  --color-bf-loss:       var(--bf-loss);
+  --color-bf-loss-dim:   var(--bf-loss-dim);
+  --color-bf-renta:      var(--bf-renta);
+  --color-bf-capital:    var(--bf-capital);
+  --color-bf-chart-line: var(--bf-chart-line);
+  --color-bf-chart-gain: var(--bf-chart-gain);
+  --color-bf-chart-loss: var(--bf-chart-loss);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -53,6 +75,30 @@
 }
 
 :root {
+  /* ── BuildFuture semantic tokens — light ─────────────────────────────── */
+  --bf-page:        #f8fafc;   /* slate-50  — fondo de página */
+  --bf-surface:     #ffffff;   /* white     — cards principales */
+  --bf-surface-2:   #f1f5f9;   /* slate-100 — cards internas / inputs */
+  --bf-surface-3:   #e2e8f0;   /* slate-200 — hover states */
+  --bf-border:      #e2e8f0;   /* slate-200 */
+  --bf-border-2:    #cbd5e1;   /* slate-300 — bordes más nítidos */
+  --bf-text:        #0f172a;   /* slate-900 — texto principal */
+  --bf-text-2:      #334155;   /* slate-700 — texto secundario */
+  --bf-text-3:      #64748b;   /* slate-500 — texto terciario / labels */
+  --bf-text-4:      #94a3b8;   /* slate-400 — texto muy sutil */
+  --bf-text-5:      #cbd5e1;   /* slate-300 — placeholders */
+
+  /* Accent semánticos — se oscurecen en light */
+  --bf-gain:        #059669;   /* emerald-600 */
+  --bf-gain-dim:    #d1fae5;   /* emerald-100 bg */
+  --bf-loss:        #dc2626;   /* red-600 */
+  --bf-loss-dim:    #fee2e2;   /* red-100 bg */
+  --bf-renta:       #059669;   /* emerald-600 — renta mensual */
+  --bf-capital:     #7c3aed;   /* violet-700 — capital acumulado */
+  --bf-chart-line:  #3b82f6;   /* blue-500 */
+  --bf-chart-gain:  #059669;   /* emerald-600 */
+  --bf-chart-loss:  #dc2626;   /* red-600 */
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -88,6 +134,30 @@
 }
 
 .dark {
+  /* ── BuildFuture semantic tokens — dark ──────────────────────────────── */
+  --bf-page:        #020617;   /* slate-950 */
+  --bf-surface:     #0f172a;   /* slate-900 */
+  --bf-surface-2:   #1e293b;   /* slate-800 */
+  --bf-surface-3:   #334155;   /* slate-700 */
+  --bf-border:      #1e293b;   /* slate-800 */
+  --bf-border-2:    #334155;   /* slate-700 */
+  --bf-text:        #f1f5f9;   /* slate-100 */
+  --bf-text-2:      #cbd5e1;   /* slate-300 */
+  --bf-text-3:      #64748b;   /* slate-500 */
+  --bf-text-4:      #475569;   /* slate-600 */
+  --bf-text-5:      #334155;   /* slate-700 */
+
+  /* Accent semánticos — más vivos en dark */
+  --bf-gain:        #34d399;   /* emerald-400 */
+  --bf-gain-dim:    #064e3b;   /* emerald-900 bg */
+  --bf-loss:        #f87171;   /* red-400 */
+  --bf-loss-dim:    #7f1d1d;   /* red-900 bg */
+  --bf-renta:       #34d399;   /* emerald-400 */
+  --bf-capital:     #c4b5fd;   /* violet-300 */
+  --bf-chart-line:  #3b82f6;   /* blue-500 */
+  --bf-chart-gain:  #34d399;   /* emerald-400 */
+  --bf-chart-loss:  #f87171;   /* red-400 */
+
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

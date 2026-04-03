@@ -51,14 +51,14 @@ function HeroInfoSheet({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
       <div
-        className="bg-slate-950 rounded-t-3xl border-t border-slate-800 max-h-[85vh] overflow-y-auto"
+        className="bg-bf-page rounded-t-3xl border-t border-bf-border max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-slate-950 pt-3 pb-2 px-5 border-b border-slate-800/60">
-          <div className="w-10 h-1 bg-slate-700 rounded-full mx-auto mb-3" />
+        <div className="sticky top-0 bg-bf-page pt-3 pb-2 px-5 border-b border-bf-border/60">
+          <div className="w-10 h-1 bg-bf-surface-3 rounded-full mx-auto mb-3" />
           <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-slate-100">¿Qué miden las barras?</p>
-            <button onClick={onClose} className="text-slate-500 hover:text-slate-300">
+            <p className="text-sm font-bold text-bf-text">¿Qué miden las barras?</p>
+            <button onClick={onClose} className="text-bf-text-3 hover:text-bf-text-2">
               <X size={18} />
             </button>
           </div>
@@ -70,20 +70,20 @@ function HeroInfoSheet({ onClose }: { onClose: () => void }) {
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-xl bg-emerald-950/60 border border-emerald-900/50 flex items-center justify-center text-sm">💰</div>
-              <p className="text-sm font-semibold text-slate-200">Barra de Renta</p>
+              <p className="text-sm font-semibold text-bf-text-2">Barra de Renta</p>
             </div>
-            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Muestra qué porcentaje de tus gastos mensuales ya cubrís con los <span className="text-slate-200 font-medium">rendimientos de tus instrumentos de renta</span> (LECAPs, FCIs, Bonos, ONs).
+            <div className="bg-bf-surface rounded-2xl border border-bf-border p-4 space-y-3">
+              <p className="text-[11px] text-bf-text-3 leading-relaxed">
+                Muestra qué porcentaje de tus gastos mensuales ya cubrís con los <span className="text-bf-text-2 font-medium">rendimientos de tus instrumentos de renta</span> (LECAPs, FCIs, Bonos, ONs).
               </p>
-              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-bf-surface-2 rounded-full overflow-hidden">
                 <div className="h-full w-3/5 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400" />
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
+              <p className="text-[11px] text-bf-text-3 leading-relaxed">
                 Al llegar al <span className="text-emerald-400 font-semibold">100%</span>, tus rendimientos mensuales cubren todos tus gastos. Ese es el momento de libertad financiera por renta.
               </p>
               <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl px-3 py-2">
-                <p className="text-[10px] text-slate-400 leading-snug">
+                <p className="text-[10px] text-bf-text-3 leading-snug">
                   💡 Configurá tu presupuesto en <span className="text-emerald-400">Metas →</span> para que la barra sea precisa.
                 </p>
               </div>
@@ -94,19 +94,19 @@ function HeroInfoSheet({ onClose }: { onClose: () => void }) {
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-xl bg-violet-950/60 border border-violet-900/50 flex items-center justify-center text-sm">📈</div>
-              <p className="text-sm font-semibold text-slate-200">Barra de Capital</p>
+              <p className="text-sm font-semibold text-bf-text-2">Barra de Capital</p>
             </div>
-            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Muestra cuánto capital de largo plazo acumulaste en relación al <span className="text-slate-200 font-medium">objetivo sumado de todas tus metas</span>.
+            <div className="bg-bf-surface rounded-2xl border border-bf-border p-4 space-y-3">
+              <p className="text-[11px] text-bf-text-3 leading-relaxed">
+                Muestra cuánto capital de largo plazo acumulaste en relación al <span className="text-bf-text-2 font-medium">objetivo sumado de todas tus metas</span>.
               </p>
-              <div className="bg-slate-800/60 rounded-xl px-3 py-2.5 space-y-1.5">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider">¿Cómo se calcula?</p>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
+              <div className="bg-bf-surface-2/60 rounded-xl px-3 py-2.5 space-y-1.5">
+                <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">¿Cómo se calcula?</p>
+                <p className="text-[11px] text-bf-text-2 leading-relaxed">
                   (CEDEARs + ETFs + Crypto + Cash) ÷ suma de tus metas. Cuando llegás al <span className="text-violet-400 font-semibold">100%</span> alcanzaste todos tus objetivos de capital.
                 </p>
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
+              <p className="text-[11px] text-bf-text-3 leading-relaxed">
                 Configurá tus metas en la sección <span className="text-violet-400">Metas →</span> para que la barra refleje tus objetivos reales.
               </p>
             </div>
@@ -129,20 +129,20 @@ function SegmentedBar({ pct, color, amountColor, label, amount, sublabel, href }
     <div className={href ? "group" : ""}>
       {/* label + chevron */}
       <div className="flex items-center justify-between mb-1.5">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{label}</p>
-        {href && <ChevronRight size={11} className="text-slate-600 group-hover:text-slate-400 transition-colors" />}
+        <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">{label}</p>
+        {href && <ChevronRight size={11} className="text-bf-text-4 group-hover:text-bf-text-3 transition-colors" />}
       </div>
       {/* amount prominente */}
       <div className="flex items-end justify-between mb-2">
         <p className={`text-xl font-extrabold leading-none tabular-nums ${amountColor}`}>{amount}</p>
-        <p className="text-sm font-bold text-slate-400 leading-none">{Math.round(clamped)}%</p>
+        <p className="text-sm font-bold text-bf-text-3 leading-none">{Math.round(clamped)}%</p>
       </div>
       {/* barra */}
-      <div className="h-2 bg-slate-800 rounded-full overflow-hidden mb-1.5">
+      <div className="h-2 bg-bf-surface-2 rounded-full overflow-hidden mb-1.5">
         <div className={`h-full rounded-full transition-all duration-700 ${color}`} style={{ width: `${Math.max(clamped, 0.5)}%` }} />
       </div>
       {/* sublabel */}
-      <p className="text-[10px] text-slate-500">{sublabel}</p>
+      <p className="text-[10px] text-bf-text-3">{sublabel}</p>
     </div>
   );
   if (href) return <Link href={href} className="block">{inner}</Link>;
@@ -172,13 +172,13 @@ export function DashboardHero({
   return (
     <>
     {infoOpen && <HeroInfoSheet onClose={() => setInfoOpen(false)} />}
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+    <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
 
       {/* ── Total + streak ───────────────────────────────────────────────────── */}
       <div className="px-5 pt-4 pb-3 flex items-start justify-between">
         <div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Portafolio total</p>
-          <p className="text-2xl font-extrabold text-slate-100 leading-none tabular-nums">
+          <p className="text-[10px] text-bf-text-3 uppercase tracking-wider mb-1">Portafolio total</p>
+          <p className="text-2xl font-extrabold text-bf-text leading-none tabular-nums">
             {fmtTotal(portfolioTotal)}
           </p>
           {streak && streak.current >= 1 && (
@@ -193,7 +193,7 @@ export function DashboardHero({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setInfoOpen(true)}
-            className="text-slate-600 hover:text-slate-400 transition-colors p-1"
+            className="text-bf-text-4 hover:text-bf-text-3 transition-colors p-1"
             aria-label="Explicación de las barras"
           >
             <Info size={15} />
@@ -203,7 +203,7 @@ export function DashboardHero({
       </div>
 
       {/* ── Barras segmentadas ───────────────────────────────────────────────── */}
-      <div className="px-5 pb-5 space-y-5 border-t border-slate-800/60 pt-4">
+      <div className="px-5 pb-5 space-y-5 border-t border-bf-border/60 pt-4">
         <SegmentedBar
           pct={rentaPct}
           color="bg-gradient-to-r from-emerald-600 to-emerald-400"

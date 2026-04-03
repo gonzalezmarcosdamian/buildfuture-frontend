@@ -29,20 +29,20 @@ export function InvestmentStreak({ streak, currentMonthInvested = false }: Props
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-slate-500 uppercase tracking-wider">Racha de inversión</p>
+      <p className="text-xs text-bf-text-3 uppercase tracking-wider">Racha de inversión</p>
 
       {/* Estado del mes actual — el feedback loop principal */}
       <div className={`rounded-2xl border px-4 py-3 flex items-center justify-between ${
         currentMonthInvested
           ? "bg-emerald-950/30 border-emerald-800/60"
-          : "bg-slate-900 border-slate-700"
+          : "bg-bf-surface border-bf-border-2"
       }`}>
         <div>
-          <p className="text-xs font-semibold text-slate-200">{monthName}</p>
+          <p className="text-xs font-semibold text-bf-text-2">{monthName}</p>
           {currentMonthInvested ? (
             <p className="text-[11px] text-emerald-400 mt-0.5">Invertiste este mes ✓</p>
           ) : (
-            <p className="text-[11px] text-slate-500 mt-0.5">Todavía no invertiste este mes</p>
+            <p className="text-[11px] text-bf-text-3 mt-0.5">Todavía no invertiste este mes</p>
           )}
         </div>
         <div className="text-2xl leading-none">
@@ -52,16 +52,16 @@ export function InvestmentStreak({ streak, currentMonthInvested = false }: Props
 
       {/* Stats racha */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
+        <div className="bg-bf-surface border border-bf-border rounded-xl p-3 text-center">
           <p className="text-2xl font-bold text-blue-400">{streak.current}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">meses seguidos</p>
+          <p className="text-[10px] text-bf-text-3 mt-0.5">meses seguidos</p>
           {currentBadge && (
             <p className="text-xs mt-1">{currentBadge.emoji} {currentBadge.label}</p>
           )}
         </div>
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-slate-300">{streak.longest}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">mejor racha</p>
+        <div className="bg-bf-surface border border-bf-border rounded-xl p-3 text-center">
+          <p className="text-2xl font-bold text-bf-text-2">{streak.longest}</p>
+          <p className="text-[10px] text-bf-text-3 mt-0.5">mejor racha</p>
           {longestBadge && (
             <p className="text-xs mt-1">{longestBadge.emoji} {longestBadge.label}</p>
           )}
@@ -69,7 +69,7 @@ export function InvestmentStreak({ streak, currentMonthInvested = false }: Props
       </div>
 
       {/* Calendario estilo GitHub */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
+      <div className="bg-bf-surface border border-bf-border rounded-xl p-3">
         <div className="grid grid-cols-12 gap-1">
           {streak.calendar.map((entry, i) => {
             const d = new Date(entry.month + "T00:00:00");
@@ -83,11 +83,11 @@ export function InvestmentStreak({ streak, currentMonthInvested = false }: Props
                       ? "bg-emerald-500"
                       : isCurrentMonth
                       ? "bg-slate-600 ring-1 ring-slate-400"
-                      : "bg-slate-800"
+                      : "bg-bf-surface-2"
                   }`}
                   title={`${monthLabel} ${d.getFullYear()}`}
                 />
-                <span className={`text-[8px] ${isCurrentMonth ? "text-slate-400" : "text-slate-600"}`}>
+                <span className={`text-[8px] ${isCurrentMonth ? "text-bf-text-3" : "text-bf-text-4"}`}>
                   {monthLabel[0]}
                 </span>
               </div>
@@ -113,11 +113,11 @@ export function InvestmentStreak({ streak, currentMonthInvested = false }: Props
                   ? "bg-emerald-950/30 border-emerald-800"
                   : inProgress
                   ? "bg-blue-950/20 border-blue-900/50"
-                  : "bg-slate-900 border-slate-800 opacity-40"
+                  : "bg-bf-surface border-bf-border opacity-40"
               }`}
             >
               <p className="text-base">{b.emoji}</p>
-              <p className={`text-[9px] mt-0.5 ${reached ? "text-emerald-400" : "text-slate-500"}`}>
+              <p className={`text-[9px] mt-0.5 ${reached ? "text-emerald-400" : "text-bf-text-3"}`}>
                 {b.label}
               </p>
               {inProgress && (

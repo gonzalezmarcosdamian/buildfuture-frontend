@@ -2,6 +2,7 @@
 import { supabase } from "@/lib/supabase";
 
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import {
   AreaChart,
   Area,
@@ -113,8 +114,8 @@ function TRow({ label, value, dim, color }: {
 }) {
   return (
     <div className="flex justify-between gap-4">
-      <span className="text-slate-500">{label}</span>
-      <span className={dim ? "text-[10px] text-slate-600" : color ?? "text-slate-100 font-semibold"}>
+      <span className="text-bf-text-3">{label}</span>
+      <span className={dim ? "text-[10px] text-bf-text-4" : color ?? "text-bf-text font-semibold"}>
         {value}
       </span>
     </div>
@@ -133,14 +134,14 @@ function TenenciaTooltip({ active, payload, currency, mep }: {
   const usedMep = p.fx_mep > 0 ? p.fx_mep : mep;
 
   return (
-    <div className="bg-slate-800/95 border border-slate-700 rounded-xl px-3 py-2.5 text-xs shadow-xl min-w-[168px]">
-      <p className="text-slate-400 mb-2 font-medium">{p.label}</p>
+    <div className="bg-bf-surface-2/95 border border-bf-border-2 rounded-xl px-3 py-2.5 text-xs shadow-xl min-w-[168px]">
+      <p className="text-bf-text-3 mb-2 font-medium">{p.label}</p>
       <div className="space-y-1">
         <TRow label="Tenencia" value={fmtFull(p.total_usd, currency, usedMep)} />
         <TRow label="≈" value={fmtHint(p.total_usd, currency, usedMep)} dim />
         {hasDelta && (
-          <div className="flex justify-between gap-4 pt-1 mt-0.5 border-t border-slate-700/50">
-            <span className="text-slate-500">Variación</span>
+          <div className="flex justify-between gap-4 pt-1 mt-0.5 border-t border-bf-border-2/50">
+            <span className="text-bf-text-3">Variación</span>
             <span className={`font-medium ${gain ? "text-emerald-400" : "text-red-400"}`}>
               {fmtFull(p.delta_usd, currency, usedMep, true)}
               {prevTotal > 0 && (
@@ -150,7 +151,7 @@ function TenenciaTooltip({ active, payload, currency, mep }: {
           </div>
         )}
         {p.fx_mep > 0 && (
-          <p className="text-[9px] text-slate-600 pt-0.5">
+          <p className="text-[9px] text-bf-text-4 pt-0.5">
             MEP ${p.fx_mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
           </p>
         )}
@@ -172,34 +173,34 @@ function RendimientoTooltip({ active, payload, currency, mep }: {
   const hasCapital = Math.abs(capitalIn) > 1;
 
   return (
-    <div className="bg-slate-800/95 border border-slate-700 rounded-xl px-3 py-2.5 text-xs shadow-xl min-w-[168px]">
-      <p className="text-slate-400 mb-2 font-medium">{p.label}</p>
+    <div className="bg-bf-surface-2/95 border border-bf-border-2 rounded-xl px-3 py-2.5 text-xs shadow-xl min-w-[168px]">
+      <p className="text-bf-text-3 mb-2 font-medium">{p.label}</p>
       <div className="space-y-1">
         <TRow label="Cierre" value={fmtFull(p.total_usd, currency, usedMep)} />
         <div className="flex justify-between gap-4">
-          <span className="text-slate-500">Mercado</span>
+          <span className="text-bf-text-3">Mercado</span>
           <span className={`font-semibold ${gainPositive ? "text-emerald-400" : "text-red-400"}`}>
             {fmtFull(marketGain / (currency === "ARS" ? mep : 1), currency, usedMep, true)}
           </span>
         </div>
         {prevTotal > 0 && marketGain !== 0 && (
           <div className="flex justify-between gap-4">
-            <span className="text-slate-500">Rend. %</span>
+            <span className="text-bf-text-3">Rend. %</span>
             <span className={`font-semibold ${gainPositive ? "text-emerald-400" : "text-red-400"}`}>
               {gainPositive ? "+" : ""}{((marketGain / (currency === "ARS" ? mep : 1)) / prevTotal * 100).toFixed(2)}%
             </span>
           </div>
         )}
         {hasCapital && (
-          <div className="flex justify-between gap-4 pt-1 mt-0.5 border-t border-slate-700/50">
-            <span className="text-slate-500">Aporte</span>
+          <div className="flex justify-between gap-4 pt-1 mt-0.5 border-t border-bf-border-2/50">
+            <span className="text-bf-text-3">Aporte</span>
             <span className="text-blue-400 font-medium">
               {fmtFull(capitalIn / (currency === "ARS" ? mep : 1), currency, usedMep, true)}
             </span>
           </div>
         )}
         {p.fx_mep > 0 && (
-          <p className="text-[9px] text-slate-600 pt-1 border-t border-slate-700/50 mt-1">
+          <p className="text-[9px] text-bf-text-4 pt-1 border-t border-bf-border-2/50 mt-1">
             MEP ${p.fx_mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
           </p>
         )}
@@ -214,6 +215,20 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
   const { currency } = useCurrency();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme !== "light";
+
+  // Chart colors — responden al tema
+  const C = {
+    grid:      isDark ? "#1e293b" : "#e2e8f0",
+    axis:      isDark ? "#64748b" : "#94a3b8",
+    line:      "#3b82f6",
+    gainFill:  isDark ? "#34d399" : "#059669",
+    lossFill:  isDark ? "#f87171" : "#dc2626",
+    refLine:   isDark ? "#475569" : "#94a3b8",
+    barCursor: isDark ? "#1e293b50" : "#e2e8f050",
+    dotBg:     isDark ? "#0f172a" : "#ffffff",
+  };
 
   async function changePeriod(p: Period) {
     if (p === period) return;
@@ -275,7 +290,7 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
   const onlyOnePoint = chartData.length === 1;
 
   return (
-    <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
+    <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border space-y-3">
 
       {/* Period chips */}
       <div className="flex justify-end gap-1">
@@ -285,8 +300,8 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
             onClick={() => changePeriod(p)}
             className={`text-[10px] px-2 py-1 rounded-lg transition-colors ${
               activePeriod === p
-                ? "bg-slate-700 text-slate-100"
-                : "text-slate-500 hover:text-slate-300"
+                ? "bg-bf-surface-3 text-bf-text"
+                : "text-bf-text-3 hover:text-bf-text-2"
             }`}
           >
             {PERIOD_LABELS[p]}
@@ -296,16 +311,16 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
 
       {/* Chart */}
       {loading ? (
-        <div className="h-44 flex items-center justify-center text-slate-600 text-xs">Cargando…</div>
+        <div className="h-44 flex items-center justify-center text-bf-text-4 text-xs">Cargando…</div>
       ) : !data.has_data || chartData.length === 0 ? (
         <div className="h-44 flex flex-col items-center justify-center gap-1">
-          <p className="text-slate-600 text-xs">Sin historial aún</p>
-          <p className="text-slate-700 text-[10px]">Los snapshots se acumulan automáticamente</p>
+          <p className="text-bf-text-4 text-xs">Sin historial aún</p>
+          <p className="text-bf-text-5 text-[10px]">Los snapshots se acumulan automáticamente</p>
         </div>
       ) : mode === "tenencia" ? (
         <>
           {onlyOnePoint && (
-            <p className="text-[10px] text-slate-600 text-center">
+            <p className="text-[10px] text-bf-text-4 text-center">
               Primer snapshot registrado — la curva crece con el tiempo
             </p>
           )}
@@ -317,15 +332,15 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
                   <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 9, fill: "#64748b" }}
+                tick={{ fontSize: 9, fill: C.axis }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fontSize: 9, fill: "#64748b" }}
+                tick={{ fontSize: 9, fill: C.axis }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={compact}
@@ -334,16 +349,16 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
               />
               <Tooltip
                 content={renderTenenciaTooltip}
-                cursor={{ stroke: "#3b82f680", strokeWidth: 1, strokeDasharray: "4 2" }}
+                cursor={{ stroke: `${C.line}80`, strokeWidth: 1, strokeDasharray: "4 2" }}
               />
               <Area
                 type="monotone"
                 dataKey="displayTotal"
-                stroke="#3b82f6"
+                stroke={C.line}
                 strokeWidth={2}
                 fill="url(#tenenciaGrad)"
-                dot={onlyOnePoint ? { r: 5, fill: "#3b82f6", stroke: "#0f172a", strokeWidth: 2 } : false}
-                activeDot={{ r: 5, fill: "#3b82f6", stroke: "#0f172a", strokeWidth: 2 }}
+                dot={onlyOnePoint ? { r: 5, fill: C.line, stroke: C.dotBg, strokeWidth: 2 } : false}
+                activeDot={{ r: 5, fill: C.line, stroke: C.dotBg, strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -351,25 +366,25 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
       ) : (
         <ResponsiveContainer width="100%" height={176}>
           <BarChart data={chartData} barCategoryGap="30%" margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fontSize: 9, fill: "#64748b" }}
+              tick={{ fontSize: 9, fill: C.axis }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 9, fill: "#64748b" }}
+              tick={{ fontSize: 9, fill: C.axis }}
               axisLine={false}
               tickLine={false}
               tickFormatter={compact}
               width={yWidthRendimiento}
               domain={rendDomain}
             />
-            <ReferenceLine y={0} stroke="#475569" strokeWidth={1.5} />
+            <ReferenceLine y={0} stroke={C.refLine} strokeWidth={1.5} />
             <Tooltip
               content={renderRendimientoTooltip}
-              cursor={{ fill: "#1e293b50" }}
+              cursor={{ fill: C.barCursor }}
             />
             <Bar dataKey="displayMarketGain" radius={[3, 3, 3, 3]} isAnimationActive={false}>
               {chartData.map((entry, i) => {
@@ -378,9 +393,9 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
                 return (
                   <Cell
                     key={i}
-                    fill={positive ? "#34d399" : "#f87171"}
+                    fill={positive ? C.gainFill : C.lossFill}
                     fillOpacity={hasCapital ? 0.55 : 0.88}
-                    stroke={hasCapital ? "#3b82f6" : "none"}
+                    stroke={hasCapital ? C.line : "none"}
                     strokeWidth={hasCapital ? 1.5 : 0}
                   />
                 );
@@ -392,7 +407,7 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
 
       {/* Footer */}
       {data.has_data && chartData.length > 0 && (
-        <div className="flex items-center gap-3 text-[9px] text-slate-600">
+        <div className="flex items-center gap-3 text-[9px] text-bf-text-4">
           {mode === "rendimiento" && (
             <>
               <span className="flex items-center gap-1">

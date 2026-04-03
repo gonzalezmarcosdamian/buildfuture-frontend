@@ -139,20 +139,20 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
     {/* Modal desconectar */}
     {showDisconnectModal && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-        <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-full max-w-sm space-y-4">
+        <div className="bg-bf-surface border border-bf-border-2 rounded-2xl p-5 w-full max-w-sm space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-950/50 border border-red-900 flex items-center justify-center shrink-0">
               <AlertTriangle size={18} className="text-red-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-100">¿Desconectar {meta?.label}?</p>
-              <p className="text-xs text-slate-500 mt-0.5">Se borrarán tus credenciales y todas las posiciones sincronizadas.</p>
+              <p className="text-sm font-semibold text-bf-text">¿Desconectar {meta?.label}?</p>
+              <p className="text-xs text-bf-text-3 mt-0.5">Se borrarán tus credenciales y todas las posiciones sincronizadas.</p>
             </div>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setShowDisconnectModal(false)}
-              className="flex-1 py-2.5 rounded-xl border border-slate-700 text-sm text-slate-300 hover:bg-slate-800 transition-colors"
+              className="flex-1 py-2.5 rounded-xl border border-bf-border-2 text-sm text-bf-text-2 hover:bg-bf-surface-2 transition-colors"
             >
               Cancelar
             </button>
@@ -177,31 +177,31 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
       />
     )}
 
-    <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+    <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
             <p className={`font-semibold text-sm ${meta?.color}`}>
               {meta?.label || integration.provider}
             </p>
-            <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
+            <span className="text-[10px] bg-bf-surface-2 text-bf-text-3 px-1.5 py-0.5 rounded">
               {integration.provider_type}
             </span>
             {isCocos && connected && (
               <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex items-center gap-1 ${
-                autoSync ? "bg-yellow-900/40 text-yellow-400" : "bg-slate-700 text-slate-500"
+                autoSync ? "bg-yellow-900/40 text-yellow-400" : "bg-bf-surface-3 text-bf-text-3"
               }`}>
                 <Zap size={9} />
                 {autoSync ? "auto-sync" : "manual"}
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">{meta?.description}</p>
+          <p className="text-xs text-bf-text-3 mt-0.5">{meta?.description}</p>
         </div>
         {connected ? (
           <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
         ) : (
-          <XCircle size={18} className="text-slate-600 shrink-0" />
+          <XCircle size={18} className="text-bf-text-4 shrink-0" />
         )}
       </div>
 
@@ -209,7 +209,7 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
         {connected ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-bf-text-3">
                 {lastSynced
                   ? `Sync: ${new Date(lastSynced).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}`
                   : "Sin sync aún"}
@@ -217,7 +217,7 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowDisconnectModal(true)}
-                  className="flex items-center gap-1 text-xs text-slate-600 hover:text-red-400 transition-colors"
+                  className="flex items-center gap-1 text-xs text-bf-text-4 hover:text-red-400 transition-colors"
                 >
                   <Unplug size={11} />
                   Desconectar
@@ -253,7 +253,7 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
         ) : integration.provider === "BINANCE" ? (
           <ConnectBinanceForm onSuccess={handleConnected} />
         ) : (
-          <p className="text-xs text-slate-600 italic">Próximamente</p>
+          <p className="text-xs text-bf-text-4 italic">Próximamente</p>
         )}
 
         {integration.last_error && (

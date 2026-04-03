@@ -121,16 +121,16 @@ export function ConnectPPIForm({ onSuccess }: Props) {
 
   return (
     <div className="mt-3 space-y-3">
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-bf-text-3">
         Generá tus claves en PPI →{" "}
-        <span className="text-slate-300 font-medium">Gestiones → API</span>.
+        <span className="text-bf-text-2 font-medium">Gestiones → API</span>.
         Solo lectura — BuildFuture nunca opera en tu nombre.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         {/* Public key */}
         <div>
-          <label className="text-xs text-slate-400 mb-1 block">Clave pública (Public Key)</label>
+          <label className="text-xs text-bf-text-3 mb-1 block">Clave pública (Public Key)</label>
           <input
             type="text"
             value={publicKey}
@@ -138,13 +138,13 @@ export function ConnectPPIForm({ onSuccess }: Props) {
             placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
             autoComplete="off"
             required
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+            className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
           />
         </div>
 
         {/* Private key */}
         <div>
-          <label className="text-xs text-slate-400 mb-1 block">Clave privada (Private Key)</label>
+          <label className="text-xs text-bf-text-3 mb-1 block">Clave privada (Private Key)</label>
           <div className="relative">
             <input
               type={showPrivateKey ? "text" : "password"}
@@ -153,12 +153,12 @@ export function ConnectPPIForm({ onSuccess }: Props) {
               placeholder="••••••••••••••••••••••••"
               autoComplete="new-password"
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 pr-10 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 pr-10 text-[16px] leading-tight text-bf-text placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPrivateKey(!showPrivateKey)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 hover:text-bf-text-2"
             >
               {showPrivateKey ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -168,7 +168,7 @@ export function ConnectPPIForm({ onSuccess }: Props) {
         {/* Account number: buscar o escribir manualmente */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs text-slate-400">Número de cuenta</label>
+            <label className="text-xs text-bf-text-3">Número de cuenta</label>
             {publicKey && privateKey && accounts.length === 0 && (
               <button
                 type="button"
@@ -190,7 +190,7 @@ export function ConnectPPIForm({ onSuccess }: Props) {
               value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value)}
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-purple-500 transition-colors"
             >
               <option value="">— Seleccioná una cuenta —</option>
               {accounts.map((acc) => {
@@ -210,10 +210,10 @@ export function ConnectPPIForm({ onSuccess }: Props) {
               onChange={(e) => setAccountNumber(e.target.value)}
               placeholder="Ej: 12345678"
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
             />
           )}
-          <p className="text-[10px] text-slate-600 mt-1">
+          <p className="text-[10px] text-bf-text-4 mt-1">
             Podés obtenerlo desde PPI o usando el botón &quot;Buscar cuentas&quot; arriba.
           </p>
         </div>
@@ -236,7 +236,7 @@ export function ConnectPPIForm({ onSuccess }: Props) {
           <button
             type="button"
             onClick={() => { setOpen(false); setError(""); setAccounts([]); }}
-            className="flex-1 py-2.5 rounded-xl text-sm text-slate-400 bg-slate-800 hover:bg-slate-700 transition-colors"
+            className="flex-1 py-2.5 rounded-xl text-sm text-bf-text-3 bg-bf-surface-2 hover:bg-bf-surface-3 transition-colors"
           >
             Cancelar
           </button>

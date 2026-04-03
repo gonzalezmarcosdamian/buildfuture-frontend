@@ -59,13 +59,13 @@ function SingleSyncButton({ provider }: { provider: string }) {
         className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl border transition-colors ${
           ok
             ? "bg-emerald-950/40 border-emerald-800 text-emerald-400"
-            : "bg-slate-800/50 border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-600"
+            : "bg-bf-surface-2/50 border-bf-border-2 text-bf-text-3 hover:text-bf-text-2 hover:border-bf-border-2"
         } disabled:opacity-50`}
       >
         <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
         {syncing ? "Sync..." : ok ? "Listo" : "Sync"}
         {!syncing && !ok && (
-          <span className="text-[9px] text-slate-600 font-medium">{provider}</span>
+          <span className="text-[9px] text-bf-text-4 font-medium">{provider}</span>
         )}
       </button>
       {error && <p className="text-[10px] text-red-400">{error}</p>}

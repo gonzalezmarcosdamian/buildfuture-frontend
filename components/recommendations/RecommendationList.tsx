@@ -98,12 +98,12 @@ function InstrumentLogo({ ticker, logoUrl }: { ticker: string; logoUrl?: string 
         src={logoUrl}
         alt={ticker}
         onError={() => setErr(true)}
-        className="w-8 h-8 rounded-full bg-slate-800 object-contain p-0.5 shrink-0"
+        className="w-8 h-8 rounded-full bg-bf-surface-2 object-contain p-0.5 shrink-0"
       />
     );
   }
   return (
-    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-300 shrink-0">
+    <div className="w-8 h-8 rounded-full bg-bf-surface-3 flex items-center justify-center text-[9px] font-bold text-bf-text-2 shrink-0">
       {ticker.slice(0, 2)}
     </div>
   );
@@ -132,7 +132,7 @@ const RISK_DESCRIPTION: Record<string, string> = {
 
 function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
   if (typeof document === "undefined") return null;
-  const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
+  const assetStyle = assetBg[rec.asset_type] || "bg-bf-surface-2/60 border-bf-border-2 text-bf-text-2";
   const isCapital  = rec.job === "capital";
   const hasRange   = rec.yield_range_low !== undefined && rec.yield_range_high !== undefined;
   const rangeData  = hasRange
@@ -145,7 +145,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="bg-slate-900 border border-slate-700 rounded-t-2xl w-full max-w-lg p-5 pb-8 space-y-4 max-h-[90vh] overflow-y-auto"
+        className="bg-bf-surface border border-bf-border-2 rounded-t-2xl w-full max-w-lg p-5 pb-8 space-y-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -160,7 +160,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
               </span>
             ))}
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-300 shrink-0">
+          <button onClick={onClose} className="text-bf-text-3 hover:text-bf-text-2 shrink-0">
             <X size={16} />
           </button>
         </div>
@@ -169,8 +169,8 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
         <div className="flex items-center gap-3">
           <InstrumentLogo ticker={rec.ticker} logoUrl={rec.logo_url} />
           <div>
-            <p className="text-lg font-bold text-slate-100">{rec.ticker}</p>
-            <p className="text-xs text-slate-500">{rec.name}</p>
+            <p className="text-lg font-bold text-bf-text">{rec.ticker}</p>
+            <p className="text-xs text-bf-text-3">{rec.name}</p>
           </div>
         </div>
 
@@ -181,7 +181,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
               <p className={`text-2xl font-bold leading-tight tabular-nums ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
                 {rangeData.range}
               </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">{rangeData.label}</p>
+              <p className="text-[10px] text-bf-text-3 mt-0.5">{rangeData.label}</p>
             </div>
           ) : (
             <p className="text-3xl font-bold text-emerald-400">
@@ -195,24 +195,24 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
         </div>
 
         {/* Capital → retorno */}
-        <div className="flex items-center justify-between bg-slate-800/50 rounded-xl px-3 py-2.5">
+        <div className="flex items-center justify-between bg-bf-surface-2/50 rounded-xl px-3 py-2.5">
           <div>
-            <p className="text-[10px] text-slate-500">Invertir</p>
-            <p className="text-sm font-semibold text-slate-200">
+            <p className="text-[10px] text-bf-text-3">Invertir</p>
+            <p className="text-sm font-semibold text-bf-text-2">
               ${rec.amount_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD
             </p>
           </div>
           <div className="text-right">
             {isCapital ? (
               <>
-                <p className="text-[10px] text-slate-500">Apreciación estimada</p>
+                <p className="text-[10px] text-bf-text-3">Apreciación estimada</p>
                 <p className="text-sm font-semibold text-blue-400">
                   {rangeData ? rangeData.range : `+${(rec.annual_yield_pct * 100).toFixed(1)}%`} USD/año
                 </p>
               </>
             ) : (
               <>
-                <p className="text-[10px] text-slate-500">Genera</p>
+                <p className="text-[10px] text-bf-text-3">Genera</p>
                 <p className="text-sm font-semibold text-emerald-400">
                   +${rec.monthly_return_usd.toFixed(2)} USD/mes
                 </p>
@@ -223,20 +223,20 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
 
         {/* ¿Qué es? */}
         <div className="space-y-1.5">
-          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">¿Qué es?</p>
-          <p className="text-xs text-slate-300 leading-relaxed">
+          <p className="text-[10px] font-semibold text-bf-text-3 uppercase tracking-wider">¿Qué es?</p>
+          <p className="text-xs text-bf-text-2 leading-relaxed">
             {ASSET_DESCRIPTION[rec.asset_type] ?? `Instrumento financiero de tipo ${rec.asset_type}.`}
           </p>
         </div>
 
         {/* ¿Por qué ahora? */}
         <div className="space-y-1.5">
-          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">¿Por qué ahora?</p>
-          <p className="text-xs text-slate-300 leading-relaxed">{rec.why_now || rec.rationale}</p>
+          <p className="text-[10px] font-semibold text-bf-text-3 uppercase tracking-wider">¿Por qué ahora?</p>
+          <p className="text-xs text-bf-text-2 leading-relaxed">{rec.why_now || rec.rationale}</p>
         </div>
 
         {/* ¿Qué riesgo tiene? */}
-        <div className={`rounded-xl border px-3 py-2.5 space-y-1 ${riskColor[rec.risk_level] ?? "border-slate-700 bg-slate-800/40 text-slate-400"}`}>
+        <div className={`rounded-xl border px-3 py-2.5 space-y-1 ${riskColor[rec.risk_level] ?? "border-bf-border-2 bg-bf-surface-2/40 text-bf-text-3"}`}>
           <div className="flex items-center gap-1.5">
             {riskIcon[rec.risk_level]}
             <p className="text-[10px] font-semibold uppercase tracking-wider">¿Qué riesgo tiene?</p>
@@ -255,7 +255,7 @@ function RecModal({ rec, onClose }: { rec: Rec; onClose: () => void }) {
 // ── Card ───────────────────────────────────────────────────────────────────────
 
 function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
-  const assetStyle = assetBg[rec.asset_type] || "bg-slate-800/60 border-slate-700 text-slate-300";
+  const assetStyle = assetBg[rec.asset_type] || "bg-bf-surface-2/60 border-bf-border-2 text-bf-text-2";
   const isCapital  = rec.job === "capital";
   const hasRange   = rec.yield_range_low !== undefined && rec.yield_range_high !== undefined;
   const rangeData  = hasRange
@@ -263,7 +263,7 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
     : null;
 
   return (
-    <div className="snap-center shrink-0 w-[58vw] max-w-[210px] rounded-2xl border bg-slate-900 border-slate-800 flex flex-col">
+    <div className="snap-center shrink-0 w-[58vw] max-w-[210px] rounded-2xl border bg-bf-surface border-bf-border flex flex-col">
       <div className="p-3 flex flex-col gap-2.5">
 
         {/* Top: asset badge + info button */}
@@ -274,7 +274,7 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onInfo(); }}
-            className="text-slate-600 hover:text-slate-400 transition-colors p-1 -m-1"
+            className="text-bf-text-4 hover:text-bf-text-3 transition-colors p-1 -m-1"
           >
             <Info size={13} />
           </button>
@@ -284,8 +284,8 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
         <div className="flex items-center gap-2">
           <InstrumentLogo ticker={rec.ticker} logoUrl={rec.logo_url} />
           <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-100 leading-tight">{rec.ticker}</p>
-            <p className="text-[10px] text-slate-500 leading-tight mt-0.5 truncate">{rec.name}</p>
+            <p className="text-sm font-bold text-bf-text leading-tight">{rec.ticker}</p>
+            <p className="text-[10px] text-bf-text-3 leading-tight mt-0.5 truncate">{rec.name}</p>
           </div>
         </div>
 
@@ -295,7 +295,7 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
             {rangeData ? rangeData.range : `${(rec.annual_yield_pct * 100).toFixed(1)}%`}
           </p>
           <div className="flex items-center gap-1.5">
-            <p className="text-[9px] text-slate-600 leading-none">
+            <p className="text-[9px] text-bf-text-4 leading-none">
               {rangeData ? rangeData.label : `${rec.currency}/año`}
             </p>
             <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit ${riskColor[rec.risk_level]}`}>
@@ -308,7 +308,7 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
         {/* Profile pills */}
         <div className="flex flex-wrap gap-1">
           {(rec.recommended_for ?? []).map((p) => (
-            <span key={p} className={`text-[8px] px-1.5 py-0.5 rounded-md border font-medium ${profileColor[p] ?? "text-slate-400 border-slate-700"}`}>
+            <span key={p} className={`text-[8px] px-1.5 py-0.5 rounded-md border font-medium ${profileColor[p] ?? "text-bf-text-3 border-bf-border-2"}`}>
               {p}
             </span>
           ))}
@@ -340,7 +340,7 @@ function RecSection({
         <span className="text-base leading-none">{meta.icon}</span>
         <div>
           <p className={`text-xs font-semibold ${meta.color}`}>{meta.label}</p>
-          <p className="text-[10px] text-slate-600">{meta.sublabel}</p>
+          <p className="text-[10px] text-bf-text-4">{meta.sublabel}</p>
         </div>
       </div>
 
@@ -349,21 +349,21 @@ function RecSection({
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="shrink-0 w-[58vw] max-w-[210px] rounded-2xl border border-slate-800 bg-slate-900 p-3 space-y-3 animate-pulse"
+              className="shrink-0 w-[58vw] max-w-[210px] rounded-2xl border border-bf-border bg-bf-surface p-3 space-y-3 animate-pulse"
             >
               <div className="flex justify-between">
-                <div className="h-4 w-12 bg-slate-800 rounded-md" />
-                <div className="h-4 w-4 bg-slate-800 rounded-full" />
+                <div className="h-4 w-12 bg-bf-surface-2 rounded-md" />
+                <div className="h-4 w-4 bg-bf-surface-2 rounded-full" />
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-slate-800 rounded-full" />
+                <div className="w-8 h-8 bg-bf-surface-2 rounded-full" />
                 <div className="space-y-1">
-                  <div className="h-3 w-14 bg-slate-800 rounded" />
-                  <div className="h-2 w-20 bg-slate-800 rounded" />
+                  <div className="h-3 w-14 bg-bf-surface-2 rounded" />
+                  <div className="h-2 w-20 bg-bf-surface-2 rounded" />
                 </div>
               </div>
-              <div className="h-7 w-20 bg-slate-800 rounded" />
-              <div className="h-14 bg-slate-800/50 rounded-lg" />
+              <div className="h-7 w-20 bg-bf-surface-2 rounded" />
+              <div className="h-14 bg-bf-surface-2/50 rounded-lg" />
             </div>
           ))}
         </div>
@@ -416,10 +416,10 @@ export function RecommendationList({
       <div className="space-y-4">
         {["renta", "capital"].map((s) => (
           <div key={s} className="space-y-2">
-            <div className="h-4 w-32 bg-slate-800 rounded animate-pulse" />
+            <div className="h-4 w-32 bg-bf-surface-2 rounded animate-pulse" />
             <div className="flex gap-3 overflow-hidden">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="shrink-0 w-[58vw] max-w-[210px] h-52 bg-slate-800/60 rounded-2xl animate-pulse" />
+                <div key={i} className="shrink-0 w-[58vw] max-w-[210px] h-52 bg-bf-surface-2/60 rounded-2xl animate-pulse" />
               ))}
             </div>
           </div>
@@ -437,11 +437,11 @@ export function RecommendationList({
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-100">Dónde invertir</h2>
+          <h2 className="text-sm font-semibold text-bf-text">Dónde invertir</h2>
           <button
             onClick={() => load(true)}
             disabled={refreshing}
-            className="text-slate-500 hover:text-blue-400 transition-colors"
+            className="text-bf-text-3 hover:text-blue-400 transition-colors"
           >
             <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
           </button>
@@ -451,13 +451,13 @@ export function RecommendationList({
         <RecSection job="renta" recs={data.renta} onInfo={setModalRec} refreshing={refreshing} />
 
         {data.renta.length > 0 && data.capital.length > 0 && (
-          <div className="border-t border-slate-800" />
+          <div className="border-t border-bf-border" />
         )}
 
         {/* Sección capital */}
         <RecSection job="capital" recs={data.capital} onInfo={setModalRec} refreshing={refreshing} />
 
-        <p className="text-[10px] text-slate-700 text-center">
+        <p className="text-[10px] text-bf-text-5 text-center">
           Datos en tiempo real · No es asesoramiento financiero
         </p>
       </div>

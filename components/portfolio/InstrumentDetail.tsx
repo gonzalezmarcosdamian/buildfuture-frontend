@@ -39,7 +39,7 @@ const ASSET_BADGES: Record<string, string> = {
   LETRA:  "bg-yellow-900 text-yellow-300",
   CRYPTO: "bg-orange-900 text-orange-300",
   FCI:    "bg-green-900 text-green-300",
-  CASH:   "bg-slate-700 text-slate-300",
+  CASH:   "bg-bf-surface-3 text-bf-text-2",
 };
 
 const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" };
@@ -51,14 +51,14 @@ function MetricRow({ label, value, sub, highlight }: {
     ? "text-emerald-400 font-semibold"
     : highlight === "red"
     ? "text-red-400 font-semibold"
-    : "text-slate-100 font-semibold";
+    : "text-bf-text font-semibold";
 
   return (
-    <div className="flex items-start justify-between py-2.5 border-b border-slate-800 last:border-0">
-      <span className="text-xs text-slate-400">{label}</span>
+    <div className="flex items-start justify-between py-2.5 border-b border-bf-border last:border-0">
+      <span className="text-xs text-bf-text-3">{label}</span>
       <div className="text-right">
         <span className={`text-xs ${valueClass}`}>{value}</span>
-        {sub && <p className="text-[10px] text-slate-600 mt-px">{sub}</p>}
+        {sub && <p className="text-[10px] text-bf-text-4 mt-px">{sub}</p>}
       </div>
     </div>
   );
@@ -213,12 +213,12 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
+      <div className="bg-bf-surface rounded-2xl border border-bf-border p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-xl font-bold text-slate-100">{inst.ticker}</h1>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[inst.asset_type] || "bg-slate-700 text-slate-300"}`}>
+              <h1 className="text-xl font-bold text-bf-text">{inst.ticker}</h1>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[inst.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
                 {inst.context.type_label}
               </span>
               {inst.asset_type === "LETRA" && inst.days_to_maturity !== null && inst.days_to_maturity <= 60 && inst.days_to_maturity > 0 && (
@@ -233,13 +233,13 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-400">{inst.description}</p>
+            <p className="text-xs text-bf-text-3">{inst.description}</p>
           </div>
           <div className="text-right">
-            <p className="text-base font-bold text-slate-100">
+            <p className="text-base font-bold text-bf-text">
               {FLAG[currency]} {fmt(inst.current_value_usd)}
             </p>
-            <p className="text-[10px] text-slate-500">{hint(inst.current_value_usd)}</p>
+            <p className="text-[10px] text-bf-text-3">{hint(inst.current_value_usd)}</p>
           </div>
         </div>
 
@@ -250,14 +250,14 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
           <div className="flex items-center gap-2">
             {pnlSign ? <TrendingUp size={16} className="text-emerald-400" /> : <TrendingDown size={16} className="text-red-400" />}
             <div>
-              <p className="text-[10px] text-slate-500">{pnlLabel}</p>
+              <p className="text-[10px] text-bf-text-3">{pnlLabel}</p>
               <p className={`text-sm font-bold ${pnlSign ? "text-emerald-400" : "text-red-400"}`}>
                 {pnlSign ? "+" : ""}{FLAG[currency]} {fmt(inst.pnl_usd)}
               </p>
             </div>
           </div>
           <div>
-            <p className="text-[10px] text-slate-500 text-right">Rendimiento</p>
+            <p className="text-[10px] text-bf-text-3 text-right">Rendimiento</p>
             <p className={`text-sm font-bold ${positive ? "text-emerald-400" : "text-red-400"}`}>
               {formatPct(inst.performance_pct, 2, true)}
             </p>
@@ -266,48 +266,48 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
       </div>
 
       {/* Position metrics — layout según tipo */}
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Mi posición</p>
+      <div className="bg-bf-surface rounded-2xl border border-bf-border p-4">
+        <p className="text-[10px] text-bf-text-3 uppercase tracking-wider mb-1">Mi posición</p>
         <PositionMetrics inst={inst} fmt={fmt} hint={hint} currency={currency} />
       </div>
 
       {/* Asset context */}
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider">Sobre este instrumento</p>
-        <p className="text-xs text-slate-300">{inst.context.description}</p>
+      <div className="bg-bf-surface rounded-2xl border border-bf-border p-4 space-y-3">
+        <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">Sobre este instrumento</p>
+        <p className="text-xs text-bf-text-2">{inst.context.description}</p>
         {inst.context.currency_note && (
           <div className="flex items-start gap-2">
-            <RefreshCw size={12} className="text-slate-500 mt-0.5 shrink-0" />
-            <p className="text-[11px] text-slate-500">{inst.context.currency_note}</p>
+            <RefreshCw size={12} className="text-bf-text-3 mt-0.5 shrink-0" />
+            <p className="text-[11px] text-bf-text-3">{inst.context.currency_note}</p>
           </div>
         )}
         <div className="flex items-start gap-2">
           <Droplets size={12} className="text-blue-500 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-slate-500">
-            <span className="text-slate-400">Liquidez:</span> {inst.context.liquidity}
+          <p className="text-[11px] text-bf-text-3">
+            <span className="text-bf-text-3">Liquidez:</span> {inst.context.liquidity}
           </p>
         </div>
         <div className="flex items-start gap-2">
           <Zap size={12} className="text-yellow-500 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-slate-500">
-            <span className="text-slate-400">Fuente de datos:</span> {inst.source}
+          <p className="text-[11px] text-bf-text-3">
+            <span className="text-bf-text-3">Fuente de datos:</span> {inst.source}
           </p>
         </div>
       </div>
 
       {/* MEP footer */}
-      <div className="bg-slate-900/50 rounded-2xl border border-slate-800 p-3 flex items-center justify-between">
+      <div className="bg-bf-surface/50 rounded-2xl border border-bf-border p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Shield size={13} className="text-slate-500" />
-          <span className="text-xs text-slate-500">MEP actual</span>
+          <Shield size={13} className="text-bf-text-3" />
+          <span className="text-xs text-bf-text-3">MEP actual</span>
         </div>
-        <span className="text-xs text-slate-400 font-medium">
+        <span className="text-xs text-bf-text-3 font-medium">
           ${inst.mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })} ARS/USD
         </span>
       </div>
 
       {inst.last_updated && (
-        <p className="text-[10px] text-slate-700 text-center">
+        <p className="text-[10px] text-bf-text-5 text-center">
           Última actualización: {new Date(inst.last_updated).toLocaleDateString("es-AR")}
         </p>
       )}
