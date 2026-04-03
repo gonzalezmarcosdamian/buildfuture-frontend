@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronRight, ChevronDown, MessageCircle, Mail, ExternalLink } from "lucide-react";
+import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronDown, MessageCircle, Mail, ExternalLink } from "lucide-react";
 
 // ── Hero mockup — representación del dashboard ─────────────────────────────────
 
@@ -313,32 +313,6 @@ function SectionProblema() {
   );
 }
 
-// ── CTA intermedio ─────────────────────────────────────────────────────────────
-
-function SectionCTAIntermedio() {
-  return (
-    <section className="py-20">
-      <div className="max-w-6xl mx-auto px-5 text-center space-y-6">
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">
-          Tu número existe. Solo hay que calcularlo.
-        </h2>
-        <p className="text-slate-400 text-lg max-w-xl mx-auto">
-          Creá tu cuenta gratis y en 5 minutos tenés tu dashboard de libertad financiera.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-8 py-4 rounded-2xl transition-colors text-base"
-          >
-            Empezar gratis
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-        <p className="text-[12px] text-slate-600">Sin tarjeta · Solo lectura · Podés irte cuando quieras</p>
-      </div>
-    </section>
-  );
-}
 
 // ── Mockup portfolio ──────────────────────────────────────────────────────────
 
@@ -493,12 +467,6 @@ function SectionSolucion() {
                   {pilar.headline}
                 </h3>
                 <p className="text-slate-400 text-base leading-relaxed">{pilar.body}</p>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
-                >
-                  Probarlo gratis <ChevronRight size={14} />
-                </Link>
               </div>
               {/* Mockup */}
               <div className={`flex ${pilar.flip ? "lg:justify-start" : "lg:justify-end"} justify-center`}>
@@ -577,14 +545,8 @@ function SectionComoFunciona() {
           ))}
         </div>
 
-        <div className="text-center space-y-4">
+        <div className="text-center">
           <p className="text-slate-500 text-sm">Listo. Tu dashboard está vivo.</p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-7 py-3.5 rounded-2xl transition-colors"
-          >
-            Empezar ahora <ArrowRight size={15} />
-          </Link>
         </div>
       </div>
     </section>
@@ -925,6 +887,7 @@ export default function LandingPage() {
       <SectionIntegraciones />
       <SectionProblema />
       <SectionSolucion />
+
       <SectionComoFunciona />
       <SectionVision />
       <SectionFounder />
