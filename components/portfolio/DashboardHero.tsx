@@ -38,7 +38,8 @@ interface Props {
   portfolioTotal: number;
   portfolioTotalArs?: number | null;
   mep: number;
-  cedearTotalUsd?: number | null;
+  goalsTargetTotal?: number | null;
+  goalsCount?: number;
   streak?: StreakData | null;
 }
 
@@ -96,25 +97,17 @@ function HeroInfoSheet({ onClose }: { onClose: () => void }) {
             </div>
             <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Mide tus <span className="text-slate-200 font-medium">CEDEARs y ETFs</span> contra el objetivo de libertad financiera calculado con la <span className="text-slate-200 font-medium">Regla del 4%</span>.
+                Muestra cuánto de tu portafolio total acumulaste en relación al <span className="text-slate-200 font-medium">objetivo sumado de todas tus metas de capital</span> a largo plazo.
               </p>
               <div className="bg-slate-800/60 rounded-xl px-3 py-2.5 space-y-1.5">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider">Regla del 4%</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider">¿Cómo se calcula?</p>
                 <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Si acumulás <span className="text-violet-400 font-semibold">25 veces tus gastos anuales</span> en capital, podés retirar el 4% cada año indefinidamente sin agotar el fondo.
-                </p>
-                <p className="text-[10px] text-slate-500">
-                  Objetivo = gastos/mes × 12 × 25
+                  Portafolio total ÷ suma de tus metas. Cuando llegás al <span className="text-violet-400 font-semibold">100%</span> alcanzaste todos tus objetivos de capital.
                 </p>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Solo cuentan CEDEARs/ETFs — activos de crecimiento dolarizado. Los bonos y ONs van a tu barra de Renta.
+                Configurá tus metas en la sección <span className="text-violet-400">Metas →</span> para que la barra refleje tus objetivos reales.
               </p>
-              <div className="bg-yellow-950/20 border border-yellow-900/30 rounded-xl px-3 py-2">
-                <p className="text-[10px] text-slate-400 leading-snug">
-                  ₿ <span className="text-yellow-400 font-medium">Crypto (Binance)</span> es capital especulativo — no entra en esta barra por su alta volatilidad. La ves en el resumen de tu portafolio.
-                </p>
-              </div>
             </div>
           </section>
 
@@ -159,7 +152,7 @@ function SegmentedBar({ pct, color, amountColor, label, amount, sublabel, href }
 
 export function DashboardHero({
   monthlyReturn, monthlyExpenses, covers, portfolioTotal,
-  portfolioTotalArs, mep, cedearTotalUsd, streak,
+  portfolioTotalArs, mep, goalsTargetTotal, goalsCount = 0, streak,
 }: Props) {
   const { currency } = useCurrency();
   const [infoOpen, setInfoOpen] = useState(false);
@@ -171,10 +164,8 @@ export function DashboardHero({
   const rentaPct = monthlyExpenses > 0 ? (monthlyReturn / monthlyExpenses) * 100 : 0;
   const coveredCount = covers.filter((c) => c.status === "covered").length;
 
-  // Capital bar: solo CEDEARs/ETFs vs objetivo libertad financiera (regla 4%)
-  const pureCapital = cedearTotalUsd ?? 0;
-  const freedomTarget = monthlyExpenses * 12 * 25;
-  const capitalPct = freedomTarget > 0 ? (pureCapital / freedomTarget) * 100 : 0;
+  // Capital bar: portafolio total vs suma de metas de capital del usuario
+  const capitalPct = goalsTargetTotal ? Math.min((portfolioTotal / goalsTargetTotal) * 100, 100) : 0;
 
   return (
     <>
@@ -229,13 +220,13 @@ export function DashboardHero({
           color="bg-gradient-to-r from-violet-600 to-violet-400"
           amountColor="text-violet-400"
           label="📈 Capital acumulado"
-          amount={fmtCompact(pureCapital, currency, mep)}
+          amount={fmtTotal(portfolioTotal)}
           sublabel={
-            freedomTarget > 0
-              ? `Objetivo libertad: ${fmtCompact(freedomTarget, currency, mep)} (regla 4%)`
-              : "Configurá tu presupuesto para calcular el objetivo"
+            goalsTargetTotal
+              ? `${goalsCount} ${goalsCount === 1 ? "meta" : "metas"} · objetivo total ${fmtCompact(goalsTargetTotal, currency, mep)}`
+              : "Sin metas — agregá una en Metas →"
           }
-          href="/goals?section=capital"
+          href="/goals"
         />
       </div>
     </div>

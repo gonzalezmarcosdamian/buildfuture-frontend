@@ -52,6 +52,12 @@ export async function fetchNextGoal() {
   return res.json();
 }
 
+export async function fetchCapitalGoals(): Promise<{ id: number; target_usd: number }[]> {
+  const res = await serverFetch("/portfolio/capital-goals");
+  if (!res.ok) return [];
+  return res.json();
+}
+
 export async function fetchIntegrations() {
   const res = await serverFetch("/integrations/");
   if (!res.ok) throw new Error("Failed to fetch integrations");

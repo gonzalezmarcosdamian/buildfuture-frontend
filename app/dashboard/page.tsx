@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile } from "@/lib/api-server";
+import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile, fetchCapitalGoals } from "@/lib/api-server";
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
@@ -8,13 +8,16 @@ import { ProjectionCard } from "@/components/goals/ProjectionCard";
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  const [score, budget, gamification, portfolio, profile] = await Promise.all([
+  const [score, budget, gamification, portfolio, profile, capitalGoals] = await Promise.all([
     fetchFreedomScore().catch(() => ({ portfolio_total_usd: 0, monthly_expenses_usd: 0 })),
     fetchBudget().catch(() => null),
     fetchGamification().catch(() => ({ monthly_return_usd: 0, portfolio_covers: 0 })),
     fetchPortfolio().catch(() => []),
     fetchProfile().catch(() => ({ risk_profile: null, available: false })),
+    fetchCapitalGoals().catch(() => []),
   ]);
+
+  const goalsTargetTotal = capitalGoals.reduce((sum: number, g: { target_usd: number }) => sum + g.target_usd, 0);
 
   const hasBudget = !!(budget && (budget.income_monthly_ars ?? 0) > 0);
   const hasPortfolio = !!(score.portfolio_total_usd > 0) ||
@@ -66,7 +69,8 @@ export default async function Dashboard() {
         portfolioTotal={score.portfolio_total_usd}
         portfolioTotalArs={portfolio?.summary?.total_ars ?? null}
         mep={mep}
-        cedearTotalUsd={portfolio?.summary?.cedear_total_usd ?? null}
+        goalsTargetTotal={goalsTargetTotal > 0 ? goalsTargetTotal : null}
+        goalsCount={capitalGoals.length}
         streak={gamification.streak ?? null}
       />
 
