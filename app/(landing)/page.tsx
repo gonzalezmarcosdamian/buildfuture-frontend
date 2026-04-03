@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
-import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronRight, ChevronDown } from "lucide-react";
+import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronRight, ChevronDown, MessageCircle, Mail, ExternalLink } from "lucide-react";
 
 // ── Hero mockup — representación del dashboard ─────────────────────────────────
 
@@ -172,11 +173,30 @@ function SectionHero() {
 // ── Sección Integraciones ──────────────────────────────────────────────────────
 
 const BROKERS = [
-  { name: "IOL", full: "InvertirOnline", status: "En vivo" },
-  { name: "Cocos", full: "Cocos Capital", status: "En vivo" },
-  { name: "PPI", full: "Primary Portfolio", status: "En vivo" },
-  { name: "Binance", full: "Binance", status: "En vivo" },
+  { name: "IOL", full: "InvertirOnline", domain: "invertironline.com", status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "Cocos", full: "Cocos Capital", domain: "cocos.capital", status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "PPI", full: "Primary Portfolio", domain: "ppi.com.ar", status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "Binance", full: "Binance", domain: "binance.com", status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "Carga manual", full: "Wallet, efectivo, otros", domain: null, status: "Próximamente", statusColor: "bg-slate-800 border-slate-700 text-slate-400" },
 ];
+
+function BrokerLogo({ domain, name }: { domain: string | null; name: string }) {
+  const [err, setErr] = useState(false);
+  if (domain && !err) {
+    return (
+      <Image
+        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+        alt={name}
+        width={28}
+        height={28}
+        className="rounded-lg"
+        onError={() => setErr(true)}
+        unoptimized
+      />
+    );
+  }
+  return <span className="text-base font-bold text-slate-400">+</span>;
+}
 
 function SectionIntegraciones() {
   return (
@@ -186,20 +206,20 @@ function SectionIntegraciones() {
           <p className="text-[11px] uppercase tracking-widest text-slate-600">Conectado a tu ecosistema financiero</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {BROKERS.map((b) => (
             <div
               key={b.name}
               className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col items-center gap-3 hover:border-slate-700 transition-colors"
             >
               <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-                <span className="text-[11px] font-bold text-slate-300">{b.name[0]}</span>
+                <BrokerLogo domain={b.domain} name={b.name} />
               </div>
               <div className="text-center">
                 <p className="text-sm font-semibold text-slate-200">{b.name}</p>
                 <p className="text-[10px] text-slate-600">{b.full}</p>
               </div>
-              <span className="text-[9px] px-2 py-0.5 bg-emerald-950/60 border border-emerald-800/50 text-emerald-400 rounded-full font-medium">
+              <span className={`text-[9px] px-2 py-0.5 border rounded-full font-medium ${b.statusColor}`}>
                 {b.status}
               </span>
             </div>
@@ -212,7 +232,7 @@ function SectionIntegraciones() {
             <span>Solo lectura. Nunca ejecutamos órdenes. Tus credenciales, encriptadas.</span>
           </div>
           <span className="hidden sm:inline text-slate-700">·</span>
-          <span className="text-slate-600">Más brokers en camino →</span>
+          <span className="text-slate-600">¿Usás otro broker? Escribinos →</span>
         </div>
       </div>
     </section>
@@ -763,7 +783,7 @@ const FAQS = [
   { q: "¿Es gratis?", a: "Sí, durante la beta. El modelo de monetización se definirá con la comunidad de usuarios antes de lanzar cualquier cobro. Recibirás aviso con tiempo." },
   { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si usás otro, anotate en la waitlist y contanos cuál — es la forma más directa de que lo prioricemos." },
   { q: "¿Mis datos se venden a terceros?", a: "No. Nunca. Usamos proveedores de infraestructura (Supabase, Railway, Vercel) pero no compartimos ni vendemos información personal o financiera." },
-  { q: "¿Puedo ingresar posiciones manualmente?", a: "Sí. Si tenés activos fuera de los brokers conectados — cripto en una wallet, efectivo — podés cargarlos a mano desde la sección Portafolio." },
+  { q: "¿Puedo ingresar posiciones manualmente?", a: "Próximamente. Podrás cargar activos fuera de los brokers conectados — cripto en wallets propias, efectivo, plazos fijos. Escribinos si lo necesitás y lo priorizamos." },
   { q: "¿Las sugerencias son asesoramiento financiero?", a: "No. Son sugerencias algorítmicas con fines educativos, basadas en tu perfil de riesgo. No constituyen asesoramiento financiero personalizado bajo la Ley 26.831. Toda decisión es tuya." },
 ];
 
@@ -796,73 +816,91 @@ function SectionFAQ() {
   );
 }
 
-// ── SECCIÓN WAITLIST ───────────────────────────────────────────────────────────
+// ── SECCIÓN CONTACTO ──────────────────────────────────────────────────────────
 
-function SectionWaitlist() {
-  const [email, setEmail]     = useState("");
-  const [accepted, setAccepted] = useState(false);
-  const [status, setStatus]   = useState<"idle" | "loading" | "ok" | "error">("idle");
-  const [msg, setMsg]         = useState("");
+const CONTACTO_ITEMS = [
+  {
+    icon: MessageCircle,
+    iconColor: "text-emerald-400",
+    iconBg: "bg-emerald-950/60 border-emerald-800/50",
+    title: "WhatsApp",
+    body: "La forma más rápida. Feedback, bugs, preguntas — lo que sea.",
+    cta: "Escribime por WhatsApp",
+    href: "https://wa.me/5492920445362",
+    external: true,
+  },
+  {
+    icon: Mail,
+    iconColor: "text-blue-400",
+    iconBg: "bg-blue-950/60 border-blue-800/50",
+    title: "Email",
+    body: "Feedback detallado, propuestas de integración, o simplemente saludar.",
+    cta: "ingonzalezdamian@gmail.com",
+    href: "mailto:ingonzalezdamian@gmail.com",
+    external: false,
+  },
+  {
+    icon: ExternalLink,
+    iconColor: "text-sky-400",
+    iconBg: "bg-sky-950/60 border-sky-800/50",
+    title: "LinkedIn",
+    body: "Si preferís el canal profesional o querés conectar directamente.",
+    cta: "Conectar en LinkedIn",
+    href: "https://linkedin.com/in/marcosdamiangonzalez",
+    external: true,
+  },
+];
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!accepted) { setMsg("Tenés que aceptar los términos para continuar."); return; }
-    setStatus("loading");
-    try {
-      const base = process.env.NEXT_PUBLIC_API_URL ?? "https://api-production-7ddd6.up.railway.app";
-      const res  = await fetch(`${base}/waitlist/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), source: "landing" }),
-      });
-      const data = await res.json();
-      if (res.ok) { setStatus("ok");    setMsg(data.message ?? "¡Te anotamos!"); }
-      else        { setStatus("error"); setMsg(data.detail  ?? "Algo salió mal. Intentá de nuevo."); }
-    } catch {
-      setStatus("error");
-      setMsg("No se pudo conectar. Intentá de nuevo más tarde.");
-    }
-  }
-
+function SectionContacto() {
   return (
     <section className="py-24 bg-slate-900/40 border-t border-slate-800/60">
-      <div className="max-w-xl mx-auto px-5 space-y-8 text-center">
-        <div className="space-y-3">
-          <p className="text-[11px] uppercase tracking-widest text-slate-600">Waitlist</p>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">¿Tu broker todavía no está?</h2>
-          <p className="text-slate-400">Dejá tu mail y te avisamos cuando lo integremos.</p>
+      <div className="max-w-3xl mx-auto px-5 space-y-10">
+        <div className="space-y-3 text-center">
+          <p className="text-[11px] uppercase tracking-widest text-slate-600">Contacto</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">Hablemos.</h2>
+          <p className="text-slate-400 max-w-xl mx-auto">
+            ¿Feedback sobre la app? ¿Querés que integremos tu broker?
+            ¿Algo que no funciona? Escribime directamente — leo todo.
+          </p>
         </div>
 
-        {status === "ok" ? (
-          <div className="bg-emerald-950/40 border border-emerald-800/50 rounded-2xl p-6 space-y-2">
-            <CheckCircle size={24} className="text-emerald-400 mx-auto" />
-            <p className="text-emerald-300 font-semibold">{msg}</p>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {CONTACTO_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <a
+                key={item.title}
+                href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
+                className="group bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 flex flex-col gap-4 transition-colors"
+              >
+                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${item.iconBg}`}>
+                  <Icon size={18} className={item.iconColor} />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <p className="text-sm font-semibold text-slate-200">{item.title}</p>
+                  <p className="text-[12px] text-slate-500 leading-relaxed">{item.body}</p>
+                </div>
+                <span className="text-[12px] font-semibold text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                  {item.cta} →
+                </span>
+              </a>
+            );
+          })}
+        </div>
+
+        {/* Nota integración */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-start gap-4">
+          <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 text-base">🔌</div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-slate-200">¿Usás un broker que no está?</p>
+            <p className="text-[13px] text-slate-500 leading-relaxed">
+              Escribime y lo priorizamos. Las integraciones se deciden por demanda real.
+              También podés cargar posiciones manualmente — esta funcionalidad está <span className="text-slate-300 font-medium">próximamente disponible en la app</span>.
+            </p>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email" required value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@email.com"
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-emerald-600 transition-colors"
-              />
-              <button type="submit" disabled={status === "loading"}
-                className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold px-6 py-3 rounded-xl transition-colors text-sm whitespace-nowrap">
-                {status === "loading" ? "Enviando…" : "Anotarme →"}
-              </button>
-            </div>
-            <label className="flex items-start gap-3 text-left cursor-pointer">
-              <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded border-slate-600 accent-emerald-500 shrink-0" />
-              <span className="text-[12px] text-slate-500 leading-relaxed">
-                Acepto los <Link href="/legal" className="text-emerald-400 hover:underline">términos de uso</Link> y la{" "}
-                <Link href="/legal#privacidad" className="text-emerald-400 hover:underline">política de privacidad</Link>.
-              </span>
-            </label>
-            {msg && <p className={`text-[12px] ${status === "error" ? "text-red-400" : "text-slate-500"}`}>{msg}</p>}
-          </form>
-        )}
+        </div>
       </div>
     </section>
   );
@@ -901,7 +939,7 @@ export default function LandingPage() {
       <SectionVision />
       <SectionFounder />
       <SectionFAQ />
-      <SectionWaitlist />
+      <SectionContacto />
       <SectionCTAFinal />
     </main>
   );
