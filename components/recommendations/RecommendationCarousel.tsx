@@ -18,6 +18,8 @@ interface Recommendation {
   risk_level: string;
   currency: string;
   already_in_portfolio: boolean;
+  job: string;
+  recommended_for: string[];
 }
 
 const riskColors: Record<string, string> = {
@@ -40,8 +42,27 @@ const riskIcons: Record<string, React.ReactNode> = {
   alto: <Zap size={11} />,
 };
 
+const profileColors: Record<string, string> = {
+  conservador: "text-emerald-400 bg-emerald-950/60 border-emerald-900",
+  moderado: "text-yellow-400 bg-yellow-950/60 border-yellow-900",
+  agresivo: "text-red-400 bg-red-950/60 border-red-900",
+};
+
+const jobLabel: Record<string, string> = {
+  renta: "Renta",
+  capital: "Capital",
+  ambos: "Renta + Capital",
+};
+
+const jobColors: Record<string, string> = {
+  renta: "text-teal-400 bg-teal-950/40 border-teal-900",
+  capital: "text-blue-400 bg-blue-950/40 border-blue-900",
+  ambos: "text-purple-400 bg-purple-950/40 border-purple-900",
+};
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
+
 export function RecommendationCarousel({ capitalArs = 500000, fxRate = 1320 }: { capitalArs?: number; fxRate?: number }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
   const [recs, setRecs] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -124,10 +145,24 @@ export function RecommendationCarousel({ capitalArs = 500000, fxRate = 1320 }: {
               <p className="text-[10px] text-slate-500">≈ USD {rec.amount_usd} → +${rec.monthly_return_usd}/mes</p>
             </div>
 
-            {/* Risk badge */}
-            <div className={`flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg border w-fit ${riskColors[rec.risk_level]}`}>
-              {riskIcons[rec.risk_level]}
-              riesgo {rec.risk_level}
+            {/* Job + Risk badges */}
+            <div className="flex flex-wrap gap-1">
+              <div className={`flex items-center text-[9px] font-medium px-1.5 py-0.5 rounded-md border ${jobColors[rec.job] || jobColors.renta}`}>
+                {jobLabel[rec.job] || rec.job}
+              </div>
+              <div className={`flex items-center gap-0.5 text-[9px] font-medium px-1.5 py-0.5 rounded-md border ${riskColors[rec.risk_level]}`}>
+                {riskIcons[rec.risk_level]}
+                {rec.risk_level}
+              </div>
+            </div>
+
+            {/* Perfil suitability */}
+            <div className="flex flex-wrap gap-1">
+              {(rec.recommended_for ?? []).map((p) => (
+                <span key={p} className={`text-[9px] px-1.5 py-0.5 rounded-md border font-medium ${profileColors[p]}`}>
+                  {p}
+                </span>
+              ))}
             </div>
 
             {/* Rationale */}
