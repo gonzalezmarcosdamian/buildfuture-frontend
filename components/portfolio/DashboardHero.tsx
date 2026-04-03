@@ -110,6 +110,11 @@ function HeroInfoSheet({ onClose }: { onClose: () => void }) {
               <p className="text-[11px] text-slate-400 leading-relaxed">
                 Solo cuentan CEDEARs/ETFs — activos de crecimiento dolarizado. Los bonos y ONs van a tu barra de Renta.
               </p>
+              <div className="bg-yellow-950/20 border border-yellow-900/30 rounded-xl px-3 py-2">
+                <p className="text-[10px] text-slate-400 leading-snug">
+                  ₿ <span className="text-yellow-400 font-medium">Crypto (Binance)</span> es capital especulativo — no entra en esta barra por su alta volatilidad. La ves en el resumen de tu portafolio.
+                </p>
+              </div>
             </div>
           </section>
 
