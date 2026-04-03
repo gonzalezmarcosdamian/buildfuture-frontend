@@ -1,12 +1,11 @@
 "use client";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 import { useMounted } from "@/hooks/useMounted";
 
 const OPTIONS = [
-  { value: "light", icon: Sun,     label: "Claro" },
-  { value: "system", icon: Monitor, label: "Sistema" },
-  { value: "dark",  icon: Moon,    label: "Oscuro" },
+  { value: "light", icon: Sun,  label: "Claro" },
+  { value: "dark",  icon: Moon, label: "Oscuro" },
 ] as const;
 
 export function ThemeToggle() {
