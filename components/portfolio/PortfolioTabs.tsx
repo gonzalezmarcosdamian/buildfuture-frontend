@@ -153,7 +153,12 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
   const tab = activeTab;
   const { currency } = useCurrency();
   const router = useRouter();
-  const [collapsedSources, setCollapsedSources] = useState<Record<string, boolean>>({});
+  const [collapsedSources, setCollapsedSources] = useState<Record<string, boolean>>(() => {
+    const sources = [...new Set(positions.map(p => p.source ?? "MANUAL"))];
+    const initial: Record<string, boolean> = {};
+    sources.forEach(src => { initial[src] = true; initial[`r_${src}`] = true; });
+    return initial;
+  });
 
   function toggleSource(source: string) {
     setCollapsedSources((prev) => ({ ...prev, [source]: !prev[source] }));

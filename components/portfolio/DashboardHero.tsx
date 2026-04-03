@@ -37,6 +37,7 @@ interface Props {
   covers: CoverItem[];
   portfolioTotal: number;
   portfolioTotalArs?: number | null;
+  capitalNumeratorUsd?: number | null;
   mep: number;
   goalsTargetTotal?: number | null;
   goalsCount?: number;
@@ -97,12 +98,12 @@ function HeroInfoSheet({ onClose }: { onClose: () => void }) {
             </div>
             <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Muestra cuánto de tu portafolio total acumulaste en relación al <span className="text-slate-200 font-medium">objetivo sumado de todas tus metas de capital</span> a largo plazo.
+                Muestra cuánto capital de largo plazo acumulaste en relación al <span className="text-slate-200 font-medium">objetivo sumado de todas tus metas</span>.
               </p>
               <div className="bg-slate-800/60 rounded-xl px-3 py-2.5 space-y-1.5">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider">¿Cómo se calcula?</p>
                 <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Portafolio total ÷ suma de tus metas. Cuando llegás al <span className="text-violet-400 font-semibold">100%</span> alcanzaste todos tus objetivos de capital.
+                  (CEDEARs + ETFs + Crypto + Cash) ÷ suma de tus metas. Cuando llegás al <span className="text-violet-400 font-semibold">100%</span> alcanzaste todos tus objetivos de capital.
                 </p>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
@@ -152,7 +153,7 @@ function SegmentedBar({ pct, color, amountColor, label, amount, sublabel, href }
 
 export function DashboardHero({
   monthlyReturn, monthlyExpenses, covers, portfolioTotal,
-  portfolioTotalArs, mep, goalsTargetTotal, goalsCount = 0, streak,
+  portfolioTotalArs, capitalNumeratorUsd, mep, goalsTargetTotal, goalsCount = 0, streak,
 }: Props) {
   const { currency } = useCurrency();
   const [infoOpen, setInfoOpen] = useState(false);
@@ -164,8 +165,9 @@ export function DashboardHero({
   const rentaPct = monthlyExpenses > 0 ? (monthlyReturn / monthlyExpenses) * 100 : 0;
   const coveredCount = covers.filter((c) => c.status === "covered").length;
 
-  // Capital bar: portafolio total vs suma de metas de capital del usuario
-  const capitalPct = goalsTargetTotal ? Math.min((portfolioTotal / goalsTargetTotal) * 100, 100) : 0;
+  // Capital bar: CEDEARs + ETFs + Crypto + Cash vs suma de metas de capital del usuario
+  const capitalNumerator = capitalNumeratorUsd ?? portfolioTotal;
+  const capitalPct = goalsTargetTotal ? Math.min((capitalNumerator / goalsTargetTotal) * 100, 100) : 0;
 
   return (
     <>
@@ -220,7 +222,7 @@ export function DashboardHero({
           color="bg-gradient-to-r from-violet-600 to-violet-400"
           amountColor="text-violet-400"
           label="📈 Capital acumulado"
-          amount={fmtTotal(portfolioTotal)}
+          amount={fmtCompact(capitalNumerator, currency, mep)}
           sublabel={
             goalsTargetTotal
               ? `${goalsCount} ${goalsCount === 1 ? "meta" : "metas"} · objetivo total ${fmtCompact(goalsTargetTotal, currency, mep)}`
