@@ -15,20 +15,20 @@ export function CurrencyToggle({ size = "md" }: { size?: "sm" | "md" }) {
   return (
     <button
       onClick={toggle}
-      className={`inline-flex items-center bg-slate-800 border border-slate-700 rounded-xl ${pill} transition-colors hover:border-slate-600`}
+      className={`inline-flex items-center bg-bf-surface-2 border border-bf-border-2 rounded-xl ${pill} transition-colors hover:border-bf-border-2`}
       aria-label="Cambiar moneda"
     >
       <span className={`font-semibold transition-all ${opt} ${
         currency === "USD"
-          ? "bg-slate-700 text-slate-100 shadow-sm"
-          : "text-slate-500"
+          ? "bg-bf-surface-3 text-bf-text shadow-sm"
+          : "text-bf-text-3"
       }`}>
         🇺🇸 USD
       </span>
       <span className={`font-semibold transition-all ${opt} ${
         currency === "ARS"
-          ? "bg-slate-700 text-slate-100 shadow-sm"
-          : "text-slate-500"
+          ? "bg-bf-surface-3 text-bf-text shadow-sm"
+          : "text-bf-text-3"
       }`}>
         🇦🇷 ARS
       </span>

@@ -84,8 +84,8 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
     <div className="px-4 pt-8 pb-24 space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-100">Casi listo</h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <h1 className="text-xl font-bold text-bf-text">Casi listo</h1>
+        <p className="text-sm text-bf-text-3 mt-1">
           Completá estos pasos para empezar a ver tu dashboard.
         </p>
       </div>
@@ -96,7 +96,7 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
           <div
             key={i}
             className={`h-1.5 flex-1 rounded-full transition-colors ${
-              done ? "bg-blue-500" : "bg-slate-700"
+              done ? "bg-blue-500" : "bg-bf-surface-3"
             }`}
           />
         ))}
@@ -125,23 +125,23 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
 
       {/* Risk profile card */}
       <div
-        className={`bg-slate-900 rounded-2xl border p-4 space-y-3 ${
-          riskSaved ? "border-emerald-800/40 opacity-60" : "border-slate-800"
+        className={`bg-bf-surface rounded-2xl border p-4 space-y-3 ${
+          riskSaved ? "border-emerald-800/40 opacity-60" : "border-bf-border"
         }`}
       >
         <div className="flex items-start gap-3">
           <div
             className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
-              riskSaved ? "bg-emerald-900/50 text-emerald-400" : "bg-slate-800 text-blue-400"
+              riskSaved ? "bg-emerald-900/50 text-emerald-400" : "bg-bf-surface-2 text-blue-400"
             }`}
           >
             <ShieldCheck size={18} />
           </div>
           <div>
-            <p className={`text-sm font-semibold ${riskSaved ? "text-slate-400 line-through" : "text-slate-100"}`}>
+            <p className={`text-sm font-semibold ${riskSaved ? "text-bf-text-3 line-through" : "text-bf-text"}`}>
               Elegir perfil de riesgo
             </p>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-bf-text-3 mt-0.5">
               Definí tu tolerancia al riesgo para recibir recomendaciones personalizadas.
             </p>
           </div>
@@ -158,11 +158,11 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
                   className={`w-full text-left p-3 rounded-xl border transition-colors ${
                     selectedRisk === opt.value
                       ? opt.color
-                      : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
+                      : "border-bf-border-2 bg-bf-surface-2/50 text-bf-text-2 hover:border-bf-border-2"
                   }`}
                 >
                   <p className="text-xs font-semibold">{opt.label}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">{opt.description}</p>
+                  <p className="text-[11px] text-bf-text-3 mt-0.5">{opt.description}</p>
                 </button>
               ))}
             </div>
@@ -218,37 +218,37 @@ function SetupCard({
 }) {
   return (
     <div
-      className={`bg-slate-900 rounded-2xl border p-4 space-y-3 ${
-        done ? "border-emerald-800/40 opacity-60" : "border-slate-800"
+      className={`bg-bf-surface rounded-2xl border p-4 space-y-3 ${
+        done ? "border-emerald-800/40 opacity-60" : "border-bf-border"
       }`}
     >
       <div className="flex items-start gap-3">
         <div
           className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
-            done ? "bg-emerald-900/50 text-emerald-400" : "bg-slate-800 text-blue-400"
+            done ? "bg-emerald-900/50 text-emerald-400" : "bg-bf-surface-2 text-blue-400"
           }`}
         >
           {icon}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <p className={`text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-slate-100"}`}>
+            <p className={`text-sm font-semibold ${done ? "text-bf-text-3 line-through" : "text-bf-text"}`}>
               {title}
             </p>
             {optional && !done && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-400 font-medium">
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-bf-surface-3 text-bf-text-3 font-medium">
                 Opcional
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+          <p className="text-xs text-bf-text-3 mt-0.5">{description}</p>
         </div>
       </div>
 
       {!done && (
         <button
           onClick={onCta}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors border border-slate-700"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium bg-bf-surface-2 hover:bg-bf-surface-3 text-bf-text-2 transition-colors border border-bf-border-2"
         >
           {ctaLabel}
           <ChevronRight size={14} />

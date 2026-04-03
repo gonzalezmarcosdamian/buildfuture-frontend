@@ -84,33 +84,33 @@ export function ConnectBinanceForm({ onSuccess }: Props) {
 
       {/* API Key */}
       <div>
-        <label className="block text-[10px] text-slate-400 mb-1">API Key</label>
+        <label className="block text-[10px] text-bf-text-3 mb-1">API Key</label>
         <input
           type="text"
           value={apiKey}
           onChange={e => setApiKey(e.target.value)}
           placeholder="N5XLPiPlZk..."
-          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-[16px] leading-tight text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-yellow-700"
+          className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 text-[16px] leading-tight text-bf-text-2 placeholder:text-bf-text-4 focus:outline-none focus:border-yellow-700"
           autoComplete="off"
         />
       </div>
 
       {/* Secret Key */}
       <div>
-        <label className="block text-[10px] text-slate-400 mb-1">Secret Key</label>
+        <label className="block text-[10px] text-bf-text-3 mb-1">Secret Key</label>
         <div className="relative">
           <input
             type={showSecret ? "text" : "password"}
             value={secretKey}
             onChange={e => setSecretKey(e.target.value)}
             placeholder="••••••••••••••••"
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-9 text-[16px] leading-tight text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-yellow-700"
+            className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 pr-9 text-[16px] leading-tight text-bf-text-2 placeholder:text-bf-text-4 focus:outline-none focus:border-yellow-700"
             autoComplete="off"
           />
           <button
             type="button"
             onClick={() => setShowSecret(v => !v)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-bf-text-3 hover:text-bf-text-2"
           >
             {showSecret ? <EyeOff size={13} /> : <Eye size={13} />}
           </button>
@@ -118,9 +118,9 @@ export function ConnectBinanceForm({ onSuccess }: Props) {
       </div>
 
       {/* Tooltip instrucciones */}
-      <p className="text-[10px] text-slate-500 leading-relaxed">
+      <p className="text-[10px] text-bf-text-3 leading-relaxed">
         Generá tu API Key en Binance:{" "}
-        <span className="text-slate-400">Perfil → Gestión de API → Crear API</span>
+        <span className="text-bf-text-3">Perfil → Gestión de API → Crear API</span>
         {" "}y seleccioná únicamente{" "}
         <span className="text-yellow-500 font-medium">&quot;Enable Reading&quot;</span>.
         No actives permisos de trading.
@@ -145,14 +145,14 @@ export function ConnectBinanceForm({ onSuccess }: Props) {
         <button
           type="button"
           onClick={() => { reset(); setOpen(false); }}
-          className="flex-1 text-xs text-slate-400 hover:text-slate-200 border border-slate-700 rounded-lg py-2 transition-colors"
+          className="flex-1 text-xs text-bf-text-3 hover:text-bf-text-2 border border-bf-border-2 rounded-lg py-2 transition-colors"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={loading || !apiKey || !secretKey}
-          className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium bg-yellow-600 hover:bg-yellow-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg py-2 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 text-xs font-medium bg-yellow-600 hover:bg-yellow-500 disabled:bg-bf-surface-3 disabled:text-bf-text-3 text-white rounded-lg py-2 transition-colors"
         >
           {loading ? <Loader2 size={12} className="animate-spin" /> : null}
           {loading ? "Conectando..." : "Conectar"}

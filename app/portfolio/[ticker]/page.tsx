@@ -15,7 +15,7 @@ export default async function InstrumentPage({ params }: { params: Promise<{ tic
     <div className="px-4 pt-6 pb-24 space-y-4">
       <Link
         href="/portfolio"
-        className="flex items-center gap-1 text-slate-400 hover:text-slate-200 text-sm transition-colors w-fit"
+        className="flex items-center gap-1 text-bf-text-3 hover:text-bf-text-2 text-sm transition-colors w-fit"
       >
         <ChevronLeft size={16} />
         Portafolio

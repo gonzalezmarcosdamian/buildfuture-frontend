@@ -30,8 +30,8 @@ export function ValuePropsScreen() {
     <div className="px-4 pt-10 pb-24 space-y-6 max-w-md mx-auto">
       {/* Header */}
       <div className="text-center space-y-2">
-        <p className="text-3xl font-extrabold text-slate-100">BuildFuture</p>
-        <p className="text-sm text-slate-400 leading-relaxed">
+        <p className="text-3xl font-extrabold text-bf-text">BuildFuture</p>
+        <p className="text-sm text-bf-text-3 leading-relaxed">
           Tu camino a la libertad financiera —{" "}
           <span className="text-emerald-400">renta mensual</span> hoy,{" "}
           <span className="text-violet-400">capital</span> mañana.
@@ -47,8 +47,8 @@ export function ValuePropsScreen() {
           >
             <span className="text-2xl shrink-0 leading-none mt-0.5">{p.icon}</span>
             <div>
-              <p className="text-sm font-semibold text-slate-100">{p.title}</p>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">{p.desc}</p>
+              <p className="text-sm font-semibold text-bf-text">{p.title}</p>
+              <p className="text-xs text-bf-text-3 mt-1 leading-relaxed">{p.desc}</p>
             </div>
           </div>
         ))}
@@ -63,7 +63,7 @@ export function ValuePropsScreen() {
           Conectar mi portafolio IOL
           <ChevronRight size={16} />
         </button>
-        <p className="text-center text-[11px] text-slate-600">
+        <p className="text-center text-[11px] text-bf-text-4">
           Sincronizá con InvertirOnline para ver tus posiciones en segundos.
         </p>
       </div>

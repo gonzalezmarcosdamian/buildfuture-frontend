@@ -82,15 +82,15 @@ function BudgetDrawer({ budget, onClose, onSaved }: {
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-end" onClick={onClose}>
       <div
-        className="bg-slate-950 rounded-t-2xl w-full max-h-[92vh] overflow-y-auto border-t border-slate-700"
+        className="bg-bf-page rounded-t-2xl w-full max-h-[92vh] overflow-y-auto border-t border-bf-border-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 sticky top-0 bg-slate-950 border-b border-slate-800 z-10">
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 sticky top-0 bg-bf-page border-b border-bf-border z-10">
           <div className="flex items-center gap-2">
-            <Wallet size={15} className="text-slate-400" />
-            <p className="text-sm font-bold text-slate-100">Presupuesto mensual</p>
+            <Wallet size={15} className="text-bf-text-3" />
+            <p className="text-sm font-bold text-bf-text">Presupuesto mensual</p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors">
+          <button onClick={onClose} className="text-bf-text-3 hover:text-bf-text-2 transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -122,11 +122,11 @@ function BudgetSection({ budget, mep }: { budget: Budget | null; mep: number }) 
   if (!budget || budget.income_monthly_ars === 0) {
     return (
       <>
-        <div className="bg-slate-900 rounded-2xl border border-dashed border-slate-700 p-4 flex items-center gap-4">
+        <div className="bg-bf-surface rounded-2xl border border-dashed border-bf-border-2 p-4 flex items-center gap-4">
           <span className="text-3xl shrink-0">💰</span>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-300">Sin presupuesto configurado</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">
+            <p className="text-sm font-semibold text-bf-text-2">Sin presupuesto configurado</p>
+            <p className="text-[11px] text-bf-text-3 mt-0.5">
               Ingresá tu sueldo y categorías de gasto para calcular cuánto podés invertir cada mes.
             </p>
           </div>
@@ -159,16 +159,16 @@ function BudgetSection({ budget, mep }: { budget: Budget | null; mep: number }) 
 
   return (
     <>
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+      <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
           <div className="flex items-center gap-2">
-            <Wallet size={13} className="text-slate-500" />
-            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Presupuesto mensual</p>
+            <Wallet size={13} className="text-bf-text-3" />
+            <p className="text-[10px] text-bf-text-3 uppercase tracking-wider font-semibold">Presupuesto mensual</p>
           </div>
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-300 transition-colors"
+            className="flex items-center gap-1 text-[10px] text-bf-text-3 hover:text-bf-text-2 transition-colors"
           >
             <Pencil size={11} />
             Editar
@@ -190,16 +190,16 @@ function BudgetSection({ budget, mep }: { budget: Budget | null; mep: number }) 
         </div>
 
         {/* Números clave */}
-        <div className="grid grid-cols-3 gap-px bg-slate-800/50 border-t border-slate-800 mt-2">
-          <div className="bg-slate-900 px-3 py-2.5 text-center">
-            <p className="text-[9px] text-slate-500 mb-0.5">Ingreso neto</p>
-            <p className="text-xs font-semibold text-slate-200">{fmt(budget.income_monthly_ars)}</p>
-            <p className="text-[9px] text-slate-600">{currency === "USD" ? formatARS(budget.income_monthly_ars) : `USD ${(budget.income_monthly_ars / mep).toFixed(0)}`}</p>
+        <div className="grid grid-cols-3 gap-px bg-bf-surface-2/50 border-t border-bf-border mt-2">
+          <div className="bg-bf-surface px-3 py-2.5 text-center">
+            <p className="text-[9px] text-bf-text-3 mb-0.5">Ingreso neto</p>
+            <p className="text-xs font-semibold text-bf-text-2">{fmt(budget.income_monthly_ars)}</p>
+            <p className="text-[9px] text-bf-text-4">{currency === "USD" ? formatARS(budget.income_monthly_ars) : `USD ${(budget.income_monthly_ars / mep).toFixed(0)}`}</p>
           </div>
-          <div className="bg-slate-900 px-3 py-2.5 text-center">
-            <p className="text-[9px] text-slate-500 mb-0.5">Gastos</p>
+          <div className="bg-bf-surface px-3 py-2.5 text-center">
+            <p className="text-[9px] text-bf-text-3 mb-0.5">Gastos</p>
             <p className="text-xs font-semibold text-red-400">{fmt(expensesARS)}</p>
-            <p className="text-[9px] text-slate-600">{(budget.expenses_pct * 100).toFixed(2)}% del ingreso</p>
+            <p className="text-[9px] text-bf-text-4">{(budget.expenses_pct * 100).toFixed(2)}% del ingreso</p>
           </div>
           <div className="bg-emerald-950/30 px-3 py-2.5 text-center">
             <p className="text-[9px] text-emerald-600 mb-0.5">A invertir</p>
@@ -237,13 +237,13 @@ export function GoalsClient({
   return (
     <div className="space-y-4">
       {/* Tab switcher */}
-      <div className="flex bg-slate-800/60 rounded-xl p-1 gap-1">
+      <div className="flex bg-bf-surface-2/60 rounded-xl p-1 gap-1">
         <button
           onClick={() => setTab("renta")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all ${
             tab === "renta"
               ? "bg-emerald-600 text-white shadow"
-              : "text-slate-400 hover:text-slate-200"
+              : "text-bf-text-3 hover:text-bf-text-2"
           }`}
         >
           💰 Renta mensual
@@ -253,7 +253,7 @@ export function GoalsClient({
           className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all ${
             tab === "capital"
               ? "bg-violet-600 text-white shadow"
-              : "text-slate-400 hover:text-slate-200"
+              : "text-bf-text-3 hover:text-bf-text-2"
           }`}
         >
           📈 Capital largo plazo
@@ -266,9 +266,9 @@ export function GoalsClient({
           {/* Presupuesto — fuente de verdad para ahorro mensual */}
           <BudgetSection budget={budget} mep={mep} />
 
-          <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+          <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-slate-300">Categorías desbloqueadas</p>
+              <p className="text-xs font-semibold text-bf-text-2">Categorías desbloqueadas</p>
               <span className="text-xs font-bold text-emerald-400">{covered.length}/{covers.length}</span>
             </div>
             <div className="flex gap-1 mb-3">
@@ -277,33 +277,33 @@ export function GoalsClient({
                   key={i}
                   className={`flex-1 h-2 rounded-full transition-all ${
                     c.status === "covered"  ? "bg-emerald-500" :
-                    c.status === "partial" ? "bg-yellow-500/60" : "bg-slate-700"
+                    c.status === "partial" ? "bg-yellow-500/60" : "bg-bf-surface-3"
                   }`}
                 />
               ))}
             </div>
             <div className="flex items-center justify-between text-[10px]">
-              <span className="text-slate-500">
+              <span className="text-bf-text-3">
                 Genera{" "}
                 <span className="text-emerald-400 font-semibold">
                   +<CurrencyValue usd={monthlyReturn} mep={mep} />/mes
                 </span>
               </span>
-              <span className="text-slate-500">
+              <span className="text-bf-text-3">
                 Gastos: <CurrencyValue usd={monthlyExpenses} mep={mep} />/mes
               </span>
             </div>
           </div>
 
-          <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+          <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border">
             <PortfolioCovers monthly_return_usd={monthlyReturn} items={covers} mep={mep} />
           </div>
 
           {unlockRoadmap.length > 0 && (
-            <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
+            <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border space-y-3">
               <div className="flex items-center gap-2">
                 <Zap size={14} className="text-yellow-400" />
-                <p className="text-xs font-semibold text-slate-300">Para desbloquear</p>
+                <p className="text-xs font-semibold text-bf-text-2">Para desbloquear</p>
               </div>
               {unlockRoadmap.map((c, i) => (
                 <div
@@ -311,29 +311,29 @@ export function GoalsClient({
                   className={`flex items-center gap-3 rounded-xl p-3 border ${
                     i === 0
                       ? "bg-blue-950/20 border-blue-900/40"
-                      : "bg-slate-800/40 border-slate-800 opacity-60"
+                      : "bg-bf-surface-2/40 border-bf-border opacity-60"
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-base shrink-0">
-                    {c.status === "partial" ? c.icon : <Lock size={14} className="text-slate-500" />}
+                  <div className="w-8 h-8 rounded-xl bg-bf-surface-2 flex items-center justify-center text-base shrink-0">
+                    {c.status === "partial" ? c.icon : <Lock size={14} className="text-bf-text-3" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-slate-300">{c.icon} {c.name}</p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-xs font-medium text-bf-text-2">{c.icon} {c.name}</p>
+                      <p className="text-[10px] text-bf-text-3">
                         <CurrencyValue usd={c.amount_usd} mep={mep} />/mes
                       </p>
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
+                    <p className="text-[10px] text-bf-text-3 mt-0.5">
                       Necesitás{" "}
-                      <span className="text-slate-300 font-medium">
+                      <span className="text-bf-text-2 font-medium">
                         +<CurrencyValue usd={c.monthly_needed} mep={mep} />/mes
                       </span>{" "}
                       más
                       {c.capital_needed && (
                         <span>
                           {" "}≈ invertir{" "}
-                          <span className="text-slate-300">
+                          <span className="text-bf-text-2">
                             <CurrencyValue usd={c.capital_needed} mep={mep} />
                           </span>
                         </span>

@@ -25,8 +25,8 @@ export default async function Portfolio() {
   return (
     <div className="px-4 pt-8 pb-24 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-100">Portafolio</h1>
-        <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-slate-800/50 border border-slate-800 rounded-xl text-slate-600 cursor-not-allowed opacity-50">
+        <h1 className="text-xl font-bold text-bf-text">Portafolio</h1>
+        <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-bf-surface-2/50 border border-bf-border rounded-xl text-bf-text-4 cursor-not-allowed opacity-50">
           <Plus size={12} />
           Agregar manual
         </span>

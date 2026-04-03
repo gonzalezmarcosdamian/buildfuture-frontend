@@ -115,13 +115,13 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
     <div className="space-y-3">
       {/* Unified switch + info icon */}
       <div className="flex items-center gap-2">
-        <div className="flex flex-1 bg-slate-900 rounded-xl p-1 border border-slate-800 gap-1">
+        <div className="flex flex-1 bg-bf-surface rounded-xl p-1 border border-bf-border gap-1">
           {(["composicion", "rendimientos"] as ViewMode[]).map((m) => (
             <button
               key={m}
               onClick={() => { setMode(m); setInfoModal(null); }}
               className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors ${
-                mode === m ? "bg-slate-700 text-slate-100" : "text-slate-500 hover:text-slate-300"
+                mode === m ? "bg-bf-surface-3 text-bf-text" : "text-bf-text-3 hover:text-bf-text-2"
               }`}
             >
               {m === "composicion" ? "Composición" : "Rendimientos"}
@@ -130,7 +130,7 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
         </div>
         <button
           onClick={() => setInfoModal(infoModal === activeInfoKey ? null : activeInfoKey)}
-          className="w-7 h-7 flex items-center justify-center rounded-full text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors flex-shrink-0"
+          className="w-7 h-7 flex items-center justify-center rounded-full text-bf-text-3 hover:text-bf-text-2 hover:bg-bf-surface-2 transition-colors flex-shrink-0"
           aria-label="Cómo se calcula"
         >
           <Info size={15} />
@@ -139,17 +139,17 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
 
       {/* Info modal inline */}
       {infoModal && (
-        <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 text-xs space-y-2.5 relative">
+        <div className="bg-bf-surface-2/80 border border-bf-border-2 rounded-2xl p-4 text-xs space-y-2.5 relative">
           <button
             onClick={() => setInfoModal(null)}
-            className="absolute top-3 right-3 text-slate-500 hover:text-slate-300"
+            className="absolute top-3 right-3 text-bf-text-3 hover:text-bf-text-2"
           >
             <X size={14} />
           </button>
-          <p className="font-semibold text-slate-200 pr-5">{info.title}</p>
+          <p className="font-semibold text-bf-text-2 pr-5">{info.title}</p>
           <ul className="space-y-1.5">
             {info.items.map((item, i) => (
-              <li key={i} className="flex gap-2 text-slate-400">
+              <li key={i} className="flex gap-2 text-bf-text-3">
                 <span className="text-blue-500 mt-px shrink-0">•</span>
                 {item}
               </li>
@@ -180,13 +180,13 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
       />
 
       {/* Agregar posición manual — próximamente */}
-      <div className="w-full flex items-center gap-3 p-4 bg-slate-900/30 border border-dashed border-slate-800 rounded-2xl opacity-50 cursor-not-allowed">
-        <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 text-slate-600">
+      <div className="w-full flex items-center gap-3 p-4 bg-bf-surface/30 border border-dashed border-bf-border rounded-2xl opacity-50 cursor-not-allowed">
+        <div className="w-8 h-8 rounded-xl bg-bf-surface-2 flex items-center justify-center shrink-0 text-bf-text-4">
           <Plus size={16} />
         </div>
         <div>
-          <p className="text-xs font-semibold text-slate-500">Agregar posición manual</p>
-          <p className="text-[10px] text-slate-600">
+          <p className="text-xs font-semibold text-bf-text-3">Agregar posición manual</p>
+          <p className="text-[10px] text-bf-text-4">
             Próximamente · Cripto, FCI, ETFs internacionales y más
           </p>
         </div>

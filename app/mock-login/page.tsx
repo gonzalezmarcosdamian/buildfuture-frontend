@@ -19,7 +19,7 @@ const PERSONAS = [
 const COLOR_MAP: Record<string, string> = {
   blue:    "border-blue-700 bg-blue-950/30 hover:bg-blue-900/30 text-blue-300",
   violet:  "border-violet-700 bg-violet-950/30 hover:bg-violet-900/30 text-violet-300",
-  slate:   "border-slate-700 bg-slate-800/30 hover:bg-slate-700/30 text-slate-300",
+  slate:   "border-bf-border-2 bg-bf-surface-2/30 hover:bg-bf-surface-3/30 text-bf-text-2",
   emerald: "border-emerald-700 bg-emerald-950/30 hover:bg-emerald-900/30 text-emerald-300",
   amber:   "border-amber-700 bg-amber-950/30 hover:bg-amber-900/30 text-amber-300",
   rose:    "border-rose-700 bg-rose-950/30 hover:bg-rose-900/30 text-rose-300",
@@ -51,21 +51,21 @@ function MockLoginContent() {
 
   if (!isMockMode) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500 text-sm">
+      <div className="min-h-screen bg-bf-page flex items-center justify-center text-bf-text-3 text-sm">
         Esta página solo existe en modo desarrollo.
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-10">
+    <div className="min-h-screen bg-bf-page px-4 py-10">
       <div className="max-w-lg mx-auto space-y-6">
         <div className="text-center">
           <p className="text-[10px] text-rose-500 uppercase tracking-widest font-bold mb-1">
             ⚠ Modo desarrollo — solo local
           </p>
-          <h1 className="text-xl font-bold text-slate-100">Seleccionar usuario mock</h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <h1 className="text-xl font-bold text-bf-text">Seleccionar usuario mock</h1>
+          <p className="text-xs text-bf-text-3 mt-1">
             Elegí una persona de QA para explorar distintos estados del producto.
           </p>
         </div>
@@ -90,7 +90,7 @@ function MockLoginContent() {
           ))}
         </div>
 
-        <p className="text-center text-[10px] text-slate-700">
+        <p className="text-center text-[10px] text-bf-text-5">
           NEXT_PUBLIC_MOCK_AUTH=true · X-Mock-User header
         </p>
       </div>
