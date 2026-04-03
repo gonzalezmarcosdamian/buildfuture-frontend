@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-type Mode = "login" | "register" | "forgot";
+type Mode = "login" | "forgot";
 
 function LoginForm() {
   const router = useRouter();
@@ -13,7 +14,6 @@ function LoginForm() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -23,7 +23,7 @@ function LoginForm() {
   // Mostrar error si el callback de Supabase falló (link inválido o expirado)
   useEffect(() => {
     if (searchParams.get("error") === "link_invalido") {
-      setError("El link es inválido o ya expiró. Solicitá uno nuevo.");
+      setError("El link de invitación es inválido o ya expiró. Escribile a Damián para que te reenvíe el acceso.");
     }
   }, [searchParams]);
 
@@ -31,7 +31,6 @@ function LoginForm() {
     setError("");
     setSuccess("");
     setPassword("");
-    setConfirmPassword("");
     setMode(nextMode);
   }
 
@@ -47,20 +46,6 @@ function LoginForm() {
         if (error) { setError(error.message); return; }
         setSplash(true);
         setTimeout(() => router.push("/dashboard"), 1400);
-
-      } else if (mode === "register") {
-        if (password !== confirmPassword) { setError("Las contraseñas no coinciden"); return; }
-        if (password.length < 6) { setError("La contraseña debe tener al menos 6 caracteres"); return; }
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            // Supabase redirige al callback que confirma el email y luego va al dashboard
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-        if (error) { setError(error.message); return; }
-        setSuccess("Cuenta creada. Revisá tu email para confirmar.");
 
       } else if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -96,27 +81,15 @@ function LoginForm() {
           <p className="text-bf-text-3 text-sm mt-1">Tu portafolio de libertad financiera</p>
         </div>
 
-        {/* Tab switcher — solo en login/register */}
-        {mode !== "forgot" && (
-          <div className="flex bg-bf-surface-2 rounded-xl p-1 mb-4 gap-1">
-            <button
-              onClick={() => changeMode("login")}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                mode === "login" ? "bg-bf-surface-3 text-bf-text" : "text-bf-text-3 hover:text-bf-text-2"
-              }`}
-            >
-              Ingresar
-            </button>
-            <button
-              onClick={() => changeMode("register")}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                mode === "register" ? "bg-bf-surface-3 text-bf-text" : "text-bf-text-3 hover:text-bf-text-2"
-              }`}
-            >
-              Registrarse
-            </button>
-          </div>
-        )}
+        {/* Beta notice */}
+        <div className="bg-bf-surface-2 border border-bf-border rounded-xl px-4 py-3 mb-4 text-center">
+          <p className="text-xs text-bf-text-3">
+            Beta cerrada · Acceso por invitación personal
+          </p>
+          <Link href="/#contacto" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+            ¿No tenés acceso todavía? Pedílo acá →
+          </Link>
+        </div>
 
         {/* Form card */}
         <form
@@ -166,22 +139,6 @@ function LoginForm() {
             </div>
           )}
 
-          {/* Confirmar password — solo en register */}
-          {mode === "register" && (
-            <div>
-              <label className="text-xs text-bf-text-3 mb-1 block">Confirmar contraseña</label>
-              <input
-                type={showPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-                placeholder="••••••••"
-                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
-              />
-            </div>
-          )}
-
           {error && (
             <div className="flex items-center gap-2 text-xs text-red-400 bg-red-950/30 border border-red-900 rounded-lg px-3 py-2">
               <AlertCircle size={13} />
@@ -202,13 +159,7 @@ function LoginForm() {
             className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium rounded-lg py-2.5 text-sm transition-colors"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
-            {loading
-              ? "..."
-              : mode === "login"
-              ? "Ingresar"
-              : mode === "register"
-              ? "Crear cuenta"
-              : "Enviar email"}
+            {loading ? "..." : mode === "login" ? "Ingresar" : "Enviar email"}
           </button>
 
           {mode === "login" && (
