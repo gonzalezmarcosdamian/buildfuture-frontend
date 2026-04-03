@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronDown, MessageCircle, Mail, ExternalLink } from "lucide-react";
@@ -102,7 +101,7 @@ function SectionHero() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-950/60 border border-emerald-800/50 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-medium text-emerald-400 tracking-wide uppercase">Open Finance · Argentina</span>
+              <span className="text-[11px] font-medium text-emerald-400 tracking-wide uppercase">Beta cerrada · Acceso por invitación</span>
             </div>
 
             {/* Headline */}
@@ -128,26 +127,20 @@ function SectionHero() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link
-                href="/login"
+              <a
+                href="#contacto"
                 className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-7 py-3.5 rounded-2xl transition-colors text-base"
               >
-                Empezar gratis
+                Quiero acceso
                 <ArrowRight size={16} />
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-7 py-3.5 rounded-2xl transition-colors text-base border border-slate-700"
-              >
-                Ya tengo cuenta →
-              </Link>
+              </a>
             </div>
 
             {/* Trust badges */}
             <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500">
               <span className="flex items-center gap-1.5">
                 <CheckCircle size={11} className="text-emerald-500" />
-                Sin tarjeta
+                Beta privada · No comercial
               </span>
               <span className="flex items-center gap-1.5">
                 <Eye size={11} className="text-emerald-500" />
@@ -155,7 +148,7 @@ function SectionHero() {
               </span>
               <span className="flex items-center gap-1.5">
                 <Zap size={11} className="text-emerald-500" />
-                Beta gratuita
+                Acceso por invitación personal
               </span>
             </div>
           </div>
@@ -497,9 +490,9 @@ const PASOS = [
   {
     num: "01",
     icon: "✉️",
-    title: "Creá tu cuenta",
-    body: "Solo email y contraseña. Sin datos bancarios. Sin CVU. Sin tarjeta. En 30 segundos.",
-    detail: "Usamos Supabase Auth con email confirmado. Tus credenciales nunca tocan nuestro servidor.",
+    title: "Recibí tu invitación",
+    body: "Escribime directamente. Si tu perfil encaja con la beta, te mando un link de acceso personal en menos de 24hs.",
+    detail: "La beta es cerrada — cada usuario es bienvenido por Damián personalmente. Sin registro público.",
   },
   {
     num: "02",
@@ -528,7 +521,7 @@ function SectionComoFunciona() {
             <span className="text-emerald-400">5 minutos.</span>
           </h2>
           <p className="text-slate-500 max-w-lg mx-auto">
-            Tres pasos. Sin fricciones. Sin datos bancarios. Sin riesgos.
+            Acceso personal. Sin fricciones. Sin datos bancarios. Sin riesgos.
           </p>
         </div>
 
@@ -770,12 +763,13 @@ function SectionFounder() {
 // ── SECCIÓN FAQ ────────────────────────────────────────────────────────────────
 
 const FAQS = [
+  { q: "¿Cómo accedo a BuildFuture?", a: "La beta es por invitación personal. Escribile directamente a Damián — por WhatsApp, email o LinkedIn. Si tu perfil encaja con la comunidad que estamos armando, recibís un link de acceso personal." },
+  { q: "¿Por qué la beta es cerrada?", a: "BuildFuture es un proyecto personal no comercial. Preferimos conocer a cada usuario antes de darle acceso a sus datos financieros. El control manual nos permite iterar rápido y garantizar que la experiencia sea buena para cada persona." },
+  { q: "¿BuildFuture es gratuito?", a: "Sí, y así seguirá durante toda la beta. Si en algún momento cambia el modelo, los usuarios beta recibirán aviso con al menos 30 días de anticipación y podrán eliminar su cuenta sin ninguna penalidad." },
   { q: "¿BuildFuture puede comprar o vender por mí?", a: "No. Nunca. Solo tiene acceso de lectura a tus cuentas. No puede ejecutar órdenes ni mover fondos. Podés verificarlo revisando los permisos en tu broker en cualquier momento." },
   { q: "¿Qué pasa con mis credenciales de IOL o Binance?", a: "Se almacenan encriptadas con AES-256. Nunca las vemos en texto plano. Podés revocarlas desde BuildFuture o directamente desde tu broker cuando quieras." },
-  { q: "¿Es gratis?", a: "Sí, durante la beta. El modelo de monetización se definirá con la comunidad de usuarios antes de lanzar cualquier cobro. Recibirás aviso con tiempo." },
-  { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si usás otro, anotate en la waitlist y contanos cuál — es la forma más directa de que lo prioricemos." },
+  { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si usás otro, escribile a Damián directamente — es la forma más rápida de que lo prioricemos." },
   { q: "¿Mis datos se venden a terceros?", a: "No. Nunca. Usamos proveedores de infraestructura (Supabase, Railway, Vercel) pero no compartimos ni vendemos información personal o financiera." },
-  { q: "¿Puedo ingresar posiciones manualmente?", a: "Próximamente. Podrás cargar activos fuera de los brokers conectados — cripto en wallets propias, efectivo, plazos fijos. Escribinos si lo necesitás y lo priorizamos." },
   { q: "¿Las sugerencias son asesoramiento financiero?", a: "No. Son sugerencias algorítmicas con fines educativos, basadas en tu perfil de riesgo. No constituyen asesoramiento financiero personalizado bajo la Ley 26.831. Toda decisión es tuya." },
 ];
 
@@ -845,14 +839,14 @@ const CONTACTO_ITEMS = [
 
 function SectionContacto() {
   return (
-    <section className="py-24 bg-slate-900/40 border-t border-slate-800/60">
+    <section id="contacto" className="py-24 bg-slate-900/40 border-t border-slate-800/60">
       <div className="max-w-3xl mx-auto px-5 space-y-10">
         <div className="space-y-3 text-center">
-          <p className="text-[11px] uppercase tracking-widest text-slate-600">Contacto</p>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">Hablemos.</h2>
+          <p className="text-[11px] uppercase tracking-widest text-slate-600">Acceso a la beta</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">Escribime directamente.</h2>
           <p className="text-slate-400 max-w-xl mx-auto">
-            ¿Feedback sobre la app? ¿Querés que integremos tu broker?
-            ¿Algo que no funciona? Escribime directamente — leo todo.
+            La beta es por invitación personal. Contame brevemente tu situación como inversor
+            y si encajás, te mando acceso en menos de 24hs.
           </p>
         </div>
 
@@ -908,11 +902,11 @@ function SectionCTAFinal() {
         <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-100 leading-tight">
           Tu libertad financiera<br />empieza con un número.
         </h2>
-        <p className="text-xl text-emerald-400 font-semibold">BuildFuture te lo dice hoy.</p>
-        <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-10 py-4 rounded-2xl transition-colors text-lg">
-          Crear mi cuenta gratis <ArrowRight size={18} />
-        </Link>
-        <p className="text-[12px] text-slate-600">Sin tarjeta · Solo lectura · Podés irte cuando quieras</p>
+        <p className="text-xl text-emerald-400 font-semibold">BuildFuture te lo muestra. Pedí tu acceso.</p>
+        <a href="#contacto" className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-10 py-4 rounded-2xl transition-colors text-lg">
+          Quiero acceso <ArrowRight size={18} />
+        </a>
+        <p className="text-[12px] text-slate-600">Beta cerrada · Acceso por invitación personal · No comercial</p>
       </div>
     </section>
   );
@@ -921,102 +915,6 @@ function SectionCTAFinal() {
 // ── SECCIÓN WAITLIST ───────────────────────────────────────────────────────────
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8008";
-
-function SectionWaitlist() {
-  const [email, setEmail] = useState("");
-  const [tosChecked, setTosChecked] = useState(false);
-  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!tosChecked) return;
-    setStatus("loading");
-    try {
-      const res = await fetch(`${API_URL}/waitlist/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), source: "landing_waitlist" }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || "Error al registrar");
-      }
-      setStatus("ok");
-    } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Error inesperado");
-      setStatus("error");
-    }
-  }
-
-  return (
-    <section className="py-24 border-t border-slate-800/60">
-      <div className="max-w-xl mx-auto px-5 text-center space-y-8">
-        <div className="space-y-3">
-          <p className="text-[11px] uppercase tracking-widest text-slate-600">Beta privada</p>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">
-            ¿No estás listo para crear una cuenta?
-          </h2>
-          <p className="text-slate-400">
-            Anotate en la lista. Te avisamos cuando tengamos novedades y priorizamos las integraciones por demanda.
-          </p>
-        </div>
-
-        {status === "ok" ? (
-          <div className="bg-emerald-950/40 border border-emerald-800/50 rounded-2xl p-6 space-y-2">
-            <p className="text-emerald-400 font-semibold text-lg">¡Listo, te anotamos! 🎉</p>
-            <p className="text-slate-400 text-sm">Te avisamos cuando haya novedades.</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex gap-2">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@email.com"
-                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 text-sm focus:outline-none focus:border-emerald-600"
-              />
-              <button
-                type="submit"
-                disabled={!tosChecked || status === "loading"}
-                className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-bold px-5 py-3 rounded-xl transition-colors text-sm whitespace-nowrap"
-              >
-                {status === "loading" ? "Enviando…" : "Anotarme"}
-              </button>
-            </div>
-
-            {/* Checkbox TyC — requerido por Ley 26.831 */}
-            <label className="flex items-start gap-3 text-left cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={tosChecked}
-                onChange={(e) => setTosChecked(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded border-slate-600 accent-emerald-500 shrink-0 cursor-pointer"
-              />
-              <span className="text-[12px] text-slate-500 group-hover:text-slate-400 transition-colors leading-relaxed">
-                Acepto los{" "}
-                <a href="/legal" className="text-slate-300 underline hover:text-emerald-400 transition-colors">
-                  Términos y Condiciones
-                </a>{" "}
-                y la{" "}
-                <a href="/legal#privacidad" className="text-slate-300 underline hover:text-emerald-400 transition-colors">
-                  Política de Privacidad
-                </a>
-                . Entiendo que BuildFuture no brinda asesoramiento financiero. (Ley 26.831)
-              </span>
-            </label>
-
-            {status === "error" && (
-              <p className="text-red-400 text-xs">{errorMsg}</p>
-            )}
-          </form>
-        )}
-      </div>
-    </section>
-  );
-}
 
 // ── PÁGINA PRINCIPAL ───────────────────────────────────────────────────────────
 
@@ -1032,7 +930,6 @@ export default function LandingPage() {
       <SectionVision />
       <SectionFounder />
       <SectionFAQ />
-      <SectionWaitlist />
       <SectionContacto />
       <SectionCTAFinal />
     </main>

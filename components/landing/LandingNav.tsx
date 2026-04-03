@@ -33,15 +33,9 @@ export function LandingNav() {
           <div className="hidden sm:flex items-center gap-3">
             <Link
               href="/login"
-              className="text-sm text-slate-400 hover:text-slate-100 transition-colors px-3 py-2"
+              className="text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-2"
             >
-              Iniciar sesión
-            </Link>
-            <Link
-              href="/login"
-              className="text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2 rounded-xl transition-colors"
-            >
-              Crear cuenta gratis →
+              ¿Ya tenés acceso? →
             </Link>
           </div>
 
@@ -69,17 +63,10 @@ export function LandingNav() {
           </Link>
           <Link
             href="/login"
-            className="text-lg text-slate-300 hover:text-white transition-colors"
+            className="text-lg text-slate-400 hover:text-slate-200 transition-colors"
             onClick={() => setMobileOpen(false)}
           >
-            Iniciar sesión
-          </Link>
-          <Link
-            href="/login"
-            className="text-lg font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-8 py-3 rounded-2xl transition-colors"
-            onClick={() => setMobileOpen(false)}
-          >
-            Crear cuenta gratis →
+            ¿Ya tenés acceso? →
           </Link>
         </div>
       )}
