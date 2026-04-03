@@ -68,7 +68,11 @@ export default async function Dashboard() {
         covers={gamification.portfolio_covers}
         portfolioTotal={score.portfolio_total_usd}
         portfolioTotalArs={portfolio?.summary?.total_ars ?? null}
-        capitalNumeratorUsd={portfolio?.summary?.capital_numerator_usd ?? null}
+        capitalNumeratorUsd={
+          portfolio?.summary
+            ? (portfolio.summary.cedear_total_usd ?? 0) + (portfolio.summary.crypto_total_usd ?? 0) + (portfolio.summary.cash_total_usd ?? 0)
+            : null
+        }
         mep={mep}
         goalsTargetTotal={goalsTargetTotal > 0 ? goalsTargetTotal : null}
         goalsCount={capitalGoals.length}
