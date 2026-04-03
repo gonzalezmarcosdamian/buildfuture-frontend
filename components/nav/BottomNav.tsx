@@ -35,8 +35,8 @@ export function BottomNav() {
       )}
 
       <nav
-        className="fixed left-3 right-3 z-50 bg-slate-900/95 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl shadow-black/40"
-        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}
+        className="fixed left-4 right-4 z-50 bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-lg shadow-black/30"
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)" }}
       >
         <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-2">
           {navItems.map(({ href, icon: Icon, label }) => {
