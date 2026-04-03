@@ -289,59 +289,19 @@ function RecCard({ rec, onInfo }: { rec: Rec; onInfo: () => void }) {
           </div>
         </div>
 
-        {/* Yield / range */}
-        <div className="space-y-0.5">
-          {rangeData ? (
-            <>
-              <p className={`text-base font-bold leading-tight tabular-nums ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
-                {rangeData.range}
-              </p>
-              <div className="flex items-center gap-1.5">
-                <p className="text-[9px] text-slate-600 leading-none">{rangeData.label}</p>
-                <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit ${riskColor[rec.risk_level]}`}>
-                  {riskIcon[rec.risk_level]}
-                </span>
-              </div>
-            </>
-          ) : (
-            <div className="flex items-end gap-1.5">
-              <p className={`text-2xl font-bold leading-none ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
-                {(rec.annual_yield_pct * 100).toFixed(1)}%
-              </p>
-              <div className="pb-0.5">
-                <p className="text-[9px] text-slate-600 leading-none">{rec.currency}/año</p>
-                <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit mt-0.5 ${riskColor[rec.risk_level]}`}>
-                  {riskIcon[rec.risk_level]}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Retorno */}
-        <div className="bg-slate-800/50 rounded-lg px-2.5 py-2 space-y-1">
-          <div className="flex items-center justify-between">
-            <p className="text-[9px] text-slate-500">Invertir</p>
-            <p className="text-[11px] font-semibold text-slate-200">
-              ${rec.amount_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD
+        {/* Yield range + risk */}
+        <div className="space-y-1">
+          <p className={`text-lg font-bold leading-tight tabular-nums ${isCapital ? "text-blue-400" : "text-emerald-400"}`}>
+            {rangeData ? rangeData.range : `${(rec.annual_yield_pct * 100).toFixed(1)}%`}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[9px] text-slate-600 leading-none">
+              {rangeData ? rangeData.label : `${rec.currency}/año`}
             </p>
-          </div>
-          <div className="flex items-center justify-between">
-            {isCapital ? (
-              <>
-                <p className="text-[9px] text-slate-500">Apreciación</p>
-                <p className="text-[11px] font-semibold text-blue-400">
-                  {rangeData ? rangeData.range : `+${(rec.annual_yield_pct * 100).toFixed(1)}%`}/año
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-[9px] text-slate-500">Retorno</p>
-                <p className="text-[11px] font-semibold text-emerald-400">
-                  +${rec.monthly_return_usd.toFixed(2)}/mes
-                </p>
-              </>
-            )}
+            <span className={`flex items-center gap-0.5 text-[8px] px-1 py-0.5 rounded-full border w-fit ${riskColor[rec.risk_level]}`}>
+              {riskIcon[rec.risk_level]}
+              <span className="ml-0.5 capitalize">{rec.risk_level}</span>
+            </span>
           </div>
         </div>
 
