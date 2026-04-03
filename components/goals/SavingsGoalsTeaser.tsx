@@ -9,17 +9,17 @@ const GOALS = [
 
 export function SavingsGoalsTeaser() {
   return (
-    <div className="rounded-2xl p-4 border border-dashed border-slate-700/60 bg-slate-900/50 space-y-4">
+    <div className="rounded-2xl p-4 border border-dashed border-bf-border-2/60 bg-bf-surface/50 space-y-4">
 
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold text-violet-400">Objetivos de capital</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">
+          <p className="text-[11px] text-bf-text-3 mt-0.5">
             Metas que requieren capital acumulado, no renta mensual
           </p>
         </div>
-        <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-400 bg-slate-700/80 border border-slate-600 px-2 py-0.5 rounded-full shrink-0">
+        <span className="flex items-center gap-1 text-[10px] font-semibold text-bf-text-3 bg-bf-surface-3/80 border border-bf-border-2 px-2 py-0.5 rounded-full shrink-0">
           <Clock size={10} />
           Próximamente
         </span>
@@ -30,20 +30,20 @@ export function SavingsGoalsTeaser() {
         {GOALS.map((g) => (
           <div
             key={g.name}
-            className="bg-slate-800/50 border border-dashed border-slate-700 rounded-xl p-3 space-y-2 opacity-70"
+            className="bg-bf-surface-2/50 border border-dashed border-bf-border-2 rounded-xl p-3 space-y-2 opacity-70"
           >
             <div className="flex items-center gap-2">
               <span className="text-base">{g.icon}</span>
               <div className="min-w-0">
-                <p className="text-[11px] font-medium text-slate-300 truncate">{g.name}</p>
-                <p className="text-[10px] text-slate-500">{g.amount}</p>
+                <p className="text-[11px] font-medium text-bf-text-2 truncate">{g.name}</p>
+                <p className="text-[10px] text-bf-text-3">{g.amount}</p>
               </div>
             </div>
             {/* Barra fantasma */}
-            <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-1 bg-bf-surface-3 rounded-full overflow-hidden">
               <div className="h-full w-0 bg-violet-500 rounded-full" />
             </div>
-            <p className="text-[9px] text-slate-600">0% acumulado</p>
+            <p className="text-[9px] text-bf-text-4">0% acumulado</p>
           </div>
         ))}
       </div>
@@ -51,9 +51,9 @@ export function SavingsGoalsTeaser() {
       {/* Propuesta de valor */}
       <div className="bg-violet-950/20 border border-violet-900/30 rounded-xl px-3 py-2.5 flex items-start gap-2">
         <TrendingUp size={14} className="text-violet-400 shrink-0 mt-0.5" />
-        <p className="text-[11px] text-slate-400">
+        <p className="text-[11px] text-bf-text-3">
           Conectá tus metas con tu portafolio:{" "}
-          <span className="text-slate-300">¿cuánto capital necesitás acumular para llegar en N años?</span>
+          <span className="text-bf-text-2">¿cuánto capital necesitás acumular para llegar en N años?</span>
         </p>
       </div>
 

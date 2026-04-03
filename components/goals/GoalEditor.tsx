@@ -75,53 +75,53 @@ export function GoalEditor({ budgetSavingsUSD }: { budgetSavingsUSD?: number | n
     }
   }
 
-  if (loading) return <div className="h-24 bg-slate-900 rounded-2xl border border-slate-800 animate-pulse" />;
+  if (loading) return <div className="h-24 bg-bf-surface rounded-2xl border border-bf-border animate-pulse" />;
 
   return (
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+    <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
       {/* Header always visible */}
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between p-4 text-left"
       >
         <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Meta de ahorro</p>
+          <p className="text-xs text-bf-text-3 uppercase tracking-wider mb-1">Meta de ahorro</p>
           <div className="flex items-center gap-3">
             <div>
-              <p className="text-lg font-bold text-slate-100">
+              <p className="text-lg font-bold text-bf-text">
                 {effectiveSavings != null
                   ? `$${Math.round(effectiveSavings).toLocaleString("es-AR")} USD/mes`
                   : "Sin configurar"}
               </p>
-              <p className="text-[11px] text-slate-500">{displayedYieldOpt.label} · {(savedYield * 100).toFixed(2)}% anual</p>
+              <p className="text-[11px] text-bf-text-3">{displayedYieldOpt.label} · {(savedYield * 100).toFixed(2)}% anual</p>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Pencil size={14} className="text-slate-500" />
-          {open ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
+          <Pencil size={14} className="text-bf-text-3" />
+          {open ? <ChevronUp size={16} className="text-bf-text-3" /> : <ChevronDown size={16} className="text-bf-text-3" />}
         </div>
       </button>
 
       {/* Edit form */}
       {open && (
-        <div className="border-t border-slate-800 px-4 pb-4 pt-3 space-y-4">
+        <div className="border-t border-bf-border px-4 pb-4 pt-3 space-y-4">
           {/* Ahorro mensual */}
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">¿Cuánto invertís por mes? (USD)</label>
+            <label className="text-xs text-bf-text-3 mb-1 block">¿Cuánto invertís por mes? (USD)</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">$</span>
               <input
                 type="number"
                 min={0}
                 value={editSavings}
                 onChange={(e) => setEditSavings(e.target.value)}
                 placeholder={budgetSavingsUSD != null ? String(Math.round(budgetSavingsUSD)) : "1200"}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-7 pr-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-blue-500"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-3 py-2.5 text-bf-text text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
             {budgetSavingsUSD != null && (
-              <p className="text-[10px] text-slate-500 mt-1">
+              <p className="text-[10px] text-bf-text-3 mt-1">
                 Tu presupuesto indica ~${Math.round(budgetSavingsUSD).toLocaleString("es-AR")} USD/mes disponibles
               </p>
             )}
@@ -129,7 +129,7 @@ export function GoalEditor({ budgetSavingsUSD }: { budgetSavingsUSD?: number | n
 
           {/* Rendimiento objetivo */}
           <div>
-            <label className="text-xs text-slate-400 mb-2 block">Rendimiento objetivo del portafolio</label>
+            <label className="text-xs text-bf-text-3 mb-2 block">Rendimiento objetivo del portafolio</label>
             <div className="grid grid-cols-2 gap-2">
               {YIELD_OPTIONS.map((opt) => (
                 <button
@@ -138,7 +138,7 @@ export function GoalEditor({ budgetSavingsUSD }: { budgetSavingsUSD?: number | n
                   className={`rounded-xl p-2.5 border text-left transition-all ${
                     Math.abs(editYield - opt.value) < 0.005
                       ? "bg-blue-950/40 border-blue-700 text-blue-300"
-                      : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600"
+                      : "bg-bf-surface-2 border-bf-border-2 text-bf-text-3 hover:border-bf-border-2"
                   }`}
                 >
                   <p className="text-xs font-semibold">{opt.label}</p>
@@ -164,7 +164,7 @@ export function GoalEditor({ budgetSavingsUSD }: { budgetSavingsUSD?: number | n
                 setEditYield(savedYield);
                 setOpen(false);
               }}
-              className="px-4 flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-400 text-sm rounded-xl transition-colors"
+              className="px-4 flex items-center gap-1 bg-bf-surface-2 hover:bg-bf-surface-3 text-bf-text-3 text-sm rounded-xl transition-colors"
             >
               <X size={14} />
             </button>

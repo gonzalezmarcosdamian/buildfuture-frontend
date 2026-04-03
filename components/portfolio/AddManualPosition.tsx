@@ -174,8 +174,8 @@ export function AddManualPosition() {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-12">
         <CheckCircle2 size={40} className="text-emerald-400" />
-        <p className="text-sm font-semibold text-slate-100">Posición agregada</p>
-        <p className="text-xs text-slate-500">Redirigiendo al portafolio…</p>
+        <p className="text-sm font-semibold text-bf-text">Posición agregada</p>
+        <p className="text-xs text-bf-text-3">Redirigiendo al portafolio…</p>
       </div>
     );
   }
@@ -183,8 +183,8 @@ export function AddManualPosition() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg font-bold text-slate-100">Agregar posición manual</h1>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <h1 className="text-lg font-bold text-bf-text">Agregar posición manual</h1>
+        <p className="text-xs text-bf-text-3 mt-0.5">
           Crypto, FCI, ETFs internacionales y más
         </p>
       </div>
@@ -192,19 +192,19 @@ export function AddManualPosition() {
       {/* Step 1: elegir tipo */}
       {step === 1 && (
         <div className="space-y-2">
-          <p className="text-xs text-slate-400 uppercase tracking-wider">¿Qué tipo de activo?</p>
+          <p className="text-xs text-bf-text-3 uppercase tracking-wider">¿Qué tipo de activo?</p>
           {ASSET_TYPES.map((a) => (
             <button
               key={a.value}
               onClick={() => { setAssetType(a.value); setStep(a.value === "OTRO" ? 3 : 2); }}
-              className="w-full flex items-center gap-3 p-3.5 bg-slate-900 border border-slate-800 rounded-2xl hover:border-slate-700 transition-colors text-left"
+              className="w-full flex items-center gap-3 p-3.5 bg-bf-surface border border-bf-border rounded-2xl hover:border-bf-border-2 transition-colors text-left"
             >
               <span className="text-xl w-8 text-center">{a.icon}</span>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-slate-100">{a.label}</p>
-                <p className="text-[11px] text-slate-500">{a.desc}</p>
+                <p className="text-sm font-semibold text-bf-text">{a.label}</p>
+                <p className="text-[11px] text-bf-text-3">{a.desc}</p>
               </div>
-              <ChevronRight size={14} className="text-slate-600" />
+              <ChevronRight size={14} className="text-bf-text-4" />
             </button>
           ))}
         </div>
@@ -213,10 +213,10 @@ export function AddManualPosition() {
       {/* Step 2: buscar activo */}
       {step === 2 && assetType && assetType !== "OTRO" && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <button onClick={() => { setStep(1); setSearchQuery(""); setSearchResults([]); }} className="hover:text-slate-200">← Tipo</button>
+          <div className="flex items-center gap-2 text-xs text-bf-text-3">
+            <button onClick={() => { setStep(1); setSearchQuery(""); setSearchResults([]); }} className="hover:text-bf-text-2">← Tipo</button>
             <span>/</span>
-            <span className="text-slate-200">
+            <span className="text-bf-text-2">
               {assetType === "FCI" ? "Elegir fondo" : assetType === "CRYPTO" ? "Buscar cripto" : "Buscar ticker"}
             </span>
           </div>
@@ -234,7 +234,7 @@ export function AddManualPosition() {
                 : "Ej: SPY, QQQ, AAPL"
               }
               autoFocus
-              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+              className="flex-1 bg-bf-surface-2 border border-bf-border-2 rounded-xl px-3 py-2.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500 transition-colors"
             />
             {assetType !== "FCI" && (
               <button
@@ -257,14 +257,14 @@ export function AddManualPosition() {
           {assetType === "FCI" && (
             <div className="space-y-1 max-h-96 overflow-y-auto pr-0.5">
               {loadingFci ? (
-                <div className="flex items-center justify-center gap-2 py-8 text-slate-500 text-xs">
+                <div className="flex items-center justify-center gap-2 py-8 text-bf-text-3 text-xs">
                   <Loader2 size={14} className="animate-spin" /> Cargando fondos...
                 </div>
               ) : filteredFci.length === 0 ? (
-                <p className="text-xs text-slate-600 text-center py-4">Sin resultados para &quot;{searchQuery}&quot;</p>
+                <p className="text-xs text-bf-text-4 text-center py-4">Sin resultados para &quot;{searchQuery}&quot;</p>
               ) : (
                 <>
-                  <p className="text-[10px] text-slate-600 pb-1">
+                  <p className="text-[10px] text-bf-text-4 pb-1">
                     {filteredFci.length} {filteredFci.length === 1 ? "fondo" : "fondos"}
                     {searchQuery && ` · filtrado por "${searchQuery}"`}
                   </p>
@@ -272,14 +272,14 @@ export function AddManualPosition() {
                     <button
                       key={i}
                       onClick={() => pickResult(r)}
-                      className="w-full flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-600 hover:bg-slate-800/60 transition-colors text-left"
+                      className="w-full flex items-center justify-between p-3 bg-bf-surface border border-bf-border rounded-xl hover:border-bf-border-2 hover:bg-bf-surface-2/60 transition-colors text-left"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold text-slate-100 truncate">{r.fondo ?? r.name}</p>
-                        <p className="text-[10px] text-slate-500">{r.categoria}</p>
+                        <p className="text-xs font-semibold text-bf-text truncate">{r.fondo ?? r.name}</p>
+                        <p className="text-[10px] text-bf-text-3">{r.categoria}</p>
                       </div>
                       {r.vcp && (
-                        <span className="text-[10px] text-slate-400 shrink-0 ml-2">
+                        <span className="text-[10px] text-bf-text-3 shrink-0 ml-2">
                           VCP ${r.vcp.toLocaleString("es-AR", { maximumFractionDigits: 2 })}
                         </span>
                       )}
@@ -297,17 +297,17 @@ export function AddManualPosition() {
                 <button
                   key={i}
                   onClick={() => pickResult(r)}
-                  className="w-full flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-600 transition-colors text-left"
+                  className="w-full flex items-center justify-between p-3 bg-bf-surface border border-bf-border rounded-xl hover:border-bf-border-2 transition-colors text-left"
                 >
                   <div>
-                    <p className="text-xs font-semibold text-slate-100">
+                    <p className="text-xs font-semibold text-bf-text">
                       {r.name}
-                      {r.symbol && <span className="ml-1.5 text-slate-500 font-normal">{r.symbol}</span>}
+                      {r.symbol && <span className="ml-1.5 text-bf-text-3 font-normal">{r.symbol}</span>}
                     </p>
-                    {r.market_cap_rank && <p className="text-[10px] text-slate-500">Rank #{r.market_cap_rank}</p>}
+                    {r.market_cap_rank && <p className="text-[10px] text-bf-text-3">Rank #{r.market_cap_rank}</p>}
                   </div>
                   {r.price_usd && (
-                    <span className="text-xs text-slate-400">${r.price_usd.toLocaleString()}</span>
+                    <span className="text-xs text-bf-text-3">${r.price_usd.toLocaleString()}</span>
                   )}
                 </button>
               ))}
@@ -319,10 +319,10 @@ export function AddManualPosition() {
       {/* Step 3: datos de la posición */}
       {step === 3 && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <button onClick={() => setStep(assetType === "OTRO" ? 1 : 2)} className="hover:text-slate-200">←</button>
+          <div className="flex items-center gap-2 text-xs text-bf-text-3">
+            <button onClick={() => setStep(assetType === "OTRO" ? 1 : 2)} className="hover:text-bf-text-2">←</button>
             <span>/</span>
-            <span className="text-slate-200 truncate max-w-[200px]">
+            <span className="text-bf-text-2 truncate max-w-[200px]">
               {assetType === "OTRO" ? "Activo manual"
                : selected?.fondo ?? selected?.name ?? searchQuery}
             </span>
@@ -351,10 +351,10 @@ export function AddManualPosition() {
               </Field>
             </div>
           ) : (
-            <div className="bg-slate-800/60 rounded-xl p-3 text-xs text-slate-300">
+            <div className="bg-bf-surface-2/60 rounded-xl p-3 text-xs text-bf-text-2">
               <span className="font-semibold">{selected?.fondo ?? selected?.name}</span>
-              {selected?.symbol && <span className="ml-1.5 text-slate-500">{selected.symbol}</span>}
-              {selected?.categoria && <span className="ml-1.5 text-slate-500">· {selected.categoria}</span>}
+              {selected?.symbol && <span className="ml-1.5 text-bf-text-3">{selected.symbol}</span>}
+              {selected?.categoria && <span className="ml-1.5 text-bf-text-3">· {selected.categoria}</span>}
             </div>
           )}
 
@@ -400,12 +400,12 @@ export function AddManualPosition() {
           )}
 
           {(assetType === "CRYPTO" || assetType === "ETF") && (
-            <p className="text-[10px] text-slate-600 px-1">
+            <p className="text-[10px] text-bf-text-4 px-1">
               El yield se calcula automáticamente de la variación de precio de los últimos 30 días.
             </p>
           )}
           {assetType === "FCI" && (
-            <p className="text-[10px] text-slate-600 px-1">
+            <p className="text-[10px] text-bf-text-4 px-1">
               El rendimiento se calcula automáticamente de la variación del VCP de los últimos 30 días.
             </p>
           )}
@@ -431,12 +431,12 @@ export function AddManualPosition() {
 }
 
 const inputCls =
-  "w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors";
+  "w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-xs text-slate-400 mb-1 block">{label}</label>
+      <label className="text-xs text-bf-text-3 mb-1 block">{label}</label>
       {children}
     </div>
   );

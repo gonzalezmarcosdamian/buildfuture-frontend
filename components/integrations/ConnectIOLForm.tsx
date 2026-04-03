@@ -78,13 +78,13 @@ export function ConnectIOLForm({ onSuccess }: Props) {
 
   return (
     <div className="mt-3 space-y-3">
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-bf-text-3">
         Usamos tus credenciales solo para leer tu portafolio. Nunca operamos en tu nombre.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="text-xs text-slate-400 mb-1 block">Usuario IOL</label>
+          <label className="text-xs text-bf-text-3 mb-1 block">Usuario IOL</label>
           <input
             type="text"
             value={username}
@@ -92,12 +92,12 @@ export function ConnectIOLForm({ onSuccess }: Props) {
             placeholder="tu@email.com"
             autoComplete="off"
             required
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
           />
         </div>
 
         <div>
-          <label className="text-xs text-slate-400 mb-1 block">Password</label>
+          <label className="text-xs text-bf-text-3 mb-1 block">Password</label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -106,12 +106,12 @@ export function ConnectIOLForm({ onSuccess }: Props) {
               placeholder="••••••••"
               autoComplete="new-password"
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 pr-10 text-[16px] leading-tight text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 pr-10 text-[16px] leading-tight text-bf-text placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 hover:text-bf-text-2"
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -136,7 +136,7 @@ export function ConnectIOLForm({ onSuccess }: Props) {
           <button
             type="button"
             onClick={() => { setOpen(false); setError(""); }}
-            className="flex-1 py-2.5 rounded-xl text-sm text-slate-400 bg-slate-800 hover:bg-slate-700 transition-colors"
+            className="flex-1 py-2.5 rounded-xl text-sm text-bf-text-3 bg-bf-surface-2 hover:bg-bf-surface-3 transition-colors"
           >
             Cancelar
           </button>

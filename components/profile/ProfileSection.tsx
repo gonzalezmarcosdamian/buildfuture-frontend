@@ -156,13 +156,13 @@ export function ProfileSection() {
   return (
     <div className="space-y-3">
       {/* Avatar + email header */}
-      <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 flex items-center gap-3">
+      <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border flex items-center gap-3">
         <div className="w-11 h-11 rounded-full bg-blue-600 flex items-center justify-center text-lg font-bold text-white shrink-0">
           {initial}
         </div>
         <div className="min-w-0">
-          {fullName && <p className="text-sm font-semibold text-slate-100 truncate">{fullName}</p>}
-          <p className="text-xs text-slate-400 truncate">{email}</p>
+          {fullName && <p className="text-sm font-semibold text-bf-text truncate">{fullName}</p>}
+          <p className="text-xs text-bf-text-3 truncate">{email}</p>
           {riskLabel && (
             <span className="text-[10px] text-blue-400 bg-blue-950/40 px-1.5 py-0.5 rounded mt-0.5 inline-block">
               {riskLabel}
@@ -180,18 +180,18 @@ export function ProfileSection() {
       >
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Nombre completo</label>
+            <label className="text-xs text-bf-text-3 mb-1 block">Nombre completo</label>
             <input
               type="text"
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
               placeholder="Tu nombre"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Email</label>
-            <p className="text-sm text-slate-500 px-1">{email}</p>
+            <label className="text-xs text-bf-text-3 mb-1 block">Email</label>
+            <p className="text-sm text-bf-text-3 px-1">{email}</p>
           </div>
           <Feedback msg={nameMsg} />
           <ActionButton loading={savingName} onClick={saveName} label="Guardar" />
@@ -221,7 +221,7 @@ export function ProfileSection() {
                     ? "border-emerald-700 bg-emerald-950/30 text-emerald-300"
                     : isPending
                     ? "border-blue-600 bg-blue-950/30 text-blue-300"
-                    : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
+                    : "border-bf-border-2 bg-bf-surface-2/50 text-bf-text-2 hover:border-bf-border-2"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -230,7 +230,7 @@ export function ProfileSection() {
                     <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
                   )}
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">{opt.desc}</p>
+                <p className="text-[11px] text-bf-text-3 mt-0.5">{opt.desc}</p>
               </button>
             );
           })}
@@ -303,20 +303,20 @@ function AccordionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+    <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-slate-800/50 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-bf-surface-2/50 transition-colors"
       >
-        <span className="text-slate-400">{icon}</span>
-        <span className="flex-1 text-left text-sm font-medium text-slate-200">{label}</span>
+        <span className="text-bf-text-3">{icon}</span>
+        <span className="flex-1 text-left text-sm font-medium text-bf-text-2">{label}</span>
         {sublabel && (
-          <span className="text-[10px] text-slate-500 mr-1">{sublabel}</span>
+          <span className="text-[10px] text-bf-text-3 mr-1">{sublabel}</span>
         )}
-        {open ? <ChevronUp size={14} className="text-slate-500" /> : <ChevronDown size={14} className="text-slate-500" />}
+        {open ? <ChevronUp size={14} className="text-bf-text-3" /> : <ChevronDown size={14} className="text-bf-text-3" />}
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 border-t border-slate-800 space-y-3">
+        <div className="px-4 pb-4 pt-1 border-t border-bf-border space-y-3">
           {children}
         </div>
       )}
@@ -369,7 +369,7 @@ function PasswordInput({
 }) {
   return (
     <div>
-      <label className="text-xs text-slate-400 mb-1 block">{label}</label>
+      <label className="text-xs text-bf-text-3 mb-1 block">{label}</label>
       <div className="relative">
         <input
           type={show ? "text" : "password"}
@@ -378,13 +378,13 @@ function PasswordInput({
           readOnly={!onChange}
           autoComplete="new-password"
           placeholder="••••••••"
-          className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 pr-10 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+          className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 pr-10 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
         />
         {onToggleShow && (
           <button
             type="button"
             onClick={onToggleShow}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 hover:text-bf-text-2"
           >
             {show ? <EyeOff size={14} /> : <Eye size={14} />}
           </button>

@@ -157,13 +157,13 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
   return (
     <div className="space-y-5">
       {/* Ingreso */}
-      <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-4">
-        <p className="text-sm font-semibold text-slate-100">Ingresos</p>
+      <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border space-y-4">
+        <p className="text-sm font-semibold text-bf-text">Ingresos</p>
 
         {useBruto ? (
           <div className="space-y-3">
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Sueldo bruto mensual (ARS)</label>
+              <label className="text-xs text-bf-text-3 mb-1 block">Sueldo bruto mensual (ARS)</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -171,13 +171,13 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 value={fmt(bruto)}
                 placeholder="800.000"
                 onChange={(e) => { const b = parse(e.target.value); setBruto(b); setIncome(calcNeto(b, descPct)); }}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500"
                 style={INPUT_STYLE}
               />
             </div>
-            <div className="bg-slate-800 rounded-xl p-3 space-y-2">
+            <div className="bg-bf-surface-2 rounded-xl p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] text-slate-400 font-medium">Descuentos sobre el bruto</p>
+                <p className="text-[10px] text-bf-text-3 font-medium">Descuentos sobre el bruto</p>
                 <span className="text-xs font-bold text-red-400">-{(descPct * 100).toFixed(0)}%</span>
               </div>
               <input
@@ -185,27 +185,27 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 onChange={(e) => { const d = Number(e.target.value); setDescPct(d); setIncome(calcNeto(bruto, d)); }}
                 className="w-full accent-red-500"
               />
-              <div className="flex justify-between text-[9px] text-slate-500">
+              <div className="flex justify-between text-[9px] text-bf-text-3">
                 <span>0%</span>
                 <span>40% (con Ganancias)</span>
               </div>
-              <div className="grid grid-cols-3 gap-1 text-[9px] text-slate-600 text-center mt-0.5">
+              <div className="grid grid-cols-3 gap-1 text-[9px] text-bf-text-4 text-center mt-0.5">
                 <span>Jub. 11%</span>
                 <span>Obra social 3%</span>
                 <span>PAMI 3%</span>
               </div>
-              <div className="flex items-center justify-between pt-1 border-t border-slate-700">
-                <span className="text-[10px] text-slate-400">Neto estimado</span>
+              <div className="flex items-center justify-between pt-1 border-t border-bf-border-2">
+                <span className="text-[10px] text-bf-text-3">Neto estimado</span>
                 <span className="text-sm font-bold text-emerald-400">{formatARS(income)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-500">→ Para invertir ({(savingsPct * 100).toFixed(0)}%)</span>
+                <span className="text-[10px] text-bf-text-3">→ Para invertir ({(savingsPct * 100).toFixed(0)}%)</span>
                 <span className="text-[10px] font-semibold text-emerald-500">{formatARS(savingsARS)}</span>
               </div>
             </div>
             <button
               onClick={() => setUseBruto(false)}
-              className="text-[10px] text-slate-500 hover:text-slate-300 underline underline-offset-2 transition-colors"
+              className="text-[10px] text-bf-text-3 hover:text-bf-text-2 underline underline-offset-2 transition-colors"
             >
               Ya sé mi neto, ingresar directo
             </button>
@@ -213,7 +213,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
         ) : (
           <div className="space-y-2">
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Sueldo neto mensual (ARS)</label>
+              <label className="text-xs text-bf-text-3 mb-1 block">Sueldo neto mensual (ARS)</label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -221,13 +221,13 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 value={fmt(income)}
                 placeholder="664.000"
                 onChange={(e) => setIncome(parse(e.target.value))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500"
                 style={INPUT_STYLE}
               />
             </div>
             <button
               onClick={() => { setUseBruto(true); setBruto(Math.round(income / (1 - descPct))); }}
-              className="text-[10px] text-slate-500 hover:text-slate-300 underline underline-offset-2 transition-colors"
+              className="text-[10px] text-bf-text-3 hover:text-bf-text-2 underline underline-offset-2 transition-colors"
             >
               Calcular desde bruto
             </button>
@@ -235,29 +235,29 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
         )}
 
         {/* MEP */}
-        <div className="flex items-center justify-between bg-slate-800 rounded-xl px-3 py-2.5">
+        <div className="flex items-center justify-between bg-bf-surface-2 rounded-xl px-3 py-2.5">
           <div>
-            <p className="text-[10px] text-slate-500">Dólar MEP</p>
-            <p className="text-sm font-medium text-slate-100">{fxLoading ? "..." : `$${fxRate.toLocaleString("es-AR")}`}</p>
+            <p className="text-[10px] text-bf-text-3">Dólar MEP</p>
+            <p className="text-sm font-medium text-bf-text">{fxLoading ? "..." : `$${fxRate.toLocaleString("es-AR")}`}</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-500">{fxSource}</span>
-            <button onClick={refreshFx} disabled={fxLoading} className="text-slate-500 hover:text-blue-400 transition-colors">
+            <span className="text-[10px] text-bf-text-3">{fxSource}</span>
+            <button onClick={refreshFx} disabled={fxLoading} className="text-bf-text-3 hover:text-blue-400 transition-colors">
               <RefreshCw size={12} className={fxLoading ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-slate-800 rounded-xl p-3">
-            <p className="text-[10px] text-slate-500">Ingreso</p>
-            <p className="text-sm font-bold text-slate-100">{formatARS(income)}</p>
-            <p className="text-[10px] text-slate-500">USD {(income / fxRate).toFixed(0)}</p>
+          <div className="bg-bf-surface-2 rounded-xl p-3">
+            <p className="text-[10px] text-bf-text-3">Ingreso</p>
+            <p className="text-sm font-bold text-bf-text">{formatARS(income)}</p>
+            <p className="text-[10px] text-bf-text-3">USD {(income / fxRate).toFixed(0)}</p>
           </div>
-          <div className="bg-slate-800 rounded-xl p-3">
-            <p className="text-[10px] text-slate-500">Gastos</p>
+          <div className="bg-bf-surface-2 rounded-xl p-3">
+            <p className="text-[10px] text-bf-text-3">Gastos</p>
             <p className="text-sm font-bold text-red-400">{formatARS(income * expensesPct)}</p>
-            <p className="text-[10px] text-slate-500">{(expensesPct * 100).toFixed(0)}%</p>
+            <p className="text-[10px] text-bf-text-3">{(expensesPct * 100).toFixed(0)}%</p>
           </div>
           <div className="bg-emerald-950/40 border border-emerald-900 rounded-xl p-3">
             <p className="text-[10px] text-emerald-400">Para invertir</p>
@@ -278,7 +278,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
         ))}
         <div style={{ width: `${savingsPct * 100}%`, backgroundColor: "#10B981" }} />
       </div>
-      <div className="flex flex-wrap gap-2 text-[10px] text-slate-400">
+      <div className="flex flex-wrap gap-2 text-[10px] text-bf-text-3">
         {categories.map((c, i) => (
           <span key={i} className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.is_vacation ? "#0EA5E9" : c.color }} />
@@ -292,8 +292,8 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
       </div>
 
       {/* Todas las categorías — gastos + vacaciones en un mismo listado */}
-      <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
-        <p className="text-sm font-semibold text-slate-100">Distribución</p>
+      <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border space-y-3">
+        <p className="text-sm font-semibold text-bf-text">Distribución</p>
 
         {totalAllocated >= 1.0 && (
           <div className="flex items-center gap-2 bg-red-950/40 border border-red-800/60 rounded-xl px-3 py-2">
@@ -319,19 +319,19 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
               <button
                 type="button"
                 onClick={() => setOpenEmojiIdx(openEmojiIdx === i ? null : i)}
-                className="text-lg w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-700 active:bg-slate-600 transition-colors"
+                className="text-lg w-8 h-8 flex items-center justify-center rounded-lg hover:bg-bf-surface-3 active:bg-slate-600 transition-colors"
               >
                 {cat.icon}
               </button>
               {openEmojiIdx === i && (
-                <div className="absolute left-0 top-9 z-50 bg-slate-800 border border-slate-700 rounded-xl p-2 grid grid-cols-5 gap-1 shadow-xl shadow-black/40 w-44">
+                <div className="absolute left-0 top-9 z-50 bg-bf-surface-2 border border-bf-border-2 rounded-xl p-2 grid grid-cols-5 gap-1 shadow-xl shadow-black/40 w-44">
                   {ICONS.map((ic) => (
                     <button
                       key={ic}
                       type="button"
                       onClick={() => { updateCat(i, "icon", ic); setOpenEmojiIdx(null); }}
                       className={`text-base w-7 h-7 flex items-center justify-center rounded-lg transition-colors ${
-                        cat.icon === ic ? "bg-blue-600" : "hover:bg-slate-700"
+                        cat.icon === ic ? "bg-blue-600" : "hover:bg-bf-surface-3"
                       }`}
                     >
                       {ic}
@@ -347,7 +347,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 type="text"
                 value={cat.name}
                 onChange={(e) => updateCat(i, "name", e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500 min-w-0"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-2 py-1.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500 min-w-0"
                 style={INPUT_STYLE}
               />
             </div>
@@ -372,10 +372,10 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                     const v = Math.min(parse(e.target.value) / 100, maxForCat(i));
                     updateCat(i, "percentage", Math.max(0, isNaN(v) ? 0 : v));
                   }}
-                  className="w-12 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-slate-300 text-center focus:outline-none focus:border-blue-500"
+                  className="w-12 bg-bf-surface-2 border border-bf-border-2 rounded px-1 py-0.5 text-bf-text-2 text-center focus:outline-none focus:border-blue-500"
                   style={INPUT_STYLE}
                 />
-                <span className="text-[10px] text-slate-500">%</span>
+                <span className="text-[10px] text-bf-text-3">%</span>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -385,13 +385,13 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                     const pct = income > 0 ? Math.min(ars / income, maxForCat(i)) : 0;
                     updateCat(i, "percentage", Math.max(0, isNaN(pct) ? 0 : pct));
                   }}
-                  className="w-24 bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-slate-300 text-right focus:outline-none focus:border-blue-500"
+                  className="w-24 bg-bf-surface-2 border border-bf-border-2 rounded px-1 py-0.5 text-bf-text-2 text-right focus:outline-none focus:border-blue-500"
                   style={INPUT_STYLE}
                 />
               </div>
             </div>
 
-            <button onClick={() => removeCategory(i)} className="text-slate-600 hover:text-red-400 shrink-0">
+            <button onClick={() => removeCategory(i)} className="text-bf-text-4 hover:text-red-400 shrink-0">
               <Trash2 size={13} />
             </button>
           </div>

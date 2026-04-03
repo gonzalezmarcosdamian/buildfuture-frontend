@@ -110,12 +110,12 @@ function GoalForm({
     : null;
 
   return (
-    <div className="bg-slate-800/60 rounded-2xl border border-slate-700 p-4 space-y-3">
+    <div className="bg-bf-surface-2/60 rounded-2xl border border-bf-border-2 p-4 space-y-3">
       {/* Emoji + nombre */}
       <div className="flex items-center gap-2">
         <button
           onClick={() => setShowEmojis((v) => !v)}
-          className="w-10 h-10 rounded-xl bg-slate-700 flex items-center justify-center text-xl shrink-0 hover:bg-slate-600 transition-colors"
+          className="w-10 h-10 rounded-xl bg-bf-surface-3 flex items-center justify-center text-xl shrink-0 hover:bg-slate-600 transition-colors"
         >
           {form.emoji}
         </button>
@@ -125,13 +125,13 @@ function GoalForm({
           value={form.name}
           onChange={(e) => field("name", e.target.value)}
           maxLength={60}
-          className="flex-1 bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-[16px] leading-tight text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+          className="flex-1 bg-bf-surface-3 border border-bf-border-2 rounded-xl px-3 py-2 text-[16px] leading-tight text-bf-text placeholder:text-bf-text-3 focus:outline-none focus:border-blue-500"
         />
       </div>
 
       {/* Emoji picker */}
       {showEmojis && (
-        <div className="grid grid-cols-6 gap-1.5 p-2 bg-slate-700 rounded-xl">
+        <div className="grid grid-cols-6 gap-1.5 p-2 bg-bf-surface-3 rounded-xl">
           {EMOJI_OPTIONS.map((e) => (
             <button
               key={e}
@@ -149,26 +149,26 @@ function GoalForm({
       {/* Monto objetivo */}
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[10px] text-slate-500 mb-1 block">{currencyLabel}</label>
+          <label className="text-[10px] text-bf-text-3 mb-1 block">{currencyLabel}</label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">{currencySymbol}</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">{currencySymbol}</span>
             <input
               type="number"
               min={0}
               placeholder={currencyPlaceholder}
               value={form.target_amount}
               onChange={(e) => field("target_amount", e.target.value)}
-              className="w-full bg-slate-700 border border-slate-600 rounded-xl pl-7 pr-3 py-2 text-[16px] leading-tight text-slate-100 focus:outline-none focus:border-blue-500"
+              className="w-full bg-bf-surface-3 border border-bf-border-2 rounded-xl pl-7 pr-3 py-2 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500"
             />
           </div>
           {hintAmount && (
-            <p className="text-[9px] text-slate-600 mt-1 pl-1">
+            <p className="text-[9px] text-bf-text-4 mt-1 pl-1">
               ≈ {hintAmount}
             </p>
           )}
         </div>
         <div>
-          <label className="text-[10px] text-slate-500 mb-1 block">Horizonte (años)</label>
+          <label className="text-[10px] text-bf-text-3 mb-1 block">Horizonte (años)</label>
           <input
             type="number"
             min={1}
@@ -176,10 +176,10 @@ function GoalForm({
             value={form.target_years}
             onChange={(e) => field("target_years", e.target.value)}
             placeholder="10"
-            className={`w-full bg-slate-700 border rounded-xl px-3 py-2 text-[16px] leading-tight text-slate-100 focus:outline-none ${
+            className={`w-full bg-bf-surface-3 border rounded-xl px-3 py-2 text-[16px] leading-tight text-bf-text focus:outline-none ${
               form.target_years && !yearsValid
                 ? "border-red-600 focus:border-red-500"
-                : "border-slate-600 focus:border-blue-500"
+                : "border-bf-border-2 focus:border-blue-500"
             }`}
           />
           {form.target_years && !yearsValid && (
@@ -200,7 +200,7 @@ function GoalForm({
         </button>
         <button
           onClick={onCancel}
-          className="px-4 flex items-center gap-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm rounded-xl transition-colors"
+          className="px-4 flex items-center gap-1 bg-bf-surface-3 hover:bg-slate-600 text-bf-text-2 text-sm rounded-xl transition-colors"
         >
           <X size={14} />
         </button>
@@ -234,22 +234,22 @@ function GoalCard({
     currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
 
   return (
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 space-y-3">
+    <div className="bg-bf-surface rounded-2xl border border-bf-border p-4 space-y-3">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2.5">
           <span className="text-2xl leading-none">{goal.emoji}</span>
           <div>
-            <p className="text-sm font-semibold text-slate-200">{goal.name}</p>
-            <p className="text-xs text-slate-500">{fmt(goal.target_usd)} objetivo</p>
+            <p className="text-sm font-semibold text-bf-text-2">{goal.name}</p>
+            <p className="text-xs text-bf-text-3">{fmt(goal.target_usd)} objetivo</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={onEdit}
-            className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors"
+            className="w-7 h-7 rounded-lg bg-bf-surface-2 hover:bg-bf-surface-3 flex items-center justify-center transition-colors"
           >
-            <Pencil size={12} className="text-slate-400" />
+            <Pencil size={12} className="text-bf-text-3" />
           </button>
           {confirmDelete ? (
             <button
@@ -261,9 +261,9 @@ function GoalCard({
           ) : (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-red-900/50 flex items-center justify-center transition-colors"
+              className="w-7 h-7 rounded-lg bg-bf-surface-2 hover:bg-red-900/50 flex items-center justify-center transition-colors"
             >
-              <Trash2 size={12} className="text-slate-500" />
+              <Trash2 size={12} className="text-bf-text-3" />
             </button>
           )}
         </div>
@@ -271,38 +271,38 @@ function GoalCard({
 
       {/* Barra de progreso */}
       <div>
-        <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5">
-          <span className="text-slate-400 font-medium">{fmt(goal.portfolio_usd)} acumulado</span>
+        <div className="flex items-center justify-between text-[10px] text-bf-text-3 mb-1.5">
+          <span className="text-bf-text-3 font-medium">{fmt(goal.portfolio_usd)} acumulado</span>
           <span className="text-violet-400 font-semibold">{goal.progress_pct}% de {fmt(goal.target_usd)}</span>
         </div>
-        <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-3 bg-bf-surface-2 rounded-full overflow-hidden">
           <div
             className="h-full bg-violet-500 rounded-full transition-all"
             style={{ width: `${Math.max(2, Math.min(100, goal.progress_pct))}%` }}
           />
         </div>
         <div className="flex items-center justify-between text-[10px] mt-1">
-          <span className="text-slate-600">{currency === "USD" ? "$0" : formatARS(0)}</span>
-          <span className="text-slate-600">{fmt(goal.target_usd)}</span>
+          <span className="text-bf-text-4">{currency === "USD" ? "$0" : formatARS(0)}</span>
+          <span className="text-bf-text-4">{fmt(goal.target_usd)}</span>
         </div>
       </div>
 
       {/* Tiempo estimado + aporte */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="bg-slate-800/60 rounded-xl px-3 py-2.5 text-center">
-          <p className="text-sm font-bold text-slate-100 leading-tight">{monthsLabel(goal.months_to_goal, goal.monthly_savings_usd > 0)}</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">para llegar</p>
+        <div className="bg-bf-surface-2/60 rounded-xl px-3 py-2.5 text-center">
+          <p className="text-sm font-bold text-bf-text leading-tight">{monthsLabel(goal.months_to_goal, goal.monthly_savings_usd > 0)}</p>
+          <p className="text-[10px] text-bf-text-3 mt-0.5">para llegar</p>
         </div>
-        <div className="bg-slate-800/60 rounded-xl px-3 py-2.5 text-center">
+        <div className="bg-bf-surface-2/60 rounded-xl px-3 py-2.5 text-center">
           {goal.monthly_savings_usd > 0 ? (
             <>
-              <p className="text-sm font-bold text-slate-100">{fmtMontly(goal.monthly_savings_usd)}</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">/mes del presupuesto</p>
+              <p className="text-sm font-bold text-bf-text">{fmtMontly(goal.monthly_savings_usd)}</p>
+              <p className="text-[10px] text-bf-text-3 mt-0.5">/mes del presupuesto</p>
             </>
           ) : (
             <>
-              <p className="text-sm font-bold text-slate-500">—</p>
-              <p className="text-[10px] text-slate-600 mt-0.5">sin presupuesto</p>
+              <p className="text-sm font-bold text-bf-text-3">—</p>
+              <p className="text-[10px] text-bf-text-4 mt-0.5">sin presupuesto</p>
             </>
           )}
         </div>
@@ -393,7 +393,7 @@ export function CapitalGoals({ budgetSavingsUSD, mep = 1430 }: { budgetSavingsUS
   const fmtSavings = (usd: number) =>
     currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
 
-  if (loading) return <div className="h-32 bg-slate-900 rounded-2xl border border-slate-800 animate-pulse" />;
+  if (loading) return <div className="h-32 bg-bf-surface rounded-2xl border border-bf-border animate-pulse" />;
 
   return (
     <div className="space-y-3">
@@ -401,7 +401,7 @@ export function CapitalGoals({ budgetSavingsUSD, mep = 1430 }: { budgetSavingsUS
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Target size={15} className="text-violet-400" />
-          <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Objetivos de capital</p>
+          <p className="text-xs font-semibold text-bf-text-2 uppercase tracking-wider">Objetivos de capital</p>
         </div>
         {!creating && (
           <button
@@ -416,11 +416,11 @@ export function CapitalGoals({ budgetSavingsUSD, mep = 1430 }: { budgetSavingsUS
 
       {/* Contexto: ahorro del presupuesto */}
       {budgetSavingsUSD != null && budgetSavingsUSD > 0 && (
-        <div className="bg-slate-800/40 rounded-xl px-3 py-2 flex items-center gap-2">
+        <div className="bg-bf-surface-2/40 rounded-xl px-3 py-2 flex items-center gap-2">
           <span className="text-sm">💡</span>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-bf-text-3">
             Tu presupuesto libera{" "}
-            <span className="text-slate-200 font-semibold">{fmtSavings(budgetSavingsUSD)}/mes</span>
+            <span className="text-bf-text-2 font-semibold">{fmtSavings(budgetSavingsUSD)}/mes</span>
             {" "}para invertir — usamos ese número para calcular cuándo llegás.
           </p>
         </div>
@@ -440,10 +440,10 @@ export function CapitalGoals({ budgetSavingsUSD, mep = 1430 }: { budgetSavingsUS
 
       {/* Lista de metas */}
       {goals.length === 0 && !creating ? (
-        <div className="bg-slate-900 rounded-2xl border border-dashed border-slate-700 p-6 text-center space-y-2">
+        <div className="bg-bf-surface rounded-2xl border border-dashed border-bf-border-2 p-6 text-center space-y-2">
           <p className="text-2xl">🎯</p>
-          <p className="text-sm font-medium text-slate-300">Sin metas de capital todavía</p>
-          <p className="text-xs text-slate-500">Agregá una meta — casa, auto, viaje — y te mostramos cuándo llegás.</p>
+          <p className="text-sm font-medium text-bf-text-2">Sin metas de capital todavía</p>
+          <p className="text-xs text-bf-text-3">Agregá una meta — casa, auto, viaje — y te mostramos cuándo llegás.</p>
           <button
             onClick={() => setCreating(true)}
             className="mt-2 text-xs font-medium text-violet-400 hover:text-violet-300 underline"

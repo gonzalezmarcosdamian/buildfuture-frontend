@@ -35,7 +35,7 @@ export function BottomNav() {
       )}
 
       <nav
-        className="fixed left-4 right-4 z-50 bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-lg shadow-black/30"
+        className="fixed left-4 right-4 z-50 bg-bf-surface/70 backdrop-blur-xl border border-bf-border-2/50 rounded-2xl shadow-lg shadow-black/30"
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)" }}
       >
         <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-2">
@@ -48,7 +48,7 @@ export function BottomNav() {
                 href={href}
                 onClick={() => { if (!active) setPending(href); }}
                 className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full rounded-xl transition-colors ${
-                  active ? "text-blue-400" : isPending ? "text-blue-300 opacity-70" : "text-slate-500 hover:text-slate-300"
+                  active ? "text-blue-400" : isPending ? "text-blue-300 opacity-70" : "text-bf-text-3 hover:text-bf-text-2"
                 }`}
               >
                 <Icon

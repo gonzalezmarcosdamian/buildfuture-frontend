@@ -19,10 +19,10 @@ export function PageLoader() {
       />
       {/* Page skeleton */}
       <div className="px-4 pt-8 space-y-4 max-w-lg mx-auto">
-        <div className="h-6 w-32 bg-slate-800 rounded-lg animate-pulse" />
-        <div className="h-32 bg-slate-900 rounded-2xl border border-slate-800 animate-pulse" />
-        <div className="h-24 bg-slate-900 rounded-2xl border border-slate-800 animate-pulse" />
-        <div className="h-40 bg-slate-900 rounded-2xl border border-slate-800 animate-pulse" />
+        <div className="h-6 w-32 bg-bf-surface-2 rounded-lg animate-pulse" />
+        <div className="h-32 bg-bf-surface rounded-2xl border border-bf-border animate-pulse" />
+        <div className="h-24 bg-bf-surface rounded-2xl border border-bf-border animate-pulse" />
+        <div className="h-40 bg-bf-surface rounded-2xl border border-bf-border animate-pulse" />
       </div>
     </div>
   );
