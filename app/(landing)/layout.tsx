@@ -1,5 +1,6 @@
 import { LandingNav } from "@/components/landing/LandingNav";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { CookieBanner } from "@/components/landing/CookieBanner";
 
 export default function LandingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,6 +8,7 @@ export default function LandingLayout({ children }: { children: React.ReactNode 
       <LandingNav />
       {children}
       <LandingFooter />
+      <CookieBanner />
     </div>
   );
 }

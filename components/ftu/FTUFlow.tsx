@@ -142,7 +142,7 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
               Elegir perfil de riesgo
             </p>
             <p className="text-xs text-bf-text-3 mt-0.5">
-              Definí tu tolerancia al riesgo para recibir recomendaciones personalizadas.
+              Definí tu tolerancia al riesgo para recibir sugerencias personalizadas.
             </p>
           </div>
         </div>

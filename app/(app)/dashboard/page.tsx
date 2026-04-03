@@ -79,7 +79,7 @@ export default async function Dashboard() {
         streak={gamification.streak ?? null}
       />
 
-      {/* 2 — Recomendaciones */}
+      {/* 2 — Sugerencias */}
       <RecommendationList
         capitalArs={savingsARS > 0 ? Math.round(savingsARS) : 500000}
         userProfile={profile?.risk_profile ?? null}

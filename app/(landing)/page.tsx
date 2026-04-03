@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronDown, MessageCircle, Mail, ExternalLink } from "lucide-react";
 
 // ── Hero mockup — representación del dashboard ─────────────────────────────────
@@ -173,15 +173,26 @@ function SectionHero() {
 // ── Sección Integraciones ──────────────────────────────────────────────────────
 
 const BROKERS = [
-  { name: "IOL", full: "InvertirOnline", domain: "invertironline.com", status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
-  { name: "Cocos", full: "Cocos Capital", domain: "cocos.capital", status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
-  { name: "PPI", full: "Primary Portfolio", domain: "ppi.com.ar", status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
-  { name: "Binance", full: "Binance", domain: "binance.com", status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
-  { name: "Carga manual", full: "Wallet, efectivo, otros", domain: null, status: "Próximamente", statusColor: "bg-slate-800 border-slate-700 text-slate-400" },
+  { name: "IOL", full: "InvertirOnline", domain: "invertironline.com", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "Cocos", full: "Cocos Capital", domain: "cocos.capital", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "PPI", full: "Portfolio Personal", domain: "ppi.com.ar", localLogo: "/logos/ppi.jpg", logoBg: true, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "Binance", full: "Binance", domain: "binance.com", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "Carga manual", full: "Wallet, efectivo, otros", domain: null, localLogo: null as string | null, logoBg: false, status: "Próximamente", statusColor: "bg-slate-800 border-slate-700 text-slate-400" },
 ];
 
-function BrokerLogo({ domain, name }: { domain: string | null; name: string }) {
+function BrokerLogo({ domain, name, localLogo }: { domain: string | null; name: string; localLogo: string | null }) {
   const [err, setErr] = useState(false);
+  if (localLogo) {
+    return (
+      <Image
+        src={localLogo}
+        alt={name}
+        width={32}
+        height={32}
+        className="object-contain"
+      />
+    );
+  }
   if (domain && !err) {
     return (
       <Image
@@ -212,8 +223,8 @@ function SectionIntegraciones() {
               key={b.name}
               className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col items-center gap-3 hover:border-slate-700 transition-colors"
             >
-              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-                <BrokerLogo domain={b.domain} name={b.name} />
+              <div className={`w-10 h-10 rounded-xl border flex items-center justify-center overflow-hidden ${b.logoBg ? "bg-white border-slate-300/20 p-1" : "bg-slate-800 border-slate-700"}`}>
+                <BrokerLogo domain={b.domain} name={b.name} localLogo={b.localLogo} />
               </div>
               <div className="text-center">
                 <p className="text-sm font-semibold text-slate-200">{b.name}</p>
@@ -655,16 +666,45 @@ function SectionVision() {
 
 // ── Sección Founder + Social proof ────────────────────────────────────────────
 
-const METRICAS = [
-  { valor: "USD 18K+", label: "en portafolios gestionados" },
-  { valor: "4", label: "brokers conectados" },
-  { valor: "6+", label: "meses en producción" },
-];
+function SocialProofStats() {
+  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_URL}/waitlist/count`)
+      .then((r) => r.json())
+      .then((d) => setWaitlistCount(d.count ?? null))
+      .catch(() => {});
+  }, []);
+
+  const STATS = [
+    { value: "4", label: "brokers integrados" },
+    { value: waitlistCount != null ? `+${waitlistCount}` : "…", label: "personas en lista" },
+    { value: "100%", label: "solo lectura" },
+    { value: "0", label: "datos vendidos a terceros" },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-16">
+      {STATS.map((s) => (
+        <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center space-y-1">
+          <p className="text-2xl font-extrabold text-emerald-400">{s.value}</p>
+          <p className="text-[11px] text-slate-500">{s.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function SectionFounder() {
   return (
     <section className="py-24 bg-slate-900/40 border-t border-slate-800/60">
       <div className="max-w-6xl mx-auto px-5">
+        <div className="text-center mb-10">
+          <p className="text-[11px] uppercase tracking-widest text-slate-600 mb-2">Construido en público</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">Transparencia total.</h2>
+        </div>
+
+        <SocialProofStats />
 
         {/* Founder */}
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -878,6 +918,106 @@ function SectionCTAFinal() {
   );
 }
 
+// ── SECCIÓN WAITLIST ───────────────────────────────────────────────────────────
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8008";
+
+function SectionWaitlist() {
+  const [email, setEmail] = useState("");
+  const [tosChecked, setTosChecked] = useState(false);
+  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!tosChecked) return;
+    setStatus("loading");
+    try {
+      const res = await fetch(`${API_URL}/waitlist/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), source: "landing_waitlist" }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Error al registrar");
+      }
+      setStatus("ok");
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Error inesperado");
+      setStatus("error");
+    }
+  }
+
+  return (
+    <section className="py-24 border-t border-slate-800/60">
+      <div className="max-w-xl mx-auto px-5 text-center space-y-8">
+        <div className="space-y-3">
+          <p className="text-[11px] uppercase tracking-widest text-slate-600">Beta privada</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">
+            ¿No estás listo para crear una cuenta?
+          </h2>
+          <p className="text-slate-400">
+            Anotate en la lista. Te avisamos cuando tengamos novedades y priorizamos las integraciones por demanda.
+          </p>
+        </div>
+
+        {status === "ok" ? (
+          <div className="bg-emerald-950/40 border border-emerald-800/50 rounded-2xl p-6 space-y-2">
+            <p className="text-emerald-400 font-semibold text-lg">¡Listo, te anotamos! 🎉</p>
+            <p className="text-slate-400 text-sm">Te avisamos cuando haya novedades.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex gap-2">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 text-sm focus:outline-none focus:border-emerald-600"
+              />
+              <button
+                type="submit"
+                disabled={!tosChecked || status === "loading"}
+                className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-bold px-5 py-3 rounded-xl transition-colors text-sm whitespace-nowrap"
+              >
+                {status === "loading" ? "Enviando…" : "Anotarme"}
+              </button>
+            </div>
+
+            {/* Checkbox TyC — requerido por Ley 26.831 */}
+            <label className="flex items-start gap-3 text-left cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={tosChecked}
+                onChange={(e) => setTosChecked(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-slate-600 accent-emerald-500 shrink-0 cursor-pointer"
+              />
+              <span className="text-[12px] text-slate-500 group-hover:text-slate-400 transition-colors leading-relaxed">
+                Acepto los{" "}
+                <a href="/legal" className="text-slate-300 underline hover:text-emerald-400 transition-colors">
+                  Términos y Condiciones
+                </a>{" "}
+                y la{" "}
+                <a href="/legal#privacidad" className="text-slate-300 underline hover:text-emerald-400 transition-colors">
+                  Política de Privacidad
+                </a>
+                . Entiendo que BuildFuture no brinda asesoramiento financiero. (Ley 26.831)
+              </span>
+            </label>
+
+            {status === "error" && (
+              <p className="text-red-400 text-xs">{errorMsg}</p>
+            )}
+          </form>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ── PÁGINA PRINCIPAL ───────────────────────────────────────────────────────────
 
 export default function LandingPage() {
@@ -892,6 +1032,7 @@ export default function LandingPage() {
       <SectionVision />
       <SectionFounder />
       <SectionFAQ />
+      <SectionWaitlist />
       <SectionContacto />
       <SectionCTAFinal />
     </main>
