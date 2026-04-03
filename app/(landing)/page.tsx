@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowRight, Shield, Eye, Zap, CheckCircle, AlertCircle, TrendingUp, Target, BookOpen, Cpu, Globe, ChevronDown, MessageCircle, Mail, ExternalLink } from "lucide-react";
 
 // ── Hero mockup — representación del dashboard ─────────────────────────────────
@@ -660,24 +660,13 @@ function SectionVision() {
 // ── Sección Founder + Social proof ────────────────────────────────────────────
 
 function SocialProofStats() {
-  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    fetch(`${API_URL}/waitlist/count`)
-      .then((r) => r.json())
-      .then((d) => setWaitlistCount(d.count ?? null))
-      .catch(() => {});
-  }, []);
-
   const STATS = [
     { value: "4", label: "brokers integrados" },
-    { value: waitlistCount != null ? `+${waitlistCount}` : "…", label: "personas en lista" },
     { value: "100%", label: "solo lectura" },
-    { value: "0", label: "datos vendidos a terceros" },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-16">
+    <div className="grid grid-cols-2 gap-3 mb-16 max-w-sm mx-auto">
       {STATS.map((s) => (
         <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center space-y-1">
           <p className="text-2xl font-extrabold text-emerald-400">{s.value}</p>
@@ -913,8 +902,6 @@ function SectionCTAFinal() {
 }
 
 // ── SECCIÓN WAITLIST ───────────────────────────────────────────────────────────
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8008";
 
 // ── PÁGINA PRINCIPAL ───────────────────────────────────────────────────────────
 
