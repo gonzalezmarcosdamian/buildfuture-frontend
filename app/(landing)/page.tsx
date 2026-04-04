@@ -169,7 +169,7 @@ const BROKERS = [
   { name: "IOL", full: "InvertirOnline", domain: "invertironline.com", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
   { name: "Cocos", full: "Cocos Capital", domain: "cocos.capital", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
   { name: "PPI", full: "Portfolio Personal", domain: "ppi.com.ar", localLogo: "/logos/ppi.jpg", logoBg: true, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
-  { name: "Binance", full: "Binance", domain: "binance.com", localLogo: null as string | null, logoBg: false, status: "En desarrollo · Q2 2026", statusColor: "bg-slate-800 border-slate-700 text-slate-400" },
+  { name: "Binance", full: "Binance", domain: "binance.com", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
   { name: "Carga manual", full: "Efectivo, stablecoins, FCI externos", domain: null, localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
 ];
 
