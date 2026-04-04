@@ -203,16 +203,19 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
     const num = parseFloat(editAmount);
     if (!num || num <= 0) return;
     setSavingEdit(true);
+    try {
     const isARS = ticker === "CASH_ARS";
     const mepRate = mep || 1430;
     const qtyUsd = isARS ? num / mepRate : num;
-    await authFetch(`/positions/manual/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ quantity: qtyUsd, ppc_ars: isARS ? num : num * mepRate, purchase_fx_rate: mepRate }),
-    });
-    setSavingEdit(false);
-    setEditingId(null);
-    router.refresh();
+      await authFetch(`/positions/manual/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ quantity: qtyUsd, ppc_ars: isARS ? num : num * mepRate, purchase_fx_rate: mepRate }),
+      });
+    } finally {
+      setSavingEdit(false);
+      setEditingId(null);
+      router.refresh();
+    }
   }
 
   const fmt  = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
