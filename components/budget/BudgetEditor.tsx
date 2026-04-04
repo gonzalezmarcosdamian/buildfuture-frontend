@@ -67,6 +67,8 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
   const [bruto, setBruto] = useState(Math.round(initial.income_monthly_ars / (1 - DESCUENTOS_AFIP)));
   const [descPct, setDescPct] = useState(DESCUENTOS_AFIP);
   const [income, setIncome] = useState(initial.income_monthly_ars);
+  const initialIncome = initial.income_monthly_ars;
+  const initialSavingsPct = Math.max(0, 1 - initial.categories.reduce((s, c) => s + c.percentage, 0));
   const [fxRate, setFxRate] = useState(initial.fx_rate);
   const [fxSource, setFxSource] = useState("guardado");
   const [fxLoading, setFxLoading] = useState(false);
@@ -112,6 +114,12 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
   const savingsPct = Math.max(0, 1 - totalAllocated);
   const savingsARS = income * savingsPct;
   const savingsUSD = savingsARS / fxRate;
+
+  // Keeps each category's ARS amount fixed; recalculates percentages for new income.
+  function recalcPcts(newIncome: number, currentIncome: number, cats: Category[]): Category[] {
+    if (currentIncome === 0 || newIncome === 0) return cats;
+    return cats.map((c) => ({ ...c, percentage: (c.percentage * currentIncome) / newIncome }));
+  }
 
   function maxForCat(idx: number) {
     const otherAllocated = totalAllocated - categories[idx].percentage;
@@ -170,7 +178,13 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 pattern="[0-9]*"
                 value={fmt(bruto)}
                 placeholder="800.000"
-                onChange={(e) => { const b = parse(e.target.value); setBruto(b); setIncome(calcNeto(b, descPct)); }}
+                onChange={(e) => {
+                  const b = parse(e.target.value);
+                  const newIncome = calcNeto(b, descPct);
+                  setCategories((prev) => recalcPcts(newIncome, income, prev));
+                  setBruto(b);
+                  setIncome(newIncome);
+                }}
                 className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500"
                 style={INPUT_STYLE}
               />
@@ -182,7 +196,13 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
               </div>
               <input
                 type="range" min={0} max={0.40} step={0.01} value={descPct}
-                onChange={(e) => { const d = Number(e.target.value); setDescPct(d); setIncome(calcNeto(bruto, d)); }}
+                onChange={(e) => {
+                  const d = Number(e.target.value);
+                  const newIncome = calcNeto(bruto, d);
+                  setCategories((prev) => recalcPcts(newIncome, income, prev));
+                  setDescPct(d);
+                  setIncome(newIncome);
+                }}
                 className="w-full accent-red-500"
               />
               <div className="flex justify-between text-[9px] text-bf-text-3">
@@ -220,7 +240,11 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 pattern="[0-9]*"
                 value={fmt(income)}
                 placeholder="664.000"
-                onChange={(e) => setIncome(parse(e.target.value))}
+                onChange={(e) => {
+                  const newIncome = parse(e.target.value);
+                  setCategories((prev) => recalcPcts(newIncome, income, prev));
+                  setIncome(newIncome);
+                }}
                 className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500"
                 style={INPUT_STYLE}
               />
@@ -352,7 +376,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
               />
             </div>
 
-            {/* Slider + inputs */}
+            {/* Slider + ARS input */}
             <div className="flex flex-col gap-1 shrink-0">
               <input
                 type="range"
@@ -364,18 +388,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
                 className="w-24 accent-blue-500"
               />
               <div className="flex items-center gap-1">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={(cat.percentage * 100).toFixed(0)}
-                  onChange={(e) => {
-                    const v = Math.min(parse(e.target.value) / 100, maxForCat(i));
-                    updateCat(i, "percentage", Math.max(0, isNaN(v) ? 0 : v));
-                  }}
-                  className="w-12 bg-bf-surface-2 border border-bf-border-2 rounded px-1 py-0.5 text-bf-text-2 text-center focus:outline-none focus:border-blue-500"
-                  style={INPUT_STYLE}
-                />
-                <span className="text-[10px] text-bf-text-3">%</span>
+                <span className="text-[10px] text-bf-text-3 w-10 text-right tabular-nums">{(cat.percentage * 100).toFixed(0)}%</span>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -428,6 +441,17 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
           </div>
         );
       })()}
+
+      {/* Tip educativo: ingreso subió, gastos se mantuvieron */}
+      {income > initialIncome && savingsPct > initialSavingsPct && (
+        <div className="flex items-start gap-2 bg-emerald-950/30 border border-emerald-900/50 rounded-xl px-3 py-2.5">
+          <span className="text-base leading-none shrink-0">📈</span>
+          <p className="text-[11px] text-emerald-300 leading-snug">
+            Tu ingreso subió <span className="font-semibold">{(((income - initialIncome) / initialIncome) * 100).toFixed(0)}%</span> y tus gastos se mantuvieron
+            → tu capacidad de inversión creció <span className="font-semibold">{(((savingsPct - initialSavingsPct) / (initialSavingsPct || 0.01)) * 100).toFixed(0)}%</span>. ¡Bien hecho!
+          </p>
+        </div>
+      )}
 
       {/* Guardar */}
       <button
