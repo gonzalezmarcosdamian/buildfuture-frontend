@@ -334,9 +334,6 @@ export function ProjectionCard() {
     (g) => g.target_usd > data.current_usd && g.target_usd <= maxChartValue * 1.05
   );
 
-  // Used by collapsed summary (always 10y) and InfoSheet educational content
-  const allPts10 = computePoints(data.current_usd, data.monthly_savings_usd, customRatePct / 100, 10);
-  const val10 = allPts10[allPts10.length - 1]?.with_savings_usd ?? 0;
 
   return (
     <>

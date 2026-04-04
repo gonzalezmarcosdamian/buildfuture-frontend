@@ -79,7 +79,7 @@ export function AddManualPosition() {
         .catch(() => {})
         .finally(() => setLoadingFci(false));
     }
-  }, [assetType, step]);
+  }, [assetType, step, allFci.length]);
 
   // FCI: filtro local mientras escribe
   const filteredFci = useMemo(() => {
@@ -129,7 +129,6 @@ export function AddManualPosition() {
       const isOTRO = assetType === "OTRO";
       const isFCI = assetType === "FCI";
       const isCrypto = assetType === "CRYPTO";
-      const isETF = assetType === "ETF";
 
       const body: Record<string, unknown> = {
         asset_type: assetType,

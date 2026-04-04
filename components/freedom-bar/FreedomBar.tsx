@@ -1,5 +1,5 @@
 "use client";
-import { freedomColor, formatUSD, formatPct } from "@/lib/formatters";
+import { freedomColor, formatUSD } from "@/lib/formatters";
 
 interface FreedomBarProps {
   freedomPct: number;
