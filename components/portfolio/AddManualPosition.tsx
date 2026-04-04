@@ -156,6 +156,30 @@ export function AddManualPosition() {
         {saving && <Loader2 size={14} className="animate-spin" />}
         {saving ? "Guardando..." : "Agregar al portafolio"}
       </button>
+
+      {/* Próximamente */}
+      <div className="pt-2">
+        <p className="text-[10px] text-bf-text-4 uppercase tracking-wider mb-2">Próximamente</p>
+        <div className="space-y-2">
+          {[
+            { label: "Cripto", icon: "₿" },
+            { label: "FCI", icon: "📈" },
+            { label: "ETF / Acción", icon: "🏦" },
+            { label: "Otro activo", icon: "🗂️" },
+          ].map(({ label, icon }) => (
+            <div
+              key={label}
+              className="flex items-center justify-between px-4 py-3 rounded-xl border border-bf-border bg-bf-surface opacity-40"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-base">{icon}</span>
+                <span className="text-sm text-bf-text-3">{label}</span>
+              </div>
+              <span className="text-[10px] text-bf-text-4 border border-bf-border rounded-md px-2 py-0.5">Próximamente</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
