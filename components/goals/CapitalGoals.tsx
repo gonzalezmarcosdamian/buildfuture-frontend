@@ -381,7 +381,7 @@ export function CapitalGoals({
     const displayAmount = currency === "ARS"
       ? String(Math.round(targetUSD * mep))
       : String(targetUSD);
-    return { name: "Fondo de reserva", emoji: "🛡️", target_amount: displayAmount, target_years: "1" };
+    return { name: "Fondo de reserva", emoji: "🛡️", target_amount: displayAmount, target_years: "1", backing_position_id: null };
   }
 
   async function fetchGoals() {

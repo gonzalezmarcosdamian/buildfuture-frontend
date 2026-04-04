@@ -169,8 +169,8 @@ const BROKERS = [
   { name: "IOL", full: "InvertirOnline", domain: "invertironline.com", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
   { name: "Cocos", full: "Cocos Capital", domain: "cocos.capital", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
   { name: "PPI", full: "Portfolio Personal", domain: "ppi.com.ar", localLogo: "/logos/ppi.jpg", logoBg: true, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
-  { name: "Binance", full: "Binance", domain: "binance.com", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
-  { name: "Carga manual", full: "Wallet, efectivo, otros", domain: null, localLogo: null as string | null, logoBg: false, status: "Próximamente", statusColor: "bg-slate-800 border-slate-700 text-slate-400" },
+  { name: "Binance", full: "Binance", domain: "binance.com", localLogo: null as string | null, logoBg: false, status: "En desarrollo · Q2 2026", statusColor: "bg-slate-800 border-slate-700 text-slate-400" },
+  { name: "Carga manual", full: "Efectivo, stablecoins, FCI externos", domain: null, localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
 ];
 
 function BrokerLogo({ domain, name, localLogo }: { domain: string | null; name: string; localLogo: string | null }) {
@@ -373,7 +373,7 @@ function PortfolioMockup() {
 
 function SugerenciasMockup() {
   const items = [
-    { icon: "💰", name: "LECAP Marzo 2026", label: "TNA ARS", range: "72% — 78%", risk: "Bajo", tag: "Renta fija" },
+    { icon: "💰", name: "LECAP Junio 2026", label: "TNA ARS", range: "48% — 55%", risk: "Bajo", tag: "Renta fija" },
     { icon: "📈", name: "SPY CEDEAR", label: "ret. USD/año", range: "8% — 22%", risk: "Moderado", tag: "Renta variable" },
     { icon: "🌐", name: "QQQ CEDEAR", label: "ret. USD/año", range: "10% — 28%", risk: "Alto", tag: "Renta variable" },
   ];
@@ -434,10 +434,10 @@ const PILARES = [
     flip: true,
   },
   {
-    emoji: "🎯",
-    tag: "Metas + sugerencias",
+    emoji: "💸",
+    tag: "Presupuesto + metas",
     headline: "No solo trackeás.\nAvanzás.",
-    body: "Definís tus metas: un departamento, un fondo de emergencia, retiro anticipado. BuildFuture calcula cuánto te falta y te sugiere instrumentos según tu perfil de riesgo y las condiciones del mercado argentino hoy.",
+    body: "Configurás tu sueldo y BuildFuture calcula cuánto podés invertir cada mes. Define tus metas — departamento, fondo de emergencia, retiro — y te muestra cuándo llegás. Con sugerencias de instrumentos adaptadas al mercado argentino hoy.",
     mockup: <SugerenciasMockup />,
     flip: false,
   },

@@ -117,8 +117,8 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
       <SetupCard
         done={hasPortfolio}
         icon={<Wallet size={18} />}
-        title="Sincronizar portafolio"
-        description="Conectá tu cuenta de InvertirOnline para ver tus posiciones actuales."
+        title="Cargá tu portafolio"
+        description="Conectá IOL, Cocos o PPI para sincronizar automáticamente — o cargá tus posiciones manualmente si preferís empezar así."
         ctaLabel="Ir a configuración"
         onCta={() => router.push("/settings")}
       />

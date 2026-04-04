@@ -17,8 +17,8 @@ const PROPS = [
   },
   {
     icon: "🤖",
-    title: "Sugerencias personalizadas",
-    desc: "Comité de 4 agentes expertos (Carry, Dolarización, Renta Fija, Diversificación) adaptado a tu perfil de riesgo.",
+    title: "Qué invertir, cuándo y por qué",
+    desc: "Sugerencias adaptadas al mercado argentino de hoy y a tu perfil — LECAPs, CEDEARs, ONs, FCIs. Sin adivinar, sin copiar carteras de otros.",
     color: "border-blue-900/40 bg-blue-950/20",
   },
 ];
@@ -60,11 +60,11 @@ export function ValuePropsScreen() {
           onClick={() => router.push("/settings")}
           className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold bg-blue-600 hover:bg-blue-500 text-white transition-colors"
         >
-          Conectar mi portafolio IOL
+          Empezar
           <ChevronRight size={16} />
         </button>
         <p className="text-center text-[11px] text-bf-text-4">
-          Sincronizá con InvertirOnline para ver tus posiciones en segundos.
+          Conectá IOL, Cocos o PPI — o cargá tus posiciones manualmente.
         </p>
       </div>
     </div>
