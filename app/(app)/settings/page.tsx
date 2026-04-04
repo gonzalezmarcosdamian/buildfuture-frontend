@@ -34,7 +34,7 @@ export default async function SettingsPage() {
   const integrations = await fetchIntegrations();
 
   return (
-    <div className="px-4 pt-8 pb-24 space-y-8">
+    <div className="px-4 pt-8 pb-24 space-y-8 max-w-lg mx-auto">
 
       {/* ── Mi perfil ─────────────────────────────────────── */}
       <section className="space-y-3">

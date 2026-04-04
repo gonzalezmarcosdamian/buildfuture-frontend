@@ -8,7 +8,7 @@ export default async function BudgetPage() {
   const budget = await fetchBudget();
 
   return (
-    <div className="px-4 pt-8 space-y-5 pb-8">
+    <div className="px-4 pt-8 space-y-5 pb-8 max-w-lg mx-auto">
       <div className="flex items-center gap-2">
         <Wallet size={20} className="text-bf-text-3" />
         <h1 className="text-xl font-bold text-bf-text">Mi presupuesto</h1>

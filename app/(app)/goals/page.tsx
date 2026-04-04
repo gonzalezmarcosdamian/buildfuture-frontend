@@ -36,7 +36,7 @@ export default async function Goals() {
     : null;
 
   return (
-    <div className="px-4 pt-8 pb-24 space-y-4">
+    <div className="px-4 pt-8 pb-24 space-y-4 max-w-lg mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Target size={20} className="text-blue-400" />
