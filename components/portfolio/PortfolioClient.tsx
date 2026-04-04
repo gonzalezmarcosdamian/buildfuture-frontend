@@ -189,9 +189,9 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
           <Plus size={16} />
         </div>
         <div>
-          <p className="text-xs font-semibold text-bf-text-2">Agregar posición manual</p>
+          <p className="text-xs font-semibold text-bf-text-2">Agregar efectivo</p>
           <p className="text-[10px] text-bf-text-3">
-            Cash, Cripto, FCI, ETFs internacionales y más
+            Dólares o pesos en mano / caja de ahorro
           </p>
         </div>
       </Link>
