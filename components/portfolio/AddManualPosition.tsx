@@ -20,9 +20,10 @@ async function authFetch(path: string, init: RequestInit = {}) {
   });
 }
 
-type AssetType = "CRYPTO" | "FCI" | "ETF" | "OTRO";
+type AssetType = "CRYPTO" | "FCI" | "ETF" | "OTRO" | "CASH";
 
 const ASSET_TYPES: { value: AssetType; label: string; desc: string; icon: string }[] = [
+  { value: "CASH", label: "Efectivo / Cash", desc: "Dólares o pesos en mano/caja", icon: "💵" },
   { value: "CRYPTO", label: "Cripto", desc: "BTC, ETH, stablecoins", icon: "₿" },
   { value: "FCI", label: "FCI", desc: "Cocos, Balanz, Santander...", icon: "🏦" },
   { value: "ETF", label: "ETF / Acción", desc: "SPY, QQQ, AAPL en USD", icon: "📈" },
@@ -62,6 +63,10 @@ export function AddManualPosition() {
   const [customTicker, setCustomTicker] = useState("");
   const [customName, setCustomName] = useState("");
 
+  // CASH specific
+  const [cashCurrency, setCashCurrency] = useState<"USD" | "ARS">("USD");
+  const [cashMep, setCashMep] = useState<number>(1430);
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -80,6 +85,15 @@ export function AddManualPosition() {
         .finally(() => setLoadingFci(false));
     }
   }, [assetType, step, allFci.length]);
+
+  useEffect(() => {
+    if (assetType === "CASH") {
+      fetch("https://dolarapi.com/v1/dolares/bolsa")
+        .then((r) => r.json())
+        .then((d) => { if (d.venta) setCashMep(parseFloat(d.venta)); })
+        .catch(() => {});
+    }
+  }, [assetType]);
 
   // FCI: filtro local mientras escribe
   const filteredFci = useMemo(() => {
@@ -129,27 +143,49 @@ export function AddManualPosition() {
       const isOTRO = assetType === "OTRO";
       const isFCI = assetType === "FCI";
       const isCrypto = assetType === "CRYPTO";
+      const isCASH = assetType === "CASH";
 
-      const body: Record<string, unknown> = {
-        asset_type: assetType,
-        ticker: isOTRO
-          ? customTicker.toUpperCase()
-          : isFCI
-          ? (selected?.fondo ?? selected?.name ?? "FCI")
-          : isCrypto
-          ? (selected?.symbol ?? selected?.name ?? "CRYPTO")
-          : (selected?.ticker ?? searchQuery.toUpperCase()),
-        description: isOTRO
-          ? customName
-          : (selected?.name ?? selected?.fondo ?? ""),
-        quantity: parseFloat(quantity),
-        purchase_price_usd: parseFloat(purchasePriceUsd || "0"),
-        ppc_ars: parseFloat(ppcArs || "0"),
-        purchase_fx_rate: parseFloat(purchaseFxRate || "0"),
-        external_id: isOTRO ? null : isFCI ? (selected?.fondo ?? null) : (selected?.id ?? selected?.ticker ?? null),
-        fci_categoria: isFCI ? (selected?.categoria ?? null) : null,
-        manual_yield_pct: manualYield ? parseFloat(manualYield) / 100 : null,
-      };
+      let body: Record<string, unknown>;
+
+      if (isCASH) {
+        const amount = parseFloat(quantity);
+        const isARS = cashCurrency === "ARS";
+        // quantity in "USD units" (each worth $1), ppc_ars for ARS entries
+        const qtyUsd = isARS ? amount / cashMep : amount;
+        body = {
+          asset_type: "CASH",
+          ticker: isARS ? "CASH_ARS" : "CASH_USD",
+          description: isARS ? "Efectivo en pesos" : "Efectivo en dólares",
+          quantity: qtyUsd,
+          purchase_price_usd: 1.0,
+          ppc_ars: isARS ? amount : 0,
+          purchase_fx_rate: isARS ? cashMep : 0,
+          external_id: null,
+          fci_categoria: null,
+          manual_yield_pct: null,
+        };
+      } else {
+        body = {
+          asset_type: assetType,
+          ticker: isOTRO
+            ? customTicker.toUpperCase()
+            : isFCI
+            ? (selected?.fondo ?? selected?.name ?? "FCI")
+            : isCrypto
+            ? (selected?.symbol ?? selected?.name ?? "CRYPTO")
+            : (selected?.ticker ?? searchQuery.toUpperCase()),
+          description: isOTRO
+            ? customName
+            : (selected?.name ?? selected?.fondo ?? ""),
+          quantity: parseFloat(quantity),
+          purchase_price_usd: parseFloat(purchasePriceUsd || "0"),
+          ppc_ars: parseFloat(ppcArs || "0"),
+          purchase_fx_rate: parseFloat(purchaseFxRate || "0"),
+          external_id: isOTRO ? null : isFCI ? (selected?.fondo ?? null) : (selected?.id ?? selected?.ticker ?? null),
+          fci_categoria: isFCI ? (selected?.categoria ?? null) : null,
+          manual_yield_pct: manualYield ? parseFloat(manualYield) / 100 : null,
+        };
+      }
 
       const res = await authFetch("/positions/manual", {
         method: "POST",
@@ -184,7 +220,7 @@ export function AddManualPosition() {
       <div>
         <h1 className="text-lg font-bold text-bf-text">Agregar posición manual</h1>
         <p className="text-xs text-bf-text-3 mt-0.5">
-          Crypto, FCI, ETFs internacionales y más
+          Cash, Crypto, FCI, ETFs internacionales y más
         </p>
       </div>
 
@@ -195,7 +231,7 @@ export function AddManualPosition() {
           {ASSET_TYPES.map((a) => (
             <button
               key={a.value}
-              onClick={() => { setAssetType(a.value); setStep(a.value === "OTRO" ? 3 : 2); }}
+              onClick={() => { setAssetType(a.value); setStep(a.value === "OTRO" || a.value === "CASH" ? 3 : 2); }}
               className="w-full flex items-center gap-3 p-3.5 bg-bf-surface border border-bf-border rounded-2xl hover:border-bf-border-2 transition-colors text-left"
             >
               <span className="text-xl w-8 text-center">{a.icon}</span>
@@ -319,16 +355,54 @@ export function AddManualPosition() {
       {step === 3 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-xs text-bf-text-3">
-            <button onClick={() => setStep(assetType === "OTRO" ? 1 : 2)} className="hover:text-bf-text-2">←</button>
+            <button onClick={() => setStep(assetType === "OTRO" || assetType === "CASH" ? 1 : 2)} className="hover:text-bf-text-2">←</button>
             <span>/</span>
             <span className="text-bf-text-2 truncate max-w-[200px]">
               {assetType === "OTRO" ? "Activo manual"
+               : assetType === "CASH" ? "Efectivo / Cash"
                : selected?.fondo ?? selected?.name ?? searchQuery}
             </span>
           </div>
 
           {/* Activo seleccionado o campos manuales */}
-          {assetType === "OTRO" ? (
+          {assetType === "CASH" ? (
+            <>
+              {/* Selector moneda */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCashCurrency("USD")}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${cashCurrency === "USD" ? "bg-blue-600 text-white" : "bg-bf-surface border border-bf-border text-bf-text-3 hover:border-bf-border-2"}`}
+                >
+                  USD
+                </button>
+                <button
+                  onClick={() => setCashCurrency("ARS")}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${cashCurrency === "ARS" ? "bg-blue-600 text-white" : "bg-bf-surface border border-bf-border text-bf-text-3 hover:border-bf-border-2"}`}
+                >
+                  ARS
+                </button>
+              </div>
+
+              <Field label={cashCurrency === "USD" ? "Monto en dólares (USD)" : "Monto en pesos (ARS)"}>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="0"
+                  min="0"
+                  step="any"
+                  autoFocus
+                  className={inputCls}
+                />
+              </Field>
+
+              {cashCurrency === "ARS" && quantity && parseFloat(quantity) > 0 && (
+                <p className="text-[10px] text-bf-text-4 px-1">
+                  ≈ USD {(parseFloat(quantity) / cashMep).toLocaleString("es-AR", { maximumFractionDigits: 2 })} al MEP actual (${cashMep.toLocaleString("es-AR", { maximumFractionDigits: 0 })})
+                </p>
+              )}
+            </>
+          ) : assetType === "OTRO" ? (
             <div className="space-y-2">
               <Field label="Ticker / símbolo corto">
                 <input
@@ -357,17 +431,19 @@ export function AddManualPosition() {
             </div>
           )}
 
-          <Field label="Cantidad">
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              placeholder="0"
-              min="0"
-              step="any"
-              className={inputCls}
-            />
-          </Field>
+          {assetType !== "CASH" && (
+            <Field label="Cantidad">
+              <input
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                placeholder="0"
+                min="0"
+                step="any"
+                className={inputCls}
+              />
+            </Field>
+          )}
 
           {assetType === "FCI" ? (
             <>
@@ -385,7 +461,7 @@ export function AddManualPosition() {
               <input type="number" value={purchasePriceUsd} onChange={(e) => setPurchasePriceUsd(e.target.value)}
                 placeholder="0" min="0" step="any" className={inputCls} />
             </Field>
-          ) : (
+          ) : assetType !== "CASH" ? (
             <>
               <Field label="Precio de compra (USD)">
                 <input type="number" value={purchasePriceUsd} onChange={(e) => setPurchasePriceUsd(e.target.value)}
@@ -396,7 +472,7 @@ export function AddManualPosition() {
                   placeholder="0" min="0" max="999" step="any" className={inputCls} />
               </Field>
             </>
-          )}
+          ) : null}
 
           {(assetType === "CRYPTO" || assetType === "ETF") && (
             <p className="text-[10px] text-bf-text-4 px-1">
@@ -417,7 +493,7 @@ export function AddManualPosition() {
 
           <button
             onClick={save}
-            disabled={saving || !quantity || (assetType === "OTRO" && !customTicker)}
+            disabled={saving || !quantity || parseFloat(quantity) <= 0 || (assetType === "OTRO" && !customTicker)}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-semibold transition-colors"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
