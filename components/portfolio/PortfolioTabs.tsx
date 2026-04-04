@@ -208,7 +208,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
     const qtyUsd = isARS ? num / mepRate : num;
     await authFetch(`/positions/manual/${id}`, {
       method: "PATCH",
-      body: JSON.stringify({ quantity: qtyUsd, ppc_ars: isARS ? num : 0, purchase_fx_rate: isARS ? mepRate : 0 }),
+      body: JSON.stringify({ quantity: qtyUsd, ppc_ars: isARS ? num : num * mepRate, purchase_fx_rate: mepRate }),
     });
     setSavingEdit(false);
     setEditingId(null);
