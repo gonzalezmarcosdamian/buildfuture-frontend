@@ -2,11 +2,27 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { TrendingUp, TrendingDown, ChevronRight, ChevronDown } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronRight, ChevronDown, Trash2, Pencil, Check, X } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
 import { SyncButton } from "@/components/portfolio/SyncButton";
+import { supabase } from "@/lib/supabase";
 import type { PositionDelta } from "./PortfolioClient";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+async function authFetch(path: string, init: RequestInit = {}) {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init.headers ?? {}),
+    },
+  });
+}
 
 interface Position {
   id: number;
@@ -170,9 +186,33 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
     sources.forEach(src => { initial[src] = true; initial[`r_${src}`] = true; });
     return initial;
   });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   function toggleSource(source: string) {
     setCollapsedSources((prev) => ({ ...prev, [source]: !prev[source] }));
+  }
+
+  async function deletePosition(id: number) {
+    await authFetch(`/positions/manual/${id}`, { method: "DELETE" });
+    router.refresh();
+  }
+
+  async function saveEdit(id: number, ticker: string) {
+    const num = parseFloat(editAmount);
+    if (!num || num <= 0) return;
+    setSavingEdit(true);
+    const isARS = ticker === "CASH_ARS";
+    const mepRate = mep || 1430;
+    const qtyUsd = isARS ? num / mepRate : num;
+    await authFetch(`/positions/manual/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ quantity: qtyUsd, ppc_ars: isARS ? num : 0, purchase_fx_rate: isARS ? mepRate : 0 }),
+    });
+    setSavingEdit(false);
+    setEditingId(null);
+    router.refresh();
   }
 
   const fmt  = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * mep);
@@ -317,31 +357,80 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                     <div className="space-y-0.5 mt-1">
                       {sourcePositions.map((p) => {
                         if (p.asset_type === "CASH") {
+                          const isManual = p.source === "MANUAL";
+                          const isEditing = editingId === p.id;
                           return (
-                            <div
-                              key={p.id}
-                              className="w-full flex items-center justify-between py-2 px-1"
-                            >
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-base leading-none">💵</span>
-                                  <span className="text-xs font-semibold text-bf-text-2">
-                                    {cashLabel(p.ticker)}
-                                  </span>
+                            <div key={p.id} className="w-full py-2 px-1">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-base leading-none">💵</span>
+                                    <span className="text-xs font-semibold text-bf-text-2">
+                                      {cashLabel(p.ticker)}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-bf-text-3 mt-0.5">
+                                    {cashSubtitle(p.ticker)}
+                                  </p>
                                 </div>
-                                <p className="text-[10px] text-bf-text-3 mt-0.5">
-                                  {cashSubtitle(p.ticker)}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                  <div className="text-right">
+                                    <p className="text-xs font-medium text-bf-text-2">
+                                      {FLAG[currency]} {fmt(p.current_value_usd)}
+                                    </p>
+                                    <p className="text-[10px] text-bf-text-4">{hint(p.current_value_usd)}</p>
+                                    <p className="text-[10px] text-bf-text-3">
+                                      {((p.current_value_usd / totalUsd) * 100).toFixed(2)}% del total
+                                    </p>
+                                  </div>
+                                  {isManual && !isEditing && (
+                                    <div className="flex flex-col gap-1 shrink-0">
+                                      <button
+                                        onClick={() => { setEditingId(p.id); setEditAmount(String(p.ticker === "CASH_ARS" ? Math.round(p.current_value_usd * mep) : p.current_value_usd)); }}
+                                        className="p-1 text-bf-text-4 hover:text-bf-text-2 transition-colors"
+                                        title="Editar"
+                                      >
+                                        <Pencil size={12} />
+                                      </button>
+                                      <button
+                                        onClick={() => deletePosition(p.id)}
+                                        className="p-1 text-bf-text-4 hover:text-red-400 transition-colors"
+                                        title="Eliminar"
+                                      >
+                                        <Trash2 size={12} />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <p className="text-xs font-medium text-bf-text-2">
-                                  {FLAG[currency]} {fmt(p.current_value_usd)}
-                                </p>
-                                <p className="text-[10px] text-bf-text-4">{hint(p.current_value_usd)}</p>
-                                <p className="text-[10px] text-bf-text-3">
-                                  {((p.current_value_usd / totalUsd) * 100).toFixed(2)}% del total
-                                </p>
-                              </div>
+                              {isEditing && (
+                                <div className="flex items-center gap-2 mt-2">
+                                  <input
+                                    type="number"
+                                    value={editAmount}
+                                    onChange={(e) => setEditAmount(e.target.value)}
+                                    autoFocus
+                                    placeholder="0"
+                                    className="flex-1 bg-bf-surface-2 border border-bf-border-2 rounded-lg px-2 py-1.5 text-xs text-bf-text focus:outline-none focus:border-blue-500"
+                                  />
+                                  <span className="text-[10px] text-bf-text-3 shrink-0">
+                                    {p.ticker === "CASH_ARS" ? "ARS" : "USD"}
+                                  </span>
+                                  <button
+                                    onClick={() => saveEdit(p.id, p.ticker)}
+                                    disabled={savingEdit}
+                                    className="p-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-40"
+                                  >
+                                    <Check size={12} />
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingId(null)}
+                                    className="p-1.5 text-bf-text-3 hover:text-bf-text-2 transition-colors"
+                                  >
+                                    <X size={12} />
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           );
                         }
