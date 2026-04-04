@@ -41,7 +41,7 @@ function fmtFull(usd: number): string {
   return `$${Math.round(usd).toLocaleString("es-AR")}`;
 }
 
-const YEARS = [1, 3, 5, 10];
+const YEARS = [1, 5, 10, 20, 30, 60];
 const GOAL_COLORS = ["#a78bfa", "#f472b6", "#fb923c", "#34d399", "#60a5fa"];
 
 function computePoints(
@@ -322,7 +322,8 @@ export function ProjectionCard() {
     </div>
   );
 
-  const allPoints = computePoints(data.current_usd, data.monthly_savings_usd, customRatePct / 100, 10);
+  // Always compute up to 60 years so any selected horizon can filter from a single array
+  const allPoints = computePoints(data.current_usd, data.monthly_savings_usd, customRatePct / 100, 60);
   const chartPoints = allPoints.filter((p) => p.year <= horizon);
   const last = chartPoints[chartPoints.length - 1];
   const extra = last.with_savings_usd - last.without_savings_usd;
@@ -333,6 +334,7 @@ export function ProjectionCard() {
     (g) => g.target_usd > data.current_usd && g.target_usd <= maxChartValue * 1.05
   );
 
+  // Used by collapsed summary (always 10y) and InfoSheet educational content
   const allPts10 = computePoints(data.current_usd, data.monthly_savings_usd, customRatePct / 100, 10);
   const val10 = allPts10[allPts10.length - 1]?.with_savings_usd ?? 0;
 
@@ -348,9 +350,9 @@ export function ProjectionCard() {
           <div className="flex items-center gap-2.5">
             <span className="text-base leading-none">📈</span>
             <div>
-              <p className="text-xs font-semibold text-bf-text-2">Proyección a 10 años</p>
+              <p className="text-xs font-semibold text-bf-text-2">Proyección a {horizon} años</p>
               <p className="text-[11px] text-emerald-400 font-medium">
-                {fmtK(val10)} con aportes mensuales
+                {fmtK(last.with_savings_usd)} con aportes mensuales
               </p>
             </div>
           </div>

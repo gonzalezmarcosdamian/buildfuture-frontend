@@ -311,7 +311,15 @@ function GoalCard({
   );
 }
 
-export function CapitalGoals({ budgetSavingsUSD, mep = 1430 }: { budgetSavingsUSD?: number | null; mep?: number }) {
+export function CapitalGoals({
+  budgetSavingsUSD,
+  mep = 1430,
+  monthlyExpensesUSD,
+}: {
+  budgetSavingsUSD?: number | null;
+  mep?: number;
+  monthlyExpensesUSD?: number | null;
+}) {
   const { currency } = useCurrency();
   const [goals, setGoals] = useState<CapitalGoalData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -440,16 +448,45 @@ export function CapitalGoals({ budgetSavingsUSD, mep = 1430 }: { budgetSavingsUS
 
       {/* Lista de metas */}
       {goals.length === 0 && !creating ? (
-        <div className="bg-bf-surface rounded-2xl border border-dashed border-bf-border-2 p-6 text-center space-y-2">
-          <p className="text-2xl">🎯</p>
-          <p className="text-sm font-medium text-bf-text-2">Sin metas de capital todavía</p>
-          <p className="text-xs text-bf-text-3">Agregá una meta — casa, auto, viaje — y te mostramos cuándo llegás.</p>
-          <button
-            onClick={() => setCreating(true)}
-            className="mt-2 text-xs font-medium text-violet-400 hover:text-violet-300 underline"
-          >
-            + Agregar primera meta
-          </button>
+        <div className="space-y-3">
+          {/* Placeholder: Fondo de reserva sugerido */}
+          {monthlyExpensesUSD != null && monthlyExpensesUSD > 0 && (
+            <div className="bg-bf-surface rounded-2xl border border-dashed border-violet-900/50 p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🛡️</span>
+                <div>
+                  <p className="text-sm font-semibold text-bf-text-2">Fondo de reserva</p>
+                  <p className="text-[11px] text-bf-text-3">Meta sugerida · 3 meses de gastos</p>
+                </div>
+                <span className="ml-auto text-xs bg-violet-950/60 text-violet-300 border border-violet-800/50 rounded-lg px-2 py-0.5">Sugerida</span>
+              </div>
+              <p className="text-[11px] text-bf-text-3 leading-snug">
+                Un colchón de emergencias cubre imprevistos sin tocar tus inversiones.
+                Con tus gastos actuales te recomendamos{" "}
+                <span className="text-violet-300 font-semibold">
+                  USD {Math.round(monthlyExpensesUSD * 3).toLocaleString("es-AR")}
+                </span>{" "}
+                como punto de partida.
+              </p>
+              <button
+                onClick={() => setCreating(true)}
+                className="w-full mt-1 py-2 rounded-xl bg-violet-900/40 hover:bg-violet-900/60 border border-violet-800/50 text-xs font-medium text-violet-300 transition-colors"
+              >
+                Crear esta meta →
+              </button>
+            </div>
+          )}
+          <div className="bg-bf-surface rounded-2xl border border-dashed border-bf-border-2 p-5 text-center space-y-2">
+            <p className="text-2xl">🎯</p>
+            <p className="text-sm font-medium text-bf-text-2">Agregá tu primera meta</p>
+            <p className="text-xs text-bf-text-3">Casa, auto, viaje — te mostramos cuándo llegás.</p>
+            <button
+              onClick={() => setCreating(true)}
+              className="mt-2 text-xs font-medium text-violet-400 hover:text-violet-300 underline"
+            >
+              + Agregar meta personalizada
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
