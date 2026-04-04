@@ -350,7 +350,15 @@ export function GoalsClient({
       {tab === "capital" && (
         <div className="space-y-4">
           <GoalCompliance />
-          <CapitalGoals budgetSavingsUSD={budgetSavingsUSD} mep={mep} />
+          <CapitalGoals
+            budgetSavingsUSD={budgetSavingsUSD}
+            mep={mep}
+            monthlyExpensesUSD={
+              budget && mep > 0
+                ? (budget.income_monthly_ars * budget.expenses_pct) / mep
+                : null
+            }
+          />
         </div>
       )}
     </div>
