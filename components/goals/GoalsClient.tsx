@@ -79,9 +79,9 @@ function BudgetDrawer({ budget, onClose, onSaved }: {
   onSaved: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-end" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-end justify-center" onClick={onClose}>
       <div
-        className="bg-bf-page rounded-t-2xl w-full max-h-[92vh] overflow-y-auto border-t border-bf-border-2"
+        className="bg-bf-page rounded-t-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto border-t border-bf-border-2"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 pt-4 pb-3 sticky top-0 bg-bf-page border-b border-bf-border z-10">
