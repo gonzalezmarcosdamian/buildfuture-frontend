@@ -323,9 +323,17 @@ export function CapitalGoals({
   const { currency } = useCurrency();
   const [goals, setGoals] = useState<CapitalGoalData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
+  const [initialForm, setInitialForm] = useState<GoalFormState | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+
+  function fondoReservaForm(): GoalFormState {
+    const targetUSD = monthlyExpensesUSD ? Math.round(monthlyExpensesUSD * 3) : 0;
+    const displayAmount = currency === "ARS"
+      ? String(Math.round(targetUSD * mep))
+      : String(targetUSD);
+    return { name: "Fondo de reserva", emoji: "🛡️", target_amount: displayAmount, target_years: "1" };
+  }
 
   async function fetchGoals() {
     try {
@@ -358,7 +366,7 @@ export function CapitalGoals({
           target_years: parseInt(form.target_years),
         }),
       });
-      setCreating(false);
+      setInitialForm(null);
       await fetchGoals();
     } finally {
       setSaving(false);
@@ -411,9 +419,9 @@ export function CapitalGoals({
           <Target size={15} className="text-violet-400" />
           <p className="text-xs font-semibold text-bf-text-2 uppercase tracking-wider">Objetivos de capital</p>
         </div>
-        {!creating && (
+        {!initialForm && (
           <button
-            onClick={() => setCreating(true)}
+            onClick={() => setInitialForm(emptyForm())}
             className="flex items-center gap-1 text-[11px] font-medium text-violet-400 hover:text-violet-300 bg-violet-950/30 border border-violet-900/50 px-2.5 py-1 rounded-lg transition-colors"
           >
             <Plus size={12} />
@@ -435,19 +443,19 @@ export function CapitalGoals({
       )}
 
       {/* Formulario de creación */}
-      {creating && (
+      {initialForm && (
         <GoalForm
-          initial={emptyForm()}
+          initial={initialForm}
           currency={currency}
           mep={mep}
           onSave={handleCreate}
-          onCancel={() => setCreating(false)}
+          onCancel={() => setInitialForm(null)}
           saving={saving}
         />
       )}
 
       {/* Lista de metas */}
-      {goals.length === 0 && !creating ? (
+      {goals.length === 0 && !initialForm ? (
         <div className="space-y-3">
           {/* Placeholder: Fondo de reserva sugerido */}
           {monthlyExpensesUSD != null && monthlyExpensesUSD > 0 && (
@@ -469,7 +477,7 @@ export function CapitalGoals({
                 como punto de partida.
               </p>
               <button
-                onClick={() => setCreating(true)}
+                onClick={() => setInitialForm(fondoReservaForm())}
                 className="w-full mt-1 py-2 rounded-xl bg-violet-900/40 hover:bg-violet-900/60 border border-violet-800/50 text-xs font-medium text-violet-300 transition-colors"
               >
                 Crear esta meta →
@@ -481,7 +489,7 @@ export function CapitalGoals({
             <p className="text-sm font-medium text-bf-text-2">Agregá tu primera meta</p>
             <p className="text-xs text-bf-text-3">Casa, auto, viaje — te mostramos cuándo llegás.</p>
             <button
-              onClick={() => setCreating(true)}
+              onClick={() => setInitialForm(emptyForm())}
               className="mt-2 text-xs font-medium text-violet-400 hover:text-violet-300 underline"
             >
               + Agregar meta personalizada
