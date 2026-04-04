@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Info, X, Plus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { PerformanceChart } from "./PerformanceChart";
@@ -179,18 +180,21 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
         deltasLoading={deltasLoading}
       />
 
-      {/* Agregar posición manual — próximamente */}
-      <div className="w-full flex items-center gap-3 p-4 bg-bf-surface/30 border border-dashed border-bf-border rounded-2xl opacity-50 cursor-not-allowed">
-        <div className="w-8 h-8 rounded-xl bg-bf-surface-2 flex items-center justify-center shrink-0 text-bf-text-4">
+      {/* Agregar posición manual */}
+      <Link
+        href="/portfolio/add-manual"
+        className="w-full flex items-center gap-3 p-4 bg-bf-surface/30 border border-dashed border-bf-border rounded-2xl hover:border-bf-border-2 hover:bg-bf-surface/50 transition-colors"
+      >
+        <div className="w-8 h-8 rounded-xl bg-bf-surface-2 flex items-center justify-center shrink-0 text-bf-text-3">
           <Plus size={16} />
         </div>
         <div>
-          <p className="text-xs font-semibold text-bf-text-3">Agregar posición manual</p>
-          <p className="text-[10px] text-bf-text-4">
-            Próximamente · Cripto, FCI, ETFs internacionales y más
+          <p className="text-xs font-semibold text-bf-text-2">Agregar posición manual</p>
+          <p className="text-[10px] text-bf-text-3">
+            Cash, Cripto, FCI, ETFs internacionales y más
           </p>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
