@@ -17,6 +17,15 @@ interface CapitalGoalData {
   progress_pct: number;
   months_to_goal: number | null;
   monthly_savings_usd: number;
+  backing_position_id?: number | null;
+  backing_position_ticker?: string | null;
+}
+
+interface Position {
+  id: number;
+  ticker: string;
+  asset_type: string;
+  current_value_usd: number;
 }
 
 const EMOJI_OPTIONS = ["🏠", "🚗", "✈️", "🛡️", "🎓", "💍", "🏖️", "💻", "🎯", "🚀", "⛵", "🏕️"];
@@ -54,17 +63,24 @@ interface GoalFormState {
   emoji: string;
   target_amount: string; // display value — ARS or USD depending on currency
   target_years: string;
+  backing_position_id: number | null;
 }
 
 function emptyForm(): GoalFormState {
-  return { name: "", emoji: "🎯", target_amount: "", target_years: "10" };
+  return { name: "", emoji: "🎯", target_amount: "", target_years: "10", backing_position_id: null };
 }
 
 function formFromGoal(g: CapitalGoalData, currency: "USD" | "ARS", mep: number): GoalFormState {
   const displayAmount = currency === "ARS"
     ? String(Math.round(g.target_usd * mep))
     : String(g.target_usd);
-  return { name: g.name, emoji: g.emoji, target_amount: displayAmount, target_years: String(g.target_years) };
+  return {
+    name: g.name,
+    emoji: g.emoji,
+    target_amount: displayAmount,
+    target_years: String(g.target_years),
+    backing_position_id: g.backing_position_id ?? null,
+  };
 }
 
 function amountToUSD(raw: string, currency: "USD" | "ARS", mep: number): number {
@@ -76,6 +92,7 @@ function GoalForm({
   initial,
   currency,
   mep,
+  positions,
   onSave,
   onCancel,
   saving,
@@ -83,6 +100,7 @@ function GoalForm({
   initial: GoalFormState;
   currency: "USD" | "ARS";
   mep: number;
+  positions: Position[];
   onSave: (f: GoalFormState) => void;
   onCancel: () => void;
   saving: boolean;
@@ -90,7 +108,7 @@ function GoalForm({
   const [form, setForm] = useState(initial);
   const [showEmojis, setShowEmojis] = useState(false);
 
-  function field(key: keyof GoalFormState, val: string) {
+  function field(key: keyof GoalFormState, val: string | number | null) {
     setForm((f) => ({ ...f, [key]: val }));
   }
 
@@ -188,6 +206,28 @@ function GoalForm({
         </div>
       </div>
 
+      {/* Posición de respaldo */}
+      {positions.length > 0 && (
+        <div>
+          <label className="text-[10px] text-bf-text-3 mb-1 block">Posición de respaldo (opcional)</label>
+          <select
+            value={form.backing_position_id ?? ""}
+            onChange={(e) => field("backing_position_id", e.target.value ? Number(e.target.value) : null)}
+            className="w-full bg-bf-surface-3 border border-bf-border-2 rounded-xl px-3 py-2 text-sm text-bf-text focus:outline-none focus:border-blue-500"
+          >
+            <option value="">Sin posición específica</option>
+            {positions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.ticker} ({p.asset_type}) · USD {p.current_value_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
+              </option>
+            ))}
+          </select>
+          <p className="text-[9px] text-bf-text-4 mt-1 pl-1">
+            Si elegís una posición, el progreso se calcula directamente desde su valor actual.
+          </p>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex gap-2">
         <button
@@ -269,6 +309,14 @@ function GoalCard({
         </div>
       </div>
 
+      {/* Posición de respaldo */}
+      {goal.backing_position_ticker && (
+        <div className="flex items-center gap-1.5 text-[10px] text-bf-text-4 bg-bf-surface-2/40 rounded-lg px-2.5 py-1.5">
+          <span className="text-bf-text-3">📌</span>
+          <span>Respaldado por <span className="font-medium text-bf-text-3">{goal.backing_position_ticker}</span></span>
+        </div>
+      )}
+
       {/* Barra de progreso */}
       <div>
         <div className="flex items-center justify-between text-[10px] text-bf-text-3 mb-1.5">
@@ -322,6 +370,7 @@ export function CapitalGoals({
 }) {
   const { currency } = useCurrency();
   const [goals, setGoals] = useState<CapitalGoalData[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
   const [initialForm, setInitialForm] = useState<GoalFormState | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -338,10 +387,19 @@ export function CapitalGoals({
   async function fetchGoals() {
     try {
       const token = await getToken();
-      const res = await fetch(`${API_URL}/portfolio/capital-goals`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (res.ok) setGoals(await res.json());
+      const [goalsRes, posRes] = await Promise.all([
+        fetch(`${API_URL}/portfolio/capital-goals`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }),
+        fetch(`${API_URL}/positions/active`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }),
+      ]);
+      if (goalsRes.ok) setGoals(await goalsRes.json());
+      if (posRes.ok) {
+        const all: Position[] = await posRes.json();
+        setPositions(all.filter((p) => p.asset_type !== "CASH"));
+      }
     } finally {
       setLoading(false);
     }
@@ -364,6 +422,7 @@ export function CapitalGoals({
           emoji: form.emoji,
           target_usd: amountToUSD(form.target_amount, currency, mep),
           target_years: parseInt(form.target_years),
+          backing_position_id: form.backing_position_id ?? null,
         }),
       });
       setInitialForm(null);
@@ -388,6 +447,7 @@ export function CapitalGoals({
           emoji: form.emoji,
           target_usd: amountToUSD(form.target_amount, currency, mep),
           target_years: parseInt(form.target_years),
+          backing_position_id: form.backing_position_id ?? null,
         }),
       });
       setEditingId(null);
@@ -448,6 +508,7 @@ export function CapitalGoals({
           initial={initialForm}
           currency={currency}
           mep={mep}
+          positions={positions}
           onSave={handleCreate}
           onCancel={() => setInitialForm(null)}
           saving={saving}
@@ -510,6 +571,7 @@ export function CapitalGoals({
                 initial={formFromGoal(g, currency, mep)}
                 currency={currency}
                 mep={mep}
+                positions={positions}
                 onSave={(form) => handleUpdate(g.id, form)}
                 onCancel={() => setEditingId(null)}
                 saving={saving}
