@@ -1,6 +1,7 @@
 import { fetchIntegrations } from "@/lib/api-server";
 import { Settings, Clock, User, Palette } from "lucide-react";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
+import { ManualIntegrationCard } from "@/components/integrations/ManualIntegrationCard";
 import { ProfileSection } from "@/components/profile/ProfileSection";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
@@ -73,6 +74,7 @@ export default async function SettingsPage() {
           {integrations.map((integration: { id: number; provider: string; provider_type: string; is_active: boolean; is_connected: boolean; auto_sync_enabled: boolean; last_synced_at: string | null; last_error: string }) => (
             <IntegrationCard key={integration.id} integration={integration} />
           ))}
+          <ManualIntegrationCard />
         </div>
 
         <div className="space-y-3">
