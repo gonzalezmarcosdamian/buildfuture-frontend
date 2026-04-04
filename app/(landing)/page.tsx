@@ -757,7 +757,8 @@ const FAQS = [
   { q: "¿BuildFuture es gratuito?", a: "Sí, y así seguirá durante toda la beta. Si en algún momento cambia el modelo, los usuarios beta recibirán aviso con al menos 30 días de anticipación y podrán eliminar su cuenta sin ninguna penalidad." },
   { q: "¿BuildFuture puede comprar o vender por mí?", a: "No. Nunca. Solo tiene acceso de lectura a tus cuentas. No puede ejecutar órdenes ni mover fondos. Podés verificarlo revisando los permisos en tu broker en cualquier momento." },
   { q: "¿Qué pasa con mis credenciales de IOL o Binance?", a: "Se almacenan encriptadas con AES-256. Nunca las vemos en texto plano. Podés revocarlas desde BuildFuture o directamente desde tu broker cuando quieras." },
-  { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si usás otro, escribile a Damián directamente — es la forma más rápida de que lo prioricemos." },
+  { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si no tenés broker o preferís empezar sin conectar nada, podés cargar tus posiciones manualmente. Si usás otro broker, escribile a Damián directamente — es la forma más rápida de que lo prioricemos." },
+  { q: "¿Puedo usar BuildFuture sin tener cuenta en un broker?", a: "Sí. Podés cargar tus posiciones manualmente — efectivo en pesos o dólares, stablecoins, FCIs externos, lo que sea. La carga manual te da acceso completo al dashboard, la barra de libertad y las metas. Conectar un broker lo hace automático, pero no es obligatorio para empezar." },
   { q: "¿Mis datos se venden a terceros?", a: "No. Nunca. Usamos proveedores de infraestructura (Supabase, Railway, Vercel) pero no compartimos ni vendemos información personal o financiera." },
   { q: "¿Las sugerencias son asesoramiento financiero?", a: "No. Son sugerencias algorítmicas con fines educativos, basadas en tu perfil de riesgo. No constituyen asesoramiento financiero personalizado bajo la Ley 26.831. Toda decisión es tuya." },
 ];
