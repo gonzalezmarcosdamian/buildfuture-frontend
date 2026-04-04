@@ -81,7 +81,7 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
   const allDone = hasPortfolio && riskSaved;
 
   return (
-    <div className="px-4 pt-8 pb-24 space-y-4">
+    <div className="px-4 pt-8 pb-24 space-y-4 max-w-lg mx-auto">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-bf-text">Casi listo</h1>
