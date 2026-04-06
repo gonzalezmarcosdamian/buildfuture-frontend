@@ -266,6 +266,7 @@
   }
   html {
     @apply font-sans;
-    overflow-x: hidden;
+    overflow-x: clip; /* clip no crea nuevo scroll container — preserva anchor links */
+    scroll-behavior: smooth;
   }
 }
