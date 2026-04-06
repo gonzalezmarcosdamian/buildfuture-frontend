@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile, fetchCapitalGoals } from "@/lib/api-server";
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
 import { ValuePropsScreen } from "@/components/ftu/ValuePropsScreen";
 import { ProjectionCard } from "@/components/goals/ProjectionCard";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
@@ -55,9 +55,7 @@ export default async function Dashboard() {
           <p className="text-xs text-bf-text-3">Tu camino a la libertad financiera</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/settings" className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white hover:bg-blue-500 transition-colors">
-            M
-          </Link>
+          <UserAvatar />
         </div>
       </div>
 
