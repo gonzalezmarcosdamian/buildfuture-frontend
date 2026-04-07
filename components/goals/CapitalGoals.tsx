@@ -171,8 +171,9 @@ function GoalForm({
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">{currencySymbol}</span>
             <input
-              type="number"
-              min={0}
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*\.?[0-9]*"
               placeholder={currencyPlaceholder}
               value={form.target_amount}
               onChange={(e) => field("target_amount", e.target.value)}
@@ -188,9 +189,9 @@ function GoalForm({
         <div>
           <label className="text-[10px] text-bf-text-3 mb-1 block">Horizonte (años)</label>
           <input
-            type="number"
-            min={1}
-            max={60}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={form.target_years}
             onChange={(e) => field("target_years", e.target.value)}
             placeholder="10"

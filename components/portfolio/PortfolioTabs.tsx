@@ -409,7 +409,9 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                               {isEditing && (
                                 <div className="flex items-center gap-2 mt-2">
                                   <input
-                                    type="number"
+                                    type="text"
+                                    inputMode="decimal"
+                                    pattern="[0-9]*\.?[0-9]*"
                                     value={editAmount}
                                     onChange={(e) => setEditAmount(e.target.value)}
                                     autoFocus

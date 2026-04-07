@@ -112,8 +112,9 @@ export function GoalEditor({ budgetSavingsUSD }: { budgetSavingsUSD?: number | n
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">$</span>
               <input
-                type="number"
-                min={0}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
                 value={editSavings}
                 onChange={(e) => setEditSavings(e.target.value)}
                 placeholder={budgetSavingsUSD != null ? String(Math.round(budgetSavingsUSD)) : "1200"}
