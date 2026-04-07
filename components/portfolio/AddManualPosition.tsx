@@ -26,6 +26,7 @@ export function AddManualPosition() {
   const [currency, setCurrency] = useState<"USD" | "ARS">("USD");
   const [amount, setAmount] = useState("");
   const [mep, setMep] = useState<number>(1430);
+  const [mepLoaded, setMepLoaded] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -35,7 +36,8 @@ export function AddManualPosition() {
     fetch("https://dolarapi.com/v1/dolares/bolsa")
       .then((r) => r.json())
       .then((d) => { if (d.venta) setMep(parseFloat(d.venta)); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setMepLoaded(true));
   }, []);
 
   async function save() {
@@ -87,7 +89,6 @@ export function AddManualPosition() {
   }
 
   const amountNum = parseFloat(amount);
-  const usdEquiv = currency === "ARS" && amountNum > 0 ? amountNum / mep : null;
 
   return (
     <div className="space-y-5">
@@ -99,7 +100,7 @@ export function AddManualPosition() {
       {/* Selector de moneda */}
       <div className="flex gap-2">
         <button
-          onClick={() => setCurrency("USD")}
+          onClick={() => { setCurrency("USD"); setAmount(""); }}
           className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-colors ${
             currency === "USD"
               ? "bg-blue-600 text-white"
@@ -109,7 +110,7 @@ export function AddManualPosition() {
           USD
         </button>
         <button
-          onClick={() => setCurrency("ARS")}
+          onClick={() => { setCurrency("ARS"); setAmount(""); }}
           className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-colors ${
             currency === "ARS"
               ? "bg-blue-600 text-white"
@@ -126,18 +127,23 @@ export function AddManualPosition() {
           {currency === "USD" ? "Monto en dólares" : "Monto en pesos"}
         </label>
         <input
-          type="number"
+          type="text"
+          inputMode="decimal"
+          pattern="[0-9]*\.?[0-9]*"
           value={amount}
           onChange={(e) => { setAmount(e.target.value); setError(""); }}
           placeholder="0"
-          min="0"
-          step="any"
           autoFocus
           className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl px-4 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors"
         />
-        {usdEquiv !== null && (
+        {mepLoaded && amountNum > 0 && currency === "ARS" && (
           <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">
-            ≈ USD {usdEquiv.toLocaleString("es-AR", { maximumFractionDigits: 2 })} · MEP ${mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
+            ≈ USD {(amountNum / mep).toLocaleString("es-AR", { maximumFractionDigits: 2 })} · MEP ${mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
+          </p>
+        )}
+        {mepLoaded && amountNum > 0 && currency === "USD" && (
+          <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">
+            ≈ ARS {(amountNum * mep).toLocaleString("es-AR", { maximumFractionDigits: 0 })} · MEP ${mep.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
           </p>
         )}
       </div>
