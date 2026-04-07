@@ -186,7 +186,7 @@ export function ProfileSection() {
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
               placeholder="Tu nombre"
-              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 text-bf-text text-[16px] leading-tight focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
@@ -378,7 +378,7 @@ function PasswordInput({
           readOnly={!onChange}
           autoComplete="new-password"
           placeholder="••••••••"
-          className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 pr-10 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
+          className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-lg px-3 py-2 pr-10 text-bf-text text-[16px] leading-tight focus:outline-none focus:border-blue-500 transition-colors"
         />
         {onToggleShow && (
           <button

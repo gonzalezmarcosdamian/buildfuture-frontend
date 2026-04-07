@@ -118,7 +118,7 @@ export function GoalEditor({ budgetSavingsUSD }: { budgetSavingsUSD?: number | n
                 value={editSavings}
                 onChange={(e) => setEditSavings(e.target.value)}
                 placeholder={budgetSavingsUSD != null ? String(Math.round(budgetSavingsUSD)) : "1200"}
-                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-3 py-2.5 text-bf-text text-sm focus:outline-none focus:border-blue-500"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-3 py-2.5 text-bf-text text-[16px] leading-tight focus:outline-none focus:border-blue-500"
               />
             </div>
             {budgetSavingsUSD != null && (

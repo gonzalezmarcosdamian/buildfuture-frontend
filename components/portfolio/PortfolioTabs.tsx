@@ -416,7 +416,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                                     onChange={(e) => setEditAmount(e.target.value)}
                                     autoFocus
                                     placeholder="0"
-                                    className="flex-1 bg-bf-surface-2 border border-bf-border-2 rounded-lg px-2 py-1.5 text-xs text-bf-text focus:outline-none focus:border-blue-500"
+                                    className="flex-1 bg-bf-surface-2 border border-bf-border-2 rounded-lg px-2 py-1.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500"
                                   />
                                   <span className="text-[10px] text-bf-text-3 shrink-0">
                                     {p.ticker === "CASH_ARS" ? "ARS" : "USD"}
