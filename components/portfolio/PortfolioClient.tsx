@@ -112,6 +112,50 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
     setPeriod(p);
   }
 
+  // Empty state: sin posiciones — mostrar onboarding de carga
+  if (positions.length === 0) {
+    return (
+      <div className="space-y-6 py-4">
+        <div className="text-center space-y-2 py-6">
+          <p className="text-4xl">📭</p>
+          <p className="text-sm font-semibold text-bf-text">Tu portafolio está vacío</p>
+          <p className="text-xs text-bf-text-3 leading-relaxed max-w-xs mx-auto">
+            Conectá un broker para sincronizar automáticamente, o cargá tus activos manualmente.
+          </p>
+        </div>
+
+        {/* Carrusel manual */}
+        <div className="space-y-2">
+          <p className="text-[10px] text-bf-text-4 uppercase tracking-widest px-1">Cargar manualmente</p>
+          <div className="flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {([
+              { mode: "CASH",        icon: "💵", label: "Efectivo",  sub: "ARS o USD"      },
+              { mode: "CRYPTO",      icon: "₿",  label: "Cripto",    sub: "Precio en vivo" },
+              { mode: "REAL_ESTATE", icon: "🏠", label: "Inmueble",  sub: "Con renta"      },
+            ] as const).map(({ mode: m, icon, label, sub }) => (
+              <Link key={m} href={`/portfolio/add-manual?mode=${m}`}
+                className="flex flex-col items-center gap-1.5 px-5 py-4 rounded-2xl bg-bf-surface border border-bf-border hover:border-bf-border-2 hover:bg-bf-surface-2 transition-colors shrink-0 min-w-[90px]">
+                <span className="text-2xl leading-none">{icon}</span>
+                <p className="text-xs font-semibold text-bf-text-2">{label}</p>
+                <p className="text-[9px] text-bf-text-4 text-center leading-tight">{sub}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Link a integraciones */}
+        <Link href="/integrations"
+          className="w-full flex items-center justify-between bg-bf-surface rounded-2xl p-4 border border-dashed border-bf-border hover:border-bf-border-2 transition-colors">
+          <div>
+            <p className="text-xs font-semibold text-bf-text">Conectar un broker</p>
+            <p className="text-[11px] text-bf-text-3 mt-0.5">IOL, Cocos Capital, PPI — sincronización automática</p>
+          </div>
+          <span className="text-bf-text-3 text-lg">→</span>
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {/* Switch — solo Composición por ahora; Rendimientos temporalmente oculto */}

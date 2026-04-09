@@ -1,35 +1,10 @@
 import { fetchIntegrations } from "@/lib/api-server";
-import { Settings, Clock, User, Palette } from "lucide-react";
-import { IntegrationCard } from "@/components/integrations/IntegrationCard";
-import { ManualIntegrationCard } from "@/components/integrations/ManualIntegrationCard";
+import { User, Palette, Plug, ChevronRight, CheckCircle2 } from "lucide-react";
 import { ProfileSection } from "@/components/profile/ProfileSection";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-
-const UPCOMING = [
-  {
-    label: "Binance",
-    type: "CRYPTO",
-    description: "Spot: BTC, ETH, stablecoins y más de 300 pares",
-    color: "text-yellow-400",
-    eta: "Q2 2026",
-  },
-  {
-    label: "Ripio",
-    type: "CRYPTO",
-    description: "Exchange argentino — ARS ↔ crypto, API documentada",
-    color: "text-emerald-400",
-    eta: "Q3 2026",
-  },
-  {
-    label: "Bybit",
-    type: "CRYPTO",
-    description: "Spot y derivados — API V5, disponible para Argentina",
-    color: "text-orange-400",
-    eta: "Q3 2026",
-  },
-];
 
 export default async function SettingsPage() {
   const integrations = await fetchIntegrations();
@@ -61,54 +36,39 @@ export default async function SettingsPage() {
       {/* ── Integraciones ─────────────────────────────────── */}
       <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Settings size={16} className="text-bf-text-3" />
+          <Plug size={16} className="text-bf-text-3" />
           <h2 className="text-base font-bold text-bf-text">Integraciones</h2>
         </div>
 
-        <p className="text-xs text-bf-text-3">
-          Conectá tus cuentas para sincronizar tu portafolio. Solo lectura — BuildFuture nunca opera en tu nombre.
-        </p>
-
-        <div className="space-y-3">
-          <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">Disponibles</p>
-          {integrations.map((integration: { id: number; provider: string; provider_type: string; is_active: boolean; is_connected: boolean; auto_sync_enabled: boolean; last_synced_at: string | null; last_error: string }) => (
-            <IntegrationCard key={integration.id} integration={integration} />
-          ))}
-          <ManualIntegrationCard />
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Clock size={12} className="text-bf-text-3" />
-            <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">En desarrollo</p>
-          </div>
-          {UPCOMING.map((item) => (
-            <div
-              key={item.label}
-              className="bg-bf-surface rounded-2xl p-4 border border-bf-border opacity-60"
+        {/* Resumen de conectadas */}
+        {(() => {
+          const connected = integrations.filter((i: { is_connected: boolean }) => i.is_connected);
+          return (
+            <Link
+              href="/integrations"
+              className="w-full flex items-center justify-between bg-bf-surface rounded-2xl p-4 border border-bf-border hover:border-bf-border-2 hover:bg-bf-surface-2 transition-colors"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className={`font-semibold text-sm ${item.color}`}>{item.label}</p>
-                    <span className="text-[10px] bg-bf-surface-2 text-bf-text-3 px-1.5 py-0.5 rounded">
-                      {item.type}
-                    </span>
-                  </div>
-                  <p className="text-xs text-bf-text-3 mt-0.5">{item.description}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-900/30 border border-emerald-800/40 flex items-center justify-center">
+                  <CheckCircle2 size={18} className="text-emerald-400" />
                 </div>
-                <span className="text-[10px] text-bf-text-4 shrink-0 mt-0.5">{item.eta}</span>
+                <div>
+                  <p className="text-sm font-semibold text-bf-text">
+                    {connected.length > 0
+                      ? `${connected.length} broker${connected.length > 1 ? "s" : ""} conectado${connected.length > 1 ? "s" : ""}`
+                      : "Sin brokers conectados"}
+                  </p>
+                  <p className="text-[11px] text-bf-text-3 mt-0.5">
+                    {connected.length > 0
+                      ? connected.map((i: { provider: string }) => i.provider).join(" · ") + " · Carga manual"
+                      : "Conectá IOL, Cocos, PPI o cargá manualmente"}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border">
-          <p className="text-xs text-bf-text-3 font-medium mb-1">Seguridad</p>
-          <p className="text-xs text-bf-text-3">
-            Tus credenciales se guardan cifradas. Las integraciones solo tienen permisos de lectura.
-          </p>
-        </div>
+              <ChevronRight size={16} className="text-bf-text-3 shrink-0" />
+            </Link>
+          );
+        })()}
       </section>
 
     </div>
