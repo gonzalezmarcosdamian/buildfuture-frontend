@@ -629,23 +629,16 @@ function SaveButton({ onClick, saving, disabled, label = "Agregar al portafolio"
 
 // ── Main component ──────────────────────────────────────────────────────────
 
-const MODES: { id: AssetMode; label: string; icon: string }[] = [
-  { id: "CASH",       label: "Efectivo",  icon: "💵" },
-  { id: "CRYPTO",     label: "Cripto",    icon: "₿"  },
-  { id: "REAL_ESTATE", label: "Inmueble", icon: "🏠"  },
-];
-
 export function AddManualPosition() {
   const router = useRouter();
-  // Leer ?mode=CASH|CRYPTO|REAL_ESTATE de la URL para pre-seleccionar
-  const initialMode: AssetMode = (() => {
+  // Modo viene del ?mode= del carrusel — no hay selector interno
+  const mode: AssetMode = (() => {
     if (typeof window !== "undefined") {
       const p = new URLSearchParams(window.location.search).get("mode");
       if (p === "CRYPTO" || p === "REAL_ESTATE" || p === "CASH") return p;
     }
     return "CASH";
   })();
-  const [mode, setMode] = useState<AssetMode>(initialMode);
   const [success, setSuccess] = useState<AssetMode | null>(null);
 
   const SUCCESS_LABELS: Record<AssetMode, string> = {
@@ -671,20 +664,6 @@ export function AddManualPosition() {
 
   return (
     <div className="space-y-5">
-      {/* Mode selector */}
-      <div className="flex gap-2">
-        {MODES.map((m) => (
-          <button key={m.id} onClick={() => setMode(m.id)}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 rounded-xl text-xs font-medium transition-colors border ${
-              mode === m.id
-                ? "bg-blue-600 text-white border-blue-500"
-                : "bg-bf-surface border-bf-border text-bf-text-3 hover:border-bf-border-2"
-            }`}>
-            <span className="text-base">{m.icon}</span>
-            {m.label}
-          </button>
-        ))}
-      </div>
 
       {/* Form by mode */}
       {mode === "CASH"        && <CashForm       onSuccess={handleSuccess} />}
