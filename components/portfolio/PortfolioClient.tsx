@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Info, X, Plus } from "lucide-react";
+import { Info, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { PerformanceChart } from "./PerformanceChart";
 import { PortfolioTabs } from "./PortfolioTabs";
@@ -174,21 +174,40 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
         deltasLoading={deltasLoading}
       />
 
-      {/* Agregar posición manual */}
-      <Link
-        href="/portfolio/add-manual"
-        className="w-full flex items-center gap-3 p-4 bg-bf-surface/30 border border-dashed border-bf-border rounded-2xl hover:border-bf-border-2 hover:bg-bf-surface/50 transition-colors"
-      >
-        <div className="w-8 h-8 rounded-xl bg-bf-surface-2 flex items-center justify-center shrink-0 text-bf-text-3">
-          <Plus size={16} />
+      {/* Agregar posición manual — carrusel */}
+      <div className="space-y-2">
+        <p className="text-[10px] text-bf-text-4 uppercase tracking-widest px-1">Agregar manualmente</p>
+        <div className="flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {([
+            { mode: "CASH",        icon: "💵", label: "Efectivo",  sub: "ARS o USD",      live: true  },
+            { mode: "CRYPTO",      icon: "₿",  label: "Cripto",    sub: "Precio en vivo", live: true  },
+            { mode: "REAL_ESTATE", icon: "🏠", label: "Inmueble",  sub: "Con renta",      live: true  },
+            { mode: "FCI",         icon: "📈", label: "FCI",       sub: "Próximamente",   live: false },
+            { mode: "ETF",         icon: "🌎", label: "ETF",       sub: "Próximamente",   live: false },
+          ] as const).map(({ mode, icon, label, sub, live }) =>
+            live ? (
+              <Link
+                key={mode}
+                href={`/portfolio/add-manual?mode=${mode}`}
+                className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl bg-bf-surface border border-bf-border hover:border-bf-border-2 hover:bg-bf-surface-2 transition-colors shrink-0 min-w-[80px]"
+              >
+                <span className="text-xl leading-none">{icon}</span>
+                <p className="text-[11px] font-semibold text-bf-text-2">{label}</p>
+                <p className="text-[9px] text-bf-text-4 text-center leading-tight">{sub}</p>
+              </Link>
+            ) : (
+              <div
+                key={mode}
+                className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl bg-bf-surface border border-bf-border opacity-35 shrink-0 min-w-[80px]"
+              >
+                <span className="text-xl leading-none">{icon}</span>
+                <p className="text-[11px] font-semibold text-bf-text-2">{label}</p>
+                <p className="text-[9px] text-bf-text-4 text-center leading-tight">{sub}</p>
+              </div>
+            )
+          )}
         </div>
-        <div>
-          <p className="text-xs font-semibold text-bf-text-2">Agregar activo manual</p>
-          <p className="text-[10px] text-bf-text-3">
-            Efectivo, cripto, inmuebles y más
-          </p>
-        </div>
-      </Link>
+      </div>
     </div>
   );
 }

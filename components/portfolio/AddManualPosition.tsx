@@ -637,7 +637,15 @@ const MODES: { id: AssetMode; label: string; icon: string }[] = [
 
 export function AddManualPosition() {
   const router = useRouter();
-  const [mode, setMode] = useState<AssetMode>("CASH");
+  // Leer ?mode=CASH|CRYPTO|REAL_ESTATE de la URL para pre-seleccionar
+  const initialMode: AssetMode = (() => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search).get("mode");
+      if (p === "CRYPTO" || p === "REAL_ESTATE" || p === "CASH") return p;
+    }
+    return "CASH";
+  })();
+  const [mode, setMode] = useState<AssetMode>(initialMode);
   const [success, setSuccess] = useState<AssetMode | null>(null);
 
   const SUCCESS_LABELS: Record<AssetMode, string> = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle, Pencil, Trash2, Loader2, MapPin, ExternalLink } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
@@ -84,6 +84,58 @@ function MetricRow({ label, value, sub, highlight }: {
   );
 }
 
+// ── Mini mapa OSM para REAL_ESTATE ──────────────────────────────────────────
+
+function MiniMap({ address, mapsUrl }: { address: string; mapsUrl: string }) {
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+      { headers: { "Accept-Language": "es", "User-Agent": "BuildFuture/1.0" } }
+    )
+      .then((r) => r.json())
+      .then((d) => {
+        if (d[0]) setCoords({ lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [address]);
+
+  if (loading) {
+    return (
+      <div className="h-32 rounded-xl bg-bf-surface-2 border border-bf-border animate-pulse flex items-center justify-center">
+        <span className="text-[11px] text-bf-text-4">Cargando mapa…</span>
+      </div>
+    );
+  }
+
+  if (!coords) return null;
+
+  const { lat, lon } = coords;
+  const delta = 0.006;
+  const bbox = `${lon - delta},${lat - delta},${lon + delta},${lat + delta}`;
+  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}`;
+
+  return (
+    <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="block rounded-xl overflow-hidden border border-bf-border relative group">
+      <iframe
+        src={src}
+        className="w-full h-36 pointer-events-none"
+        loading="lazy"
+        title="Ubicación del inmueble"
+      />
+      <div className="absolute inset-0 flex items-end justify-end p-2 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="flex items-center gap-1 text-[10px] text-white bg-black/60 rounded-lg px-2 py-1">
+          <ExternalLink size={9} /> Abrir en Maps
+        </span>
+      </div>
+    </a>
+  );
+}
+
+
 function PositionMetrics({ inst, fmt, hint, currency }: {
   inst: InstrumentData;
   fmt: (usd: number) => string;
@@ -110,8 +162,12 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   if (isREAL_ESTATE) {
     const yieldPct = inst.annual_yield_pct * 100;
     const monthlyRent = inst.monthly_return_usd;
+    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(inst.description)}`;
     return (
       <>
+        <div className="mb-3">
+          <MiniMap address={inst.description} mapsUrl={mapsUrl} />
+        </div>
         <MetricRow
           label="Valuación del inmueble"
           value={`${FLAG.USD} ${fmt(inst.current_value_usd)}`}
