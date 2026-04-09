@@ -1,10 +1,29 @@
 "use client";
 
-import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle, Pencil, Trash2, Loader2 } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
+import { supabase } from "@/lib/supabase";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+async function authFetch(path: string, init: RequestInit = {}) {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init.headers ?? {}),
+    },
+  });
+}
 
 interface InstrumentData {
+  id: number;
   ticker: string;
   description: string;
   asset_type: string;
@@ -34,12 +53,13 @@ interface InstrumentData {
 }
 
 const ASSET_BADGES: Record<string, string> = {
-  CEDEAR: "bg-blue-900 text-blue-300",
-  BOND:   "bg-purple-900 text-purple-300",
-  LETRA:  "bg-yellow-900 text-yellow-300",
-  CRYPTO: "bg-orange-900 text-orange-300",
-  FCI:    "bg-green-900 text-green-300",
-  CASH:   "bg-bf-surface-3 text-bf-text-2",
+  CEDEAR:      "bg-blue-900 text-blue-300",
+  BOND:        "bg-purple-900 text-purple-300",
+  LETRA:       "bg-yellow-900 text-yellow-300",
+  CRYPTO:      "bg-orange-900 text-orange-300",
+  FCI:         "bg-green-900 text-green-300",
+  CASH:        "bg-bf-surface-3 text-bf-text-2",
+  REAL_ESTATE: "bg-amber-900/60 text-amber-300",
 };
 
 const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" };
@@ -70,6 +90,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   hint: (usd: number) => string;
   currency: "USD" | "ARS";
 }) {
+  const isREAL_ESTATE = inst.asset_type === "REAL_ESTATE";
   const isFCI   = inst.asset_type === "FCI";
   const isLETRA = inst.asset_type === "LETRA";
   const isCEDEAR = inst.asset_type === "CEDEAR";
@@ -85,6 +106,37 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   const ppc_unitario = isLETRA
     ? `$${(inst.ppc_ars / 100).toLocaleString("es-AR", { maximumFractionDigits: 4 })} c/u`
     : null;
+
+  if (isREAL_ESTATE) {
+    const yieldPct = inst.annual_yield_pct * 100;
+    const monthlyRent = inst.monthly_return_usd;
+    return (
+      <>
+        <MetricRow
+          label="Valuación del inmueble"
+          value={`${FLAG.USD} ${fmt(inst.current_value_usd)}`}
+          sub={hint(inst.current_value_usd)}
+        />
+        <MetricRow
+          label="Renta mensual estimada"
+          value={`${FLAG.USD} ${fmt(monthlyRent)}`}
+          sub={`Yield anual: ${yieldPct.toFixed(2)}%`}
+          highlight={monthlyRent > 0 ? "green" : null}
+        />
+        <MetricRow
+          label="Renta anual estimada"
+          value={`${FLAG.USD} ${fmt(monthlyRent * 12)}`}
+          sub={hint(monthlyRent * 12)}
+          highlight={monthlyRent > 0 ? "green" : null}
+        />
+        <MetricRow
+          label="Yield anual"
+          value={`${yieldPct.toFixed(2)}%`}
+          sub="Calculado sobre la valuación"
+        />
+      </>
+    );
+  }
 
   if (isFCI) {
     return (
@@ -195,12 +247,17 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
 
 export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentData }) {
   const { currency } = useCurrency();
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const fmt = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * inst.mep);
   const hint = (usd: number) => currency === "USD"
     ? `≈ ${FLAG.ARS} ${formatARS(usd * inst.mep)}`
     : `≈ ${FLAG.USD} ${formatUSD(usd)}`;
 
+  const isManual = inst.source === "MANUAL";
+  const isRealEstate = inst.asset_type === "REAL_ESTATE";
   const positive = inst.performance_pct >= 0;
   const pnlSign  = inst.pnl_usd >= 0;
 
@@ -210,6 +267,17 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
     ? "Ganancia / Pérdida vs PPC (ARS/MEP)"
     : "Ganancia / Pérdida vs precio compra";
 
+  async function handleDelete() {
+    if (!confirm("¿Eliminar esta posición? Esta acción no se puede deshacer.")) return;
+    setDeleting(true); setDeleteError("");
+    try {
+      const res = await authFetch(`/positions/manual/${inst.id}`, { method: "DELETE" });
+      if (!res.ok) { setDeleteError("No se pudo eliminar"); setDeleting(false); return; }
+      router.push("/portfolio");
+      router.refresh();
+    } catch { setDeleteError("Error de conexión"); setDeleting(false); }
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -217,7 +285,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-xl font-bold text-bf-text">{inst.ticker}</h1>
+              <h1 className="text-xl font-bold text-bf-text">{isRealEstate ? inst.description : inst.ticker}</h1>
               <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[inst.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
                 {inst.context.type_label}
               </span>
@@ -233,7 +301,10 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
                 </span>
               )}
             </div>
-            <p className="text-xs text-bf-text-3">{inst.description}</p>
+            {isRealEstate
+              ? <p className="text-xs text-bf-text-4">{inst.ticker}</p>
+              : <p className="text-xs text-bf-text-3">{inst.description}</p>
+            }
           </div>
           <div className="text-right">
             <p className="text-base font-bold text-bf-text">
@@ -243,26 +314,73 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
           </div>
         </div>
 
-        {/* P&L hero */}
-        <div className={`rounded-xl p-3 flex items-center justify-between ${
-          pnlSign ? "bg-emerald-950/40 border border-emerald-900/40" : "bg-red-950/40 border border-red-900/40"
-        }`}>
-          <div className="flex items-center gap-2">
-            {pnlSign ? <TrendingUp size={16} className="text-emerald-400" /> : <TrendingDown size={16} className="text-red-400" />}
+        {/* P&L hero — oculto para REAL_ESTATE (siempre $0, sin sentido) */}
+        {!isRealEstate && (
+          <div className={`rounded-xl p-3 flex items-center justify-between ${
+            pnlSign ? "bg-emerald-950/40 border border-emerald-900/40" : "bg-red-950/40 border border-red-900/40"
+          }`}>
+            <div className="flex items-center gap-2">
+              {pnlSign ? <TrendingUp size={16} className="text-emerald-400" /> : <TrendingDown size={16} className="text-red-400" />}
+              <div>
+                <p className="text-[10px] text-bf-text-3">{pnlLabel}</p>
+                <p className={`text-sm font-bold ${pnlSign ? "text-emerald-400" : "text-red-400"}`}>
+                  {pnlSign ? "+" : ""}{FLAG[currency]} {fmt(inst.pnl_usd)}
+                </p>
+              </div>
+            </div>
             <div>
-              <p className="text-[10px] text-bf-text-3">{pnlLabel}</p>
-              <p className={`text-sm font-bold ${pnlSign ? "text-emerald-400" : "text-red-400"}`}>
-                {pnlSign ? "+" : ""}{FLAG[currency]} {fmt(inst.pnl_usd)}
+              <p className="text-[10px] text-bf-text-3 text-right">Rendimiento</p>
+              <p className={`text-sm font-bold ${positive ? "text-emerald-400" : "text-red-400"}`}>
+                {formatPct(inst.performance_pct, 2, true)}
               </p>
             </div>
           </div>
-          <div>
-            <p className="text-[10px] text-bf-text-3 text-right">Rendimiento</p>
-            <p className={`text-sm font-bold ${positive ? "text-emerald-400" : "text-red-400"}`}>
-              {formatPct(inst.performance_pct, 2, true)}
-            </p>
+        )}
+
+        {/* Renta hero para REAL_ESTATE */}
+        {isRealEstate && inst.monthly_return_usd > 0 && (
+          <div className="rounded-xl p-3 flex items-center justify-between bg-emerald-950/40 border border-emerald-900/40">
+            <div className="flex items-center gap-2">
+              <TrendingUp size={16} className="text-emerald-400" />
+              <div>
+                <p className="text-[10px] text-bf-text-3">Renta mensual estimada</p>
+                <p className="text-sm font-bold text-emerald-400">
+                  +{FLAG[currency]} {fmt(inst.monthly_return_usd)}
+                </p>
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] text-bf-text-3 text-right">Yield anual</p>
+              <p className="text-sm font-bold text-emerald-400">
+                {(inst.annual_yield_pct * 100).toFixed(2)}%
+              </p>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Edit / Delete para posiciones manuales */}
+        {isManual && (
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => router.push(`/portfolio/add-manual?edit=${inst.id}`)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-blue-500 hover:text-blue-400 transition-colors"
+            >
+              <Pencil size={12} />
+              Editar
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-red-500 hover:text-red-400 transition-colors disabled:opacity-40"
+            >
+              {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+              {deleting ? "Eliminando..." : "Eliminar"}
+            </button>
+          </div>
+        )}
+        {deleteError && (
+          <p className="text-[11px] text-red-400 text-center">{deleteError}</p>
+        )}
       </div>
 
       {/* Position metrics — layout según tipo */}
