@@ -13,7 +13,7 @@ export function ManualIntegrationCard() {
               MANUAL
             </span>
           </div>
-          <p className="text-xs text-bf-text-3 mt-0.5">Efectivo en mano o caja de ahorro</p>
+          <p className="text-xs text-bf-text-3 mt-0.5">Efectivo, cripto, inmuebles y más</p>
         </div>
         <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
       </div>
@@ -24,11 +24,11 @@ export function ManualIntegrationCard() {
           className="w-full flex items-center justify-center gap-2 bg-emerald-700/30 hover:bg-emerald-700/50 border border-emerald-800 text-emerald-400 text-sm font-medium py-2.5 rounded-xl transition-colors"
         >
           <Plus size={14} />
-          Agregar efectivo
+          Agregar activo manual
         </Link>
 
         <div className="space-y-1.5 pt-0.5">
-          {(["Cripto", "FCI", "ETF / Acción", "Otro"] as const).map((label) => (
+          {(["FCI externos", "ETF / Acción", "Otro"] as const).map((label) => (
             <div
               key={label}
               className="flex items-center justify-between px-1 opacity-40"

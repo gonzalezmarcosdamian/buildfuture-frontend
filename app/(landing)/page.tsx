@@ -170,7 +170,7 @@ const BROKERS = [
   { name: "Cocos", full: "Cocos Capital", domain: "cocos.capital", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
   { name: "PPI", full: "Portfolio Personal", domain: "ppi.com.ar", localLogo: "/logos/ppi.jpg", logoBg: true, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
   { name: "Binance", full: "Binance", domain: "binance.com", localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
-  { name: "Carga manual", full: "Efectivo, stablecoins, FCI externos", domain: null, localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+  { name: "Carga manual", full: "Efectivo, cripto, inmuebles, FCI", domain: null, localLogo: null as string | null, logoBg: false, status: "En vivo", statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
 ];
 
 function BrokerLogo({ domain, name, localLogo }: { domain: string | null; name: string; localLogo: string | null }) {
@@ -757,8 +757,8 @@ const FAQS = [
   { q: "¿BuildFuture es gratuito?", a: "Sí, y así seguirá durante toda la beta. Si en algún momento cambia el modelo, los usuarios beta recibirán aviso con al menos 30 días de anticipación y podrán eliminar su cuenta sin ninguna penalidad." },
   { q: "¿BuildFuture puede comprar o vender por mí?", a: "No. Nunca. Solo tiene acceso de lectura a tus cuentas. No puede ejecutar órdenes ni mover fondos. Podés verificarlo revisando los permisos en tu broker en cualquier momento." },
   { q: "¿Qué pasa con mis credenciales de IOL o Binance?", a: "Se almacenan encriptadas con AES-256. Nunca las vemos en texto plano. Podés revocarlas desde BuildFuture o directamente desde tu broker cuando quieras." },
-  { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si no tenés broker o preferís empezar sin conectar nada, podés cargar tus posiciones manualmente. Si usás otro broker, escribile a Damián directamente — es la forma más rápida de que lo prioricemos." },
-  { q: "¿Puedo usar BuildFuture sin tener cuenta en un broker?", a: "Sí. Podés cargar tus posiciones manualmente — efectivo en pesos o dólares, stablecoins, FCIs externos, lo que sea. La carga manual te da acceso completo al dashboard, la barra de libertad y las metas. Conectar un broker lo hace automático, pero no es obligatorio para empezar." },
+  { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si no tenés broker o preferís empezar sin conectar nada, podés cargar tus posiciones manualmente: efectivo, cripto, inmuebles que alquilás y más. Si usás otro broker, escribile a Damián directamente — es la forma más rápida de que lo prioricemos." },
+  { q: "¿Puedo usar BuildFuture sin tener cuenta en un broker?", a: "Sí. Podés cargar tus posiciones manualmente — efectivo en pesos o dólares, criptomonedas, inmuebles que alquilás, FCIs externos, lo que sea. La carga manual te da acceso completo al dashboard, la barra de libertad y las metas. Conectar un broker lo hace automático, pero no es obligatorio para empezar." },
   { q: "¿Mis datos se venden a terceros?", a: "No. Nunca. Usamos proveedores de infraestructura (Supabase, Railway, Vercel) pero no compartimos ni vendemos información personal o financiera." },
   { q: "¿Las sugerencias son asesoramiento financiero?", a: "No. Son sugerencias algorítmicas con fines educativos, basadas en tu perfil de riesgo. No constituyen asesoramiento financiero personalizado bajo la Ley 26.831. Toda decisión es tuya." },
 ];
@@ -873,7 +873,7 @@ function SectionContacto() {
             <p className="text-sm font-semibold text-slate-200">¿Usás un broker que no está?</p>
             <p className="text-[13px] text-slate-500 leading-relaxed">
               Escribime y lo priorizamos. Las integraciones se deciden por demanda real.
-              También podés cargar posiciones manualmente — esta funcionalidad está <span className="text-slate-300 font-medium">próximamente disponible en la app</span>.
+              También podés cargar posiciones manualmente — efectivo, criptomonedas, inmuebles que alquilás — disponible hoy en la app.
             </p>
           </div>
         </div>

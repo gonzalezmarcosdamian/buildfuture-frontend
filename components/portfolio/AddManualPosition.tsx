@@ -124,7 +124,6 @@ function CryptoForm({ onSuccess }: { onSuccess: () => void }) {
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<CryptoResult | null>(null);
   const [price, setPrice] = useState<number | null>(null);
-  const [loadingPrice, setLoadingPrice] = useState(false);
   const [quantity, setQuantity] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -152,14 +151,8 @@ function CryptoForm({ onSuccess }: { onSuccess: () => void }) {
     setSelected(coin);
     setQuery(`${coin.name} (${coin.symbol})`);
     setResults([]);
-    setLoadingPrice(true);
-    // Fetch precio actual desde el backend
-    authFetch(`/positions/search/crypto?q=${encodeURIComponent(coin.symbol)}`)
-      .then(() => {
-        // Precio lo obtenemos al guardar vía external_id — mostramos un placeholder
-        setPrice(null);
-      })
-      .finally(() => setLoadingPrice(false));
+    // Precio lo obtenemos al guardar vía external_id — mostramos un placeholder
+    setPrice(null);
   }
 
   function clear() { setSelected(null); setQuery(""); setResults([]); setPrice(null); }
@@ -273,16 +266,49 @@ function CryptoForm({ onSuccess }: { onSuccess: () => void }) {
 
 // ── Subcomponent: Real Estate form ──────────────────────────────────────────
 
+interface ExistingRestate {
+  id: number;
+  ticker: string;
+  description: string;
+  current_value_usd: number;
+}
+
+type RentMode = "rent" | "yield";
+
 function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
+  // Existing properties
+  const [existing, setExisting] = useState<ExistingRestate[]>([]);
+  const [loadingExisting, setLoadingExisting] = useState(true);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editValuation, setEditValuation] = useState("");
+  const [editRent, setEditRent] = useState("");
+  const [editRentMode, setEditRentMode] = useState<RentMode>("rent");
+  const [editYieldPct, setEditYieldPct] = useState("");
+  const [updateSaving, setUpdateSaving] = useState(false);
+  const [updateError, setUpdateError] = useState("");
+
+  // New property
   const [address, setAddress] = useState("");
   const [addressSuggestions, setAddressSuggestions] = useState<NominatimResult[]>([]);
   const [loadingAddress, setLoadingAddress] = useState(false);
   const [addressSelected, setAddressSelected] = useState(false);
   const [valuation, setValuation] = useState("");
+  const [rentMode, setRentMode] = useState<RentMode>("rent");
   const [rent, setRent] = useState("");
+  const [yieldInput, setYieldInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    authFetch("/positions/manual")
+      .then((r) => r.json())
+      .then((data: ExistingRestate[]) => {
+        setExisting(data.filter((p) => p.ticker.startsWith("RESTATE")));
+      })
+      .catch(() => {})
+      .finally(() => setLoadingExisting(false));
+  }, []);
 
   function handleAddressChange(val: string) {
     setAddress(val);
@@ -307,14 +333,65 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
     setAddressSelected(true);
   }
 
+  // Derived values for new property
   const valuationNum = parseFloat(valuation);
-  const rentNum = parseFloat(rent);
-  const yieldPct = valuationNum > 0 && rentNum > 0 ? (rentNum * 12) / valuationNum * 100 : null;
-  const valid = address.trim().length > 3 && valuationNum > 0 && rentNum > 0;
+  const rentNum = rentMode === "rent" ? parseFloat(rent) : 0;
+  const yieldFromRent = valuationNum > 0 && rentNum > 0 ? (rentNum * 12) / valuationNum * 100 : null;
+  const rentFromYield = rentMode === "yield" && valuationNum > 0 && parseFloat(yieldInput) > 0
+    ? (parseFloat(yieldInput) / 100) * valuationNum / 12
+    : null;
+
+  const displayYield = rentMode === "rent" ? yieldFromRent : (parseFloat(yieldInput) || null);
+  const displayRent = rentMode === "yield" ? rentFromYield : (rentNum || null);
+
+  const valid = address.trim().length > 3 && valuationNum > 0 && (
+    rentMode === "rent" ? rentNum > 0 : parseFloat(yieldInput) > 0
+  );
+
+  // Derived for edit form
+  const editValNum = parseFloat(editValuation);
+  const editRentNum = editRentMode === "rent" ? parseFloat(editRent) : 0;
+  const editYieldFromRent = editValNum > 0 && editRentNum > 0 ? (editRentNum * 12) / editValNum * 100 : null;
+  const editRentFromYield = editRentMode === "yield" && editValNum > 0 && parseFloat(editYieldPct) > 0
+    ? (parseFloat(editYieldPct) / 100) * editValNum / 12
+    : null;
+
+  function startEdit(prop: ExistingRestate) {
+    setEditingId(prop.id);
+    setEditValuation(prop.current_value_usd.toString());
+    setEditRent("");
+    setEditYieldPct("");
+    setEditRentMode("rent");
+    setUpdateError("");
+  }
+
+  async function saveUpdate() {
+    if (!editingId) return;
+    setUpdateSaving(true); setUpdateError("");
+    try {
+      const body: Record<string, number> = { purchase_price_usd: editValNum };
+      if (editRentMode === "rent" && editRentNum > 0) {
+        body.monthly_rent_usd = editRentNum;
+      } else if (editRentMode === "yield" && parseFloat(editYieldPct) > 0) {
+        body.manual_yield_pct = parseFloat(editYieldPct) / 100;
+      }
+      const res = await authFetch(`/positions/manual/${editingId}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); setUpdateError(d.detail || `Error ${res.status}`); return; }
+      setEditingId(null);
+      // Refresh list
+      const fresh = await authFetch("/positions/manual").then((r) => r.json());
+      setExisting((fresh as ExistingRestate[]).filter((p) => p.ticker.startsWith("RESTATE")));
+    } catch { setUpdateError("No se pudo conectar con el servidor"); }
+    finally { setUpdateSaving(false); }
+  }
 
   async function save() {
     if (!valid) return;
     setSaving(true); setError("");
+    const monthlyRent = rentMode === "rent" ? rentNum : rentFromYield ?? 0;
     try {
       const res = await authFetch("/positions/manual", {
         method: "POST",
@@ -329,7 +406,7 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
           external_id: null,
           fci_categoria: null,
           manual_yield_pct: null,
-          monthly_rent_usd: rentNum,
+          monthly_rent_usd: monthlyRent,
         }),
       });
       if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || `Error ${res.status}`); return; }
@@ -344,6 +421,90 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
         <h2 className="text-base font-bold text-bf-text">Inmueble</h2>
         <p className="text-xs text-bf-text-3 mt-0.5">Departamento, casa o local que alquilás</p>
       </div>
+
+      {/* Existing properties */}
+      {!loadingExisting && existing.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-bf-text-2 uppercase tracking-wide">Mis inmuebles</p>
+          {existing.map((prop) => (
+            <div key={prop.id} className="bg-bf-surface-2 border border-bf-border-2 rounded-xl px-4 py-3">
+              {editingId === prop.id ? (
+                <div className="space-y-3">
+                  <p className="text-xs text-bf-text-2 font-medium truncate">{prop.description}</p>
+                  {/* Valuation */}
+                  <div>
+                    <label className="text-[11px] text-bf-text-3 mb-1 block">Nueva valuación (USD)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-bf-text-3 text-xs">$</span>
+                      <input type="text" inputMode="decimal" value={editValuation}
+                        onChange={(e) => setEditValuation(e.target.value)}
+                        className="w-full bg-bf-surface border border-bf-border rounded-lg pl-6 pr-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                  </div>
+                  {/* Rent mode toggle */}
+                  <div className="flex gap-1.5">
+                    {(["rent", "yield"] as RentMode[]).map((m) => (
+                      <button key={m} onClick={() => setEditRentMode(m)}
+                        className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${editRentMode === m ? "bg-blue-600 text-white" : "bg-bf-surface border border-bf-border text-bf-text-3"}`}>
+                        {m === "rent" ? "Renta mensual (USD)" : "Yield anual (%)"}
+                      </button>
+                    ))}
+                  </div>
+                  {editRentMode === "rent" ? (
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-bf-text-3 text-xs">$</span>
+                      <input type="text" inputMode="decimal" value={editRent}
+                        onChange={(e) => setEditRent(e.target.value)} placeholder="600"
+                        className="w-full bg-bf-surface border border-bf-border rounded-lg pl-6 pr-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500" />
+                      {editYieldFromRent !== null && (
+                        <p className="text-[10px] text-bf-text-4 mt-1">≈ {editYieldFromRent.toFixed(2)}% anual</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <input type="text" inputMode="decimal" value={editYieldPct}
+                        onChange={(e) => setEditYieldPct(e.target.value)} placeholder="6.0"
+                        className="w-full bg-bf-surface border border-bf-border rounded-lg px-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500" />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 text-xs">%</span>
+                      {editRentFromYield !== null && (
+                        <p className="text-[10px] text-bf-text-4 mt-1">≈ USD {editRentFromYield.toFixed(0)}/mes</p>
+                      )}
+                    </div>
+                  )}
+                  {updateError && <ErrorBanner msg={updateError} />}
+                  <div className="flex gap-2">
+                    <button onClick={() => setEditingId(null)}
+                      className="flex-1 py-2 rounded-lg text-xs font-medium border border-bf-border text-bf-text-3 hover:text-bf-text transition-colors">
+                      Cancelar
+                    </button>
+                    <button onClick={saveUpdate} disabled={updateSaving || !editValNum}
+                      className="flex-1 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white transition-colors flex items-center justify-center gap-1">
+                      {updateSaving && <Loader2 size={11} className="animate-spin" />}
+                      {updateSaving ? "Guardando..." : "Guardar"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-bf-text truncate">{prop.description}</p>
+                    <p className="text-[11px] text-bf-text-4 mt-0.5">
+                      USD {prop.current_value_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })}
+                    </p>
+                  </div>
+                  <button onClick={() => startEdit(prop)}
+                    className="text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors shrink-0 ml-3">
+                    Actualizar
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+          <div className="border-t border-bf-border pt-4">
+            <p className="text-xs font-semibold text-bf-text-2 uppercase tracking-wide mb-3">Agregar otro inmueble</p>
+          </div>
+        </div>
+      )}
 
       {/* Dirección con autocomplete */}
       <div className="relative">
@@ -390,24 +551,51 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
         <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">Tu estimación del valor de mercado en dólares</p>
       </div>
 
-      {/* Renta mensual */}
-      <div>
-        <label className="text-xs text-bf-text-3 mb-1.5 block">Renta mensual (USD) *</label>
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">$</span>
-          <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={rent}
-            onChange={(e) => { setRent(e.target.value); setError(""); }}
-            placeholder="600"
-            className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-4 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
+      {/* Renta / Yield toggle */}
+      <div className="space-y-2">
+        <label className="text-xs text-bf-text-3 block">Rentabilidad *</label>
+        <div className="flex gap-2">
+          {(["rent", "yield"] as RentMode[]).map((m) => (
+            <button key={m} onClick={() => { setRentMode(m); setRent(""); setYieldInput(""); }}
+              className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border ${rentMode === m ? "bg-blue-600 text-white border-blue-500" : "bg-bf-surface border-bf-border text-bf-text-3"}`}>
+              {m === "rent" ? "Renta mensual (USD)" : "Yield anual (%)"}
+            </button>
+          ))}
         </div>
-        <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">Renta bruta mensual en dólares</p>
+        {rentMode === "rent" ? (
+          <div>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">$</span>
+              <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={rent}
+                onChange={(e) => { setRent(e.target.value); setError(""); }}
+                placeholder="600"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-4 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
+            </div>
+            {displayYield !== null && (
+              <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">≈ {displayYield.toFixed(2)}% anual</p>
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className="relative">
+              <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={yieldInput}
+                onChange={(e) => { setYieldInput(e.target.value); setError(""); }}
+                placeholder="6.0"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-4 pr-8 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">%</span>
+            </div>
+            {displayRent !== null && (
+              <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">≈ USD {displayRent.toFixed(0)}/mes</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Yield preview */}
-      {yieldPct !== null && (
+      {displayYield !== null && displayYield > 0 && (
         <div className="bg-emerald-950/30 border border-emerald-900/50 rounded-xl px-4 py-3 flex justify-between items-center">
           <span className="text-xs text-bf-text-3">Yield anual estimado</span>
-          <span className="text-sm font-bold text-emerald-400">{yieldPct.toFixed(2)}% anual</span>
+          <span className="text-sm font-bold text-emerald-400">{displayYield.toFixed(2)}% anual</span>
         </div>
       )}
 

@@ -6,7 +6,7 @@ const PROPS = [
   {
     icon: "💰",
     title: "Renta mensual real",
-    desc: "Medí cuánto de tus gastos mensuales cubre el rendimiento de tu portafolio. No acumulación abstracta — cobertura concreta.",
+    desc: "Medí cuánto de tus gastos mensuales cubre el rendimiento de tu portafolio — LECAPs, FCIs, inmuebles que alquilás. No acumulación abstracta, cobertura concreta.",
     color: "border-emerald-900/40 bg-emerald-950/20",
   },
   {
@@ -64,7 +64,7 @@ export function ValuePropsScreen() {
           <ChevronRight size={16} />
         </button>
         <p className="text-center text-[11px] text-bf-text-4">
-          Conectá IOL, Cocos o PPI — o cargá tus posiciones manualmente.
+          Conectá IOL, Cocos o PPI — o cargá efectivo, cripto e inmuebles manualmente.
         </p>
       </div>
     </div>
