@@ -114,23 +114,17 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
 
   return (
     <div className="space-y-3">
-      {/* Unified switch + info icon */}
+      {/* Switch — solo Composición por ahora; Rendimientos temporalmente oculto */}
       <div className="flex items-center gap-2">
         <div className="flex flex-1 bg-bf-surface rounded-xl p-1 border border-bf-border gap-1">
-          {(["composicion", "rendimientos"] as ViewMode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => { setMode(m); setInfoModal(null); }}
-              className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors ${
-                mode === m ? "bg-bf-surface-3 text-bf-text" : "text-bf-text-3 hover:text-bf-text-2"
-              }`}
-            >
-              {m === "composicion" ? "Composición" : "Rendimientos"}
-            </button>
-          ))}
+          <button
+            className="flex-1 text-xs py-1.5 rounded-lg font-medium bg-bf-surface-3 text-bf-text"
+          >
+            Composición
+          </button>
         </div>
         <button
-          onClick={() => setInfoModal(infoModal === activeInfoKey ? null : activeInfoKey)}
+          onClick={() => setInfoModal(infoModal === "tenencia" ? null : "tenencia")}
           className="w-7 h-7 flex items-center justify-center rounded-full text-bf-text-3 hover:text-bf-text-2 hover:bg-bf-surface-2 transition-colors flex-shrink-0"
           aria-label="Cómo se calcula"
         >
@@ -147,9 +141,9 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
           >
             <X size={14} />
           </button>
-          <p className="font-semibold text-bf-text-2 pr-5">{info.title}</p>
+          <p className="font-semibold text-bf-text-2 pr-5">{INFO_CONTENT.tenencia.title}</p>
           <ul className="space-y-1.5">
-            {info.items.map((item, i) => (
+            {INFO_CONTENT.tenencia.items.map((item, i) => (
               <li key={i} className="flex gap-2 text-bf-text-3">
                 <span className="text-blue-500 mt-px shrink-0">•</span>
                 {item}
@@ -159,11 +153,11 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
         </div>
       )}
 
-      {/* Chart — period controlled from here */}
+      {/* Chart — solo tenencia */}
       <PerformanceChart
         initialData={history}
         mep={mep}
-        chartMode={chartMode}
+        chartMode="tenencia"
         period={period}
         onPeriodChange={handlePeriodChange}
       />

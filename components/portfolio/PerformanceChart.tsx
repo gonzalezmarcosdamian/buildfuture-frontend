@@ -176,9 +176,9 @@ function RendimientoTooltip({ active, payload, currency, mep }: {
     <div className="bg-bf-surface-2/95 border border-bf-border-2 rounded-xl px-3 py-2.5 text-xs shadow-xl min-w-[168px]">
       <p className="text-bf-text-3 mb-2 font-medium">{p.label}</p>
       <div className="space-y-1">
-        <TRow label="Cierre" value={fmtFull(p.total_usd, currency, usedMep)} />
+        <TRow label="Portafolio" value={fmtFull(p.total_usd, currency, usedMep)} />
         <div className="flex justify-between gap-4">
-          <span className="text-bf-text-3">Mercado</span>
+          <span className="text-bf-text-3">Variación</span>
           <span className={`font-semibold ${gainPositive ? "text-emerald-400" : "text-red-400"}`}>
             {fmtFull(marketGain / (currency === "ARS" ? mep : 1), currency, usedMep, true)}
           </span>
