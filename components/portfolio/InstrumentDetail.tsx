@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle, Pencil, Trash2, Loader2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle, Pencil, Trash2, Loader2, MapPin, ExternalLink } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
 import { supabase } from "@/lib/supabase";
@@ -261,6 +261,21 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
   const positive = inst.performance_pct >= 0;
   const pnlSign  = inst.pnl_usd >= 0;
 
+  // Para REAL_ESTATE: extraer nombre corto de la dirección Nominatim larga
+  // Ej: "63, General Román Deheza, General Paz, Córdoba, ..." → "General Román Deheza, Córdoba"
+  const restateFriendlyName = isRealEstate
+    ? (() => {
+        const parts = inst.description.split(",").map((s) => s.trim()).filter(Boolean);
+        // Tomar partes 1 (barrio/localidad) y 3 (provincia) si existen
+        const main = parts[1] ?? parts[0] ?? inst.description;
+        const region = parts[3] ?? parts[2] ?? "";
+        return region ? `${main}, ${region}` : main;
+      })()
+    : null;
+  const mapsUrl = isRealEstate
+    ? `https://maps.google.com/?q=${encodeURIComponent(inst.description)}`
+    : null;
+
   const pnlLabel = inst.asset_type === "FCI"
     ? "Ganancia / Pérdida vs VCP compra"
     : inst.asset_type === "CEDEAR"
@@ -284,10 +299,12 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
       <div className="bg-bf-surface rounded-2xl border border-bf-border p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-xl font-bold text-bf-text">{isRealEstate ? inst.description : inst.ticker}</h1>
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <h1 className="text-xl font-bold text-bf-text">
+                {isRealEstate ? (restateFriendlyName ?? inst.ticker) : inst.ticker}
+              </h1>
               <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[inst.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
-                {inst.context.type_label}
+                {isRealEstate ? "🏠 Inmueble" : inst.context.type_label}
               </span>
               {inst.asset_type === "LETRA" && inst.days_to_maturity !== null && inst.days_to_maturity <= 60 && inst.days_to_maturity > 0 && (
                 <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium bg-amber-900/60 text-amber-300 border border-amber-700/40">
@@ -301,10 +318,22 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
                 </span>
               )}
             </div>
-            {isRealEstate
-              ? <p className="text-xs text-bf-text-4">{inst.ticker}</p>
-              : <p className="text-xs text-bf-text-3">{inst.description}</p>
-            }
+            {isRealEstate ? (
+              <a
+                href={mapsUrl!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-1 group mt-0.5"
+              >
+                <MapPin size={11} className="text-amber-400 mt-0.5 shrink-0" />
+                <span className="text-[11px] text-bf-text-3 group-hover:text-amber-300 transition-colors leading-tight line-clamp-2">
+                  {inst.description}
+                </span>
+                <ExternalLink size={10} className="text-bf-text-4 group-hover:text-amber-300 mt-0.5 shrink-0 transition-colors" />
+              </a>
+            ) : (
+              <p className="text-xs text-bf-text-3">{inst.description}</p>
+            )}
           </div>
           <div className="text-right">
             <p className="text-base font-bold text-bf-text">
@@ -389,28 +418,73 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         <PositionMetrics inst={inst} fmt={fmt} hint={hint} currency={currency} />
       </div>
 
+      {/* Mapa para REAL_ESTATE */}
+      {isRealEstate && mapsUrl && (
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full flex items-center gap-3 bg-bf-surface rounded-2xl border border-bf-border p-4 hover:border-amber-700/60 transition-colors group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-amber-900/30 border border-amber-800/40 flex items-center justify-center shrink-0">
+            <MapPin size={18} className="text-amber-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-bf-text group-hover:text-amber-300 transition-colors">
+              Ver en el mapa
+            </p>
+            <p className="text-[10px] text-bf-text-4 truncate mt-0.5">{inst.description}</p>
+          </div>
+          <ExternalLink size={14} className="text-bf-text-4 group-hover:text-amber-300 shrink-0 transition-colors" />
+        </a>
+      )}
+
       {/* Asset context */}
       <div className="bg-bf-surface rounded-2xl border border-bf-border p-4 space-y-3">
-        <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">Sobre este instrumento</p>
-        <p className="text-xs text-bf-text-2">{inst.context.description}</p>
-        {inst.context.currency_note && (
-          <div className="flex items-start gap-2">
-            <RefreshCw size={12} className="text-bf-text-3 mt-0.5 shrink-0" />
-            <p className="text-[11px] text-bf-text-3">{inst.context.currency_note}</p>
-          </div>
+        <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">
+          {isRealEstate ? "Sobre este inmueble" : "Sobre este instrumento"}
+        </p>
+        {isRealEstate ? (
+          <>
+            <p className="text-xs text-bf-text-2">
+              Propiedad registrada manualmente. La valuación y la renta son estimaciones ingresadas por vos y pueden actualizarse cuando cambien las condiciones del mercado o del contrato.
+            </p>
+            <div className="flex items-start gap-2">
+              <RefreshCw size={12} className="text-bf-text-3 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-bf-text-3">
+                Valuación en USD. Renta mensual convertida al MEP actual para el cálculo de cobertura de gastos.
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <Droplets size={12} className="text-blue-500 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-bf-text-3">
+                <span className="text-bf-text-3">Liquidez:</span> Baja — venta requiere proceso legal. La renta es mensual.
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-xs text-bf-text-2">{inst.context.description}</p>
+            {inst.context.currency_note && (
+              <div className="flex items-start gap-2">
+                <RefreshCw size={12} className="text-bf-text-3 mt-0.5 shrink-0" />
+                <p className="text-[11px] text-bf-text-3">{inst.context.currency_note}</p>
+              </div>
+            )}
+            <div className="flex items-start gap-2">
+              <Droplets size={12} className="text-blue-500 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-bf-text-3">
+                <span className="text-bf-text-3">Liquidez:</span> {inst.context.liquidity}
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <Zap size={12} className="text-yellow-500 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-bf-text-3">
+                <span className="text-bf-text-3">Fuente de datos:</span> {inst.source}
+              </p>
+            </div>
+          </>
         )}
-        <div className="flex items-start gap-2">
-          <Droplets size={12} className="text-blue-500 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-bf-text-3">
-            <span className="text-bf-text-3">Liquidez:</span> {inst.context.liquidity}
-          </p>
-        </div>
-        <div className="flex items-start gap-2">
-          <Zap size={12} className="text-yellow-500 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-bf-text-3">
-            <span className="text-bf-text-3">Fuente de datos:</span> {inst.source}
-          </p>
-        </div>
       </div>
 
       {/* MEP footer */}
