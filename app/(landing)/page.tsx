@@ -820,17 +820,17 @@ const TESTIMONIOS = [
   {
     name: "Marcelo",
     role: "Inversor particular",
-    quote: "Hay algo que ninguna app te dice: cuándo llegás. Eso es exactamente lo que faltaba.",
+    quote: "Somos muchos los que tenemos inversiones repartidas en varios lados. El problema es que nunca tenés una foto real de dónde estás parado.",
     accent: "emerald",
-    highlight: "cuándo llegás",
+    highlight: "nunca tenés una foto real",
     emoji: "💡",
   },
   {
     name: "Matías",
     role: "Inversor multi-broker",
-    quote: "Tengo plata en IOL, en Cocos y en cripto. Nunca sé cuánto tengo en total. BuildFuture es lo primero que me lo muestra junto.",
+    quote: "Aprovecho distintos instrumentos en distintos brokers — letras en uno, CEDEARs en otro. Cada uno me muestra lo suyo. Nunca tuve un solo lugar donde ver todo junto.",
     accent: "blue",
-    highlight: "lo primero que me lo muestra junto",
+    highlight: "un solo lugar donde ver todo junto",
     emoji: "🔍",
   },
   {
