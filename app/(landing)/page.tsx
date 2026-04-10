@@ -120,9 +120,11 @@ function SectionHero() {
 
             {/* Subheadline */}
             <p className="text-lg text-slate-400 leading-relaxed max-w-lg">
-              BuildFuture conecta todo tu patrimonio —
-              <span className="text-slate-200"> IOL, Cocos, PPI, Binance, tu depto en alquiler</span> —
-              y te dice exactamente cuánto falta para vivir de tus rentas.
+              Cada mes invertís algo. Pero nunca sabés{" "}
+              <span className="text-slate-200">cuánto podés invertir</span>{" "}
+              ni cuánto te acerca eso a no depender de un sueldo.
+              <br className="hidden sm:block" />
+              <span className="text-emerald-400"> BuildFuture responde las dos preguntas.</span>
             </p>
 
             {/* CTAs */}
@@ -247,6 +249,11 @@ function SectionIntegraciones() {
 
 const PROBLEMAS = [
   {
+    icon: "💸",
+    title: "No sabés cuánto podés invertir este mes.",
+    body: "Tenés ingresos, tenés gastos, sobra algo. Pero no está calculado. Así es imposible saber si estás progresando o solo acumulando sin rumbo.",
+  },
+  {
     icon: "🗂️",
     title: "Tus activos están dispersos.",
     body: "Tenés LECAPs en IOL, CEDEARs en Cocos y BTC en Binance. Ningún broker te muestra el total consolidado.",
@@ -254,17 +261,12 @@ const PROBLEMAS = [
   {
     icon: "📊",
     title: "Calculás a mano, siempre desactualizado.",
-    body: "Para saber cuánto ganás por mes usás una hoja de cálculo que cambia cada vez que hacés algo.",
+    body: "Para saber cuánto ganás por mes abrís una hoja de cálculo que ya no cuadra. La libertad financiera no se puede gestionar con una planilla que rompés cada vez que movés algo.",
   },
   {
     icon: "🧭",
     title: "No sabés cuándo sos libre.",
     body: "Tu portafolio crece, pero no tenés idea de cuándo ese crecimiento alcanza para reemplazar tu sueldo.",
-  },
-  {
-    icon: "📈",
-    title: "Tu broker mide rentabilidad, no libertad.",
-    body: "Te dice cuánto ganaste en porcentaje. No te dice cuánto te falta para dejar de depender de un sueldo.",
   },
   {
     icon: "🏠",
@@ -309,11 +311,13 @@ function SectionProblema() {
           <AlertCircle size={18} className="text-emerald-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <p className="text-sm font-semibold text-slate-200">
-              Tu broker te muestra rentabilidad. Nadie te muestra libertad.
+              Tu broker te muestra rentabilidad. Nadie te enseña a usarla.
             </p>
             <p className="text-[13px] text-slate-500">
-              BuildFuture es la primera herramienta argentina que responde la pregunta que importa:{" "}
-              <span className="text-emerald-400 font-medium">¿cuándo podés vivir de tus inversiones?</span>
+              BuildFuture es la primera herramienta argentina que responde las dos preguntas que importan:{" "}
+              <span className="text-emerald-400 font-medium">¿cuánto podés invertir este mes?</span>{" "}
+              Y:{" "}
+              <span className="text-emerald-400 font-medium">¿cuándo ese número te da libertad?</span>
             </p>
           </div>
         </div>
@@ -440,9 +444,9 @@ const PILARES = [
   },
   {
     emoji: "💸",
-    tag: "Presupuesto + metas",
-    headline: "No solo trackeás.\nAvanzás.",
-    body: "Configurás tu sueldo y BuildFuture calcula cuánto podés invertir cada mes. Define tus metas — departamento, fondo de emergencia, retiro — y te muestra cuándo llegás. Con sugerencias de instrumentos adaptadas al mercado argentino hoy.",
+    tag: "Las dos palancas",
+    headline: "Dos decisiones aceleran\ntu libertad financiera.",
+    body: "La primera: achicar gastos. Cada peso que sacás de gastos fijos es un peso que va a trabajar para vos. BuildFuture te muestra cuánto impacta en tu fecha de libertad.\n\nLa segunda: invertir con disciplina, todos los meses. No hay truco. El tiempo hace el trabajo pesado. BuildFuture calcula cuánto podés meter este mes y te proyecta cuándo ese hábito te da libertad.",
     mockup: <SugerenciasMockup />,
     flip: false,
   },
@@ -475,7 +479,7 @@ function SectionSolucion() {
                 <h3 className="text-3xl sm:text-4xl font-extrabold text-slate-100 leading-tight whitespace-pre-line">
                   {pilar.headline}
                 </h3>
-                <p className="text-slate-400 text-base leading-relaxed">{pilar.body}</p>
+                <p className="text-slate-400 text-base leading-relaxed whitespace-pre-line">{pilar.body}</p>
               </div>
               {/* Mockup */}
               <div className={`flex ${pilar.flip ? "lg:justify-start" : "lg:justify-end"} justify-center`}>
@@ -757,6 +761,9 @@ function SectionFounder() {
 // ── SECCIÓN FAQ ────────────────────────────────────────────────────────────────
 
 const FAQS = [
+  { q: "¿Cómo sé cuánto puedo invertir este mes?", a: "BuildFuture calcula tu capacidad de inversión a partir de tus ingresos y tus gastos reales. Cuando configurás tu presupuesto en la app, el sistema te muestra cuánto sobra antes de que lo gastes en otra cosa. Es el número que la mayoría de los inversores nunca tienen claro, y que cambia todo cuando lo ves seguido." },
+  { q: "Si bajo mis gastos, ¿cambia mucho mi libertad financiera?", a: "Sí, y el impacto es mayor de lo que intuís. Cada peso que dejás de gastar tiene dos efectos: aumenta cuánto podés invertir este mes, y reduce cuánto necesitás para ser libre (porque tus gastos mensuales son más bajos). El simulador de BuildFuture te muestra exactamente cuántos meses acortás tu camino con cada cambio." },
+  { q: "¿En cuánto tiempo puedo ser libre financieramente?", a: "Depende de cuánto tenés hoy, cuánto podés invertir cada mes y qué rendimiento promedio obtenés. BuildFuture calcula tu proyección con tu portafolio real como base — no con ejemplos genéricos. La barra de libertad te muestra el porcentaje actual; la proyección te dice cuándo llegás al 100% si mantenés el ritmo." },
   { q: "¿Cómo accedo a BuildFuture?", a: "La beta es por invitación personal. Escribile directamente a Damián — por WhatsApp, email o LinkedIn. Si tu perfil encaja con la comunidad que estamos armando, recibís un link de acceso personal." },
   { q: "¿Por qué la beta es cerrada?", a: "BuildFuture es un proyecto personal no comercial. Preferimos conocer a cada usuario antes de darle acceso a sus datos financieros. El control manual nos permite iterar rápido y garantizar que la experiencia sea buena para cada persona." },
   { q: "¿BuildFuture es gratuito?", a: "Sí, y así seguirá durante toda la beta. Si en algún momento cambia el modelo, los usuarios beta recibirán aviso con al menos 30 días de anticipación y podrán eliminar su cuenta sin ninguna penalidad." },
@@ -916,15 +923,14 @@ export default function LandingPage() {
   return (
     <main>
       <SectionHero />
-      <SectionIntegraciones />
       <SectionProblema />
       <SectionSolucion />
-
+      <SectionIntegraciones />
       <SectionComoFunciona />
-      <SectionVision />
       <SectionFounder />
       <SectionFAQ />
       <SectionContacto />
+      <SectionVision />
       <SectionCTAFinal />
     </main>
   );
