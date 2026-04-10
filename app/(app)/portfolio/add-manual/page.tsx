@@ -31,7 +31,7 @@ export default async function AddManualPage({
         <span className="text-2xl leading-none">{icon}</span>
         <h1 className="text-xl font-bold text-bf-text">Agregar {label}</h1>
       </div>
-      <AddManualPosition />
+      <AddManualPosition initialMode={mode as "CASH" | "CRYPTO" | "REAL_ESTATE"} />
     </div>
   );
 }

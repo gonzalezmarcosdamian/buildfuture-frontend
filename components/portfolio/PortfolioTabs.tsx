@@ -448,12 +448,16 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                             <div>
                               <div className="flex items-center gap-1.5">
                                 <span className="text-xs leading-none">{jobIcon(p.asset_type)}</span>
-                                <span className="text-xs font-semibold text-bf-text-2">{p.ticker}</span>
+                                <span className="text-xs font-semibold text-bf-text-2">
+                                  {p.asset_type === "REAL_ESTATE" ? p.description : p.ticker}
+                                </span>
                                 <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
-                                  {p.asset_type}
+                                  {p.asset_type === "REAL_ESTATE" ? "🏠 Inmueble" : p.asset_type}
                                 </span>
                               </div>
-                              <p className="text-[10px] text-bf-text-3">{p.quantity.toLocaleString("es-AR")} u.</p>
+                              <p className="text-[10px] text-bf-text-3">
+                                {p.asset_type === "REAL_ESTATE" ? "Inmueble manual" : `${p.quantity.toLocaleString("es-AR")} u.`}
+                              </p>
                             </div>
                             <div className="flex items-center gap-1">
                               <div className="text-right">
@@ -536,8 +540,12 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <span className="text-xs font-semibold text-bf-text-2">{p.ticker}</span>
-                              <p className="text-[10px] text-bf-text-3">{p.description.split(" ").slice(0, 3).join(" ")}</p>
+                              <span className="text-xs font-semibold text-bf-text-2">
+                                {p.asset_type === "REAL_ESTATE" ? p.description : p.ticker}
+                              </span>
+                              <p className="text-[10px] text-bf-text-3">
+                                {p.asset_type === "REAL_ESTATE" ? "🏠 Inmueble" : p.description.split(" ").slice(0, 3).join(" ")}
+                              </p>
                             </div>
                             <div className="flex items-center gap-1">
                               <div className="text-right">

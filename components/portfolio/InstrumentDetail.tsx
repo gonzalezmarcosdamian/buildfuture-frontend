@@ -26,6 +26,7 @@ interface InstrumentData {
   id: number;
   ticker: string;
   description: string;
+  external_id: string | null;
   asset_type: string;
   source: string;
   quantity: number;
@@ -162,11 +163,13 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   if (isREAL_ESTATE) {
     const yieldPct = inst.annual_yield_pct * 100;
     const monthlyRent = inst.monthly_return_usd;
-    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(inst.description)}`;
+    // external_id stores the full address for new entries; description is the user-defined name
+    const addressForMap = inst.external_id ?? inst.description;
+    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(addressForMap)}`;
     return (
       <>
         <div className="mb-3">
-          <MiniMap address={inst.description} mapsUrl={mapsUrl} />
+          <MiniMap address={addressForMap} mapsUrl={mapsUrl} />
         </div>
         <MetricRow
           label="Valuación del inmueble"
@@ -317,19 +320,12 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
   const positive = inst.performance_pct >= 0;
   const pnlSign  = inst.pnl_usd >= 0;
 
-  // Para REAL_ESTATE: extraer nombre corto de la dirección Nominatim larga
-  // Ej: "63, General Román Deheza, General Paz, Córdoba, ..." → "General Román Deheza, Córdoba"
-  const restateFriendlyName = isRealEstate
-    ? (() => {
-        const parts = inst.description.split(",").map((s) => s.trim()).filter(Boolean);
-        // Tomar partes 1 (barrio/localidad) y 3 (provincia) si existen
-        const main = parts[1] ?? parts[0] ?? inst.description;
-        const region = parts[3] ?? parts[2] ?? "";
-        return region ? `${main}, ${region}` : main;
-      })()
-    : null;
+  // Para REAL_ESTATE: description = nombre definido por usuario, external_id = dirección completa
+  // Legacy (posiciones viejas): external_id es null → usar description como fallback
+  const restateAddress = isRealEstate ? (inst.external_id ?? inst.description) : null;
+  const restateName = isRealEstate ? inst.description : null;
   const mapsUrl = isRealEstate
-    ? `https://maps.google.com/?q=${encodeURIComponent(inst.description)}`
+    ? `https://maps.google.com/?q=${encodeURIComponent(restateAddress!)}`
     : null;
 
   const pnlLabel = inst.asset_type === "FCI"
@@ -357,7 +353,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
           <div>
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h1 className="text-xl font-bold text-bf-text">
-                {isRealEstate ? (restateFriendlyName ?? inst.ticker) : inst.ticker}
+                {isRealEstate ? (restateName ?? inst.ticker) : inst.ticker}
               </h1>
               <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[inst.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
                 {isRealEstate ? "🏠 Inmueble" : inst.context.type_label}
@@ -374,7 +370,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
                 </span>
               )}
             </div>
-            {isRealEstate ? (
+            {isRealEstate && restateAddress ? (
               <a
                 href={mapsUrl!}
                 target="_blank"
@@ -383,7 +379,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
               >
                 <MapPin size={11} className="text-amber-400 mt-0.5 shrink-0" />
                 <span className="text-[11px] text-bf-text-3 group-hover:text-amber-300 transition-colors leading-tight line-clamp-2">
-                  {inst.description}
+                  {restateAddress}
                 </span>
                 <ExternalLink size={10} className="text-bf-text-4 group-hover:text-amber-300 mt-0.5 shrink-0 transition-colors" />
               </a>
@@ -447,7 +443,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         {isManual && (
           <div className="flex gap-2 pt-1">
             <button
-              onClick={() => router.push(`/portfolio/add-manual?edit=${inst.id}`)}
+              onClick={() => router.push(`/portfolio/add-manual?mode=${inst.asset_type}`)}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-blue-500 hover:text-blue-400 transition-colors"
             >
               <Pencil size={12} />
@@ -489,7 +485,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
             <p className="text-xs font-semibold text-bf-text group-hover:text-amber-300 transition-colors">
               Ver en el mapa
             </p>
-            <p className="text-[10px] text-bf-text-4 truncate mt-0.5">{inst.description}</p>
+            <p className="text-[10px] text-bf-text-4 truncate mt-0.5">{restateAddress ?? inst.description}</p>
           </div>
           <ExternalLink size={14} className="text-bf-text-4 group-hover:text-amber-300 shrink-0 transition-colors" />
         </a>

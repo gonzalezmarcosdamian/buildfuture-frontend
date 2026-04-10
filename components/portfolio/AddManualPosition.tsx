@@ -288,6 +288,7 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
   const [updateError, setUpdateError] = useState("");
 
   // New property
+  const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [addressSuggestions, setAddressSuggestions] = useState<NominatimResult[]>([]);
   const [loadingAddress, setLoadingAddress] = useState(false);
@@ -344,7 +345,7 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
   const displayYield = rentMode === "rent" ? yieldFromRent : (parseFloat(yieldInput) || null);
   const displayRent = rentMode === "yield" ? rentFromYield : (rentNum || null);
 
-  const valid = address.trim().length > 3 && valuationNum > 0 && (
+  const valid = name.trim().length > 1 && address.trim().length > 3 && valuationNum > 0 && (
     rentMode === "rent" ? rentNum > 0 : parseFloat(yieldInput) > 0
   );
 
@@ -398,12 +399,12 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
         body: JSON.stringify({
           asset_type: "REAL_ESTATE",
           ticker: "RESTATE",
-          description: address.slice(0, 100),
+          description: name.trim().slice(0, 80),
           quantity: 1.0,
           purchase_price_usd: valuationNum,
           ppc_ars: 0,
           purchase_fx_rate: 0,
-          external_id: null,
+          external_id: address.slice(0, 200),
           fci_categoria: null,
           manual_yield_pct: null,
           monthly_rent_usd: monthlyRent,
@@ -505,6 +506,19 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
           </div>
         </div>
       )}
+
+      {/* Nombre del inmueble */}
+      <div>
+        <label className="text-xs text-bf-text-3 mb-1.5 block">Nombre del inmueble *</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Ej: Departamento en Córdoba, Local comercial"
+          className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl px-4 py-3 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
+        />
+        <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">Este nombre aparecerá en tu listado de posiciones</p>
+      </div>
 
       {/* Dirección con autocomplete */}
       <div className="relative">
@@ -629,16 +643,9 @@ function SaveButton({ onClick, saving, disabled, label = "Agregar al portafolio"
 
 // ── Main component ──────────────────────────────────────────────────────────
 
-export function AddManualPosition() {
+export function AddManualPosition({ initialMode = "CASH" }: { initialMode?: AssetMode }) {
   const router = useRouter();
-  // Modo viene del ?mode= del carrusel — no hay selector interno
-  const mode: AssetMode = (() => {
-    if (typeof window !== "undefined") {
-      const p = new URLSearchParams(window.location.search).get("mode");
-      if (p === "CRYPTO" || p === "REAL_ESTATE" || p === "CASH") return p;
-    }
-    return "CASH";
-  })();
+  const mode: AssetMode = initialMode;
   const [success, setSuccess] = useState<AssetMode | null>(null);
 
   const SUCCESS_LABELS: Record<AssetMode, string> = {
