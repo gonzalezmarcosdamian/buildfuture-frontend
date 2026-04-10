@@ -245,17 +245,23 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   }
 
   // CEDEAR, LETRA, BOND, CRYPTO, ETF
+  // Letras CER: ticker comienza con X (ej: X29Y6). TIR real = rendimiento anual sobre CER.
+  const isCERLetter = isLETRA && inst.ticker.toUpperCase().startsWith("X");
+
   const maturitySub = isLETRA && inst.maturity_date
     ? `Vence ${new Date(inst.maturity_date + "T12:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })}${inst.days_to_maturity !== null ? ` · ${inst.days_to_maturity} días` : ""}`
     : undefined;
 
-  const rentaSub = isLETRA
-    ? `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%${maturitySub ? ` · ${maturitySub}` : ""}`
+  const yieldPct = (inst.annual_yield_pct * 100).toFixed(2);
+  const rentaSub = isCERLetter
+    ? `TIR real ${Number(yieldPct) >= 0 ? "+" : ""}${yieldPct}% sobre CER${maturitySub ? ` · ${maturitySub}` : ""}`
+    : isLETRA
+    ? `TNA ${yieldPct}%${maturitySub ? ` · ${maturitySub}` : ""}`
     : inst.asset_type === "BOND"
-    ? `YTM ${(inst.annual_yield_pct * 100).toFixed(2)}%`
+    ? `YTM ${yieldPct}%`
     : inst.asset_type === "ON"
-    ? `TIR ${(inst.annual_yield_pct * 100).toFixed(2)}%`
-    : `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`;
+    ? `TIR ${yieldPct}%`
+    : `TNA ${yieldPct}%`;
 
   return (
     <>
