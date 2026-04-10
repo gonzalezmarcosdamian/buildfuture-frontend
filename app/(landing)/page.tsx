@@ -121,8 +121,8 @@ function SectionHero() {
             {/* Subheadline */}
             <p className="text-lg text-slate-400 leading-relaxed max-w-lg">
               BuildFuture conecta todo tu patrimonio —
-              <span className="text-slate-200"> IOL, Cocos, PPI, Binance</span> —
-              y te muestra en tiempo real qué tan cerca estás de vivir de tus inversiones.
+              <span className="text-slate-200"> IOL, Cocos, PPI, Binance, tu depto en alquiler</span> —
+              y te dice exactamente cuánto falta para vivir de tus rentas.
             </p>
 
             {/* CTAs */}
@@ -266,6 +266,11 @@ const PROBLEMAS = [
     title: "Tu broker mide rentabilidad, no libertad.",
     body: "Te dice cuánto ganaste en porcentaje. No te dice cuánto te falta para dejar de depender de un sueldo.",
   },
+  {
+    icon: "🏠",
+    title: "Tu depto alquila, pero no aparece en ningún lado.",
+    body: "El alquiler entra todos los meses, pero no está en tu broker ni en tu hoja de cálculo. Tu mayor activo queda afuera del cuadro, y tu libertad financiera real es más alta de lo que creés.",
+  },
 ];
 
 function SectionProblema() {
@@ -324,7 +329,7 @@ function PortfolioMockup() {
   const positions = [
     { ticker: "LETE", name: "Letra del Tesoro", type: "LETRA", val: "USD 5.200", pct: "+12.4%", src: "IOL", color: "text-emerald-400" },
     { ticker: "GGAL", name: "Galicia CEDEAR", type: "CEDEAR", val: "USD 4.800", pct: "+31.2%", src: "Cocos", color: "text-emerald-400" },
-    { ticker: "SPY", name: "S&P 500 ETF", type: "ETF", val: "USD 3.100", pct: "+8.7%", src: "Cocos", color: "text-emerald-400" },
+    { ticker: "🏠", name: "Depto Palermo", type: "Inmueble", val: "USD 95.000", pct: "6.6% yield", src: "Manual", color: "text-amber-400" },
     { ticker: "BTC", name: "Bitcoin", type: "CRYPTO", val: "USD 2.900", pct: "+54.1%", src: "Binance", color: "text-emerald-400" },
     { ticker: "AL30", name: "Bono Argentina", type: "BOND", val: "USD 2.450", pct: "-3.2%", src: "IOL", color: "text-red-400" },
   ];
@@ -421,7 +426,7 @@ const PILARES = [
     emoji: "🗂️",
     tag: "Portafolio unificado",
     headline: "Todo tu patrimonio,\nen un solo número.",
-    body: "Conectás IOL, Cocos, PPI y Binance. BuildFuture sincroniza automáticamente y te muestra el total en pesos y dólares, con el MEP del día. Sin copiar y pegar. Sin Excel. Sin adivinar.",
+    body: "Conectás IOL, Cocos, PPI y Binance. Y sumás lo que los brokers no ven: tu depto en alquiler, efectivo en mano y cripto fuera del exchange. Todo en un solo número, en pesos y dólares, con el MEP del día.",
     mockup: <PortfolioMockup />,
     flip: false,
   },
@@ -758,7 +763,8 @@ const FAQS = [
   { q: "¿BuildFuture puede comprar o vender por mí?", a: "No. Nunca. Solo tiene acceso de lectura a tus cuentas. No puede ejecutar órdenes ni mover fondos. Podés verificarlo revisando los permisos en tu broker en cualquier momento." },
   { q: "¿Qué pasa con mis credenciales de IOL o Binance?", a: "Se almacenan encriptadas con AES-256. Nunca las vemos en texto plano. Podés revocarlas desde BuildFuture o directamente desde tu broker cuando quieras." },
   { q: "¿Funciona con mi broker?", a: "Hoy: IOL, Cocos Capital, PPI y Binance. Si no tenés broker o preferís empezar sin conectar nada, podés cargar tus posiciones manualmente: efectivo, cripto, inmuebles que alquilás y más. Si usás otro broker, escribile a Damián directamente — es la forma más rápida de que lo prioricemos." },
-  { q: "¿Puedo usar BuildFuture sin tener cuenta en un broker?", a: "Sí. Podés cargar tus posiciones manualmente — efectivo en pesos o dólares, criptomonedas, inmuebles que alquilás, FCIs externos, lo que sea. La carga manual te da acceso completo al dashboard, la barra de libertad y las metas. Conectar un broker lo hace automático, pero no es obligatorio para empezar." },
+  { q: "¿Puedo cargar mi departamento en alquiler?", a: "Sí. Ingresás el nombre del inmueble, la dirección, el valor en USD y el alquiler mensual que cobrás. BuildFuture calcula el yield anual y lo incorpora a tu barra de libertad financiera. Para muchos usuarios, el depto es el activo que más mueve el número. No necesitás ninguna integración — lo actualizás cuando querés." },
+  { q: "No tengo broker ni acciones. Solo tengo un departamento alquilado y efectivo. ¿BuildFuture me sirve?", a: "Sí. Podés cargar tu inmueble manualmente con dirección, valuación y renta, y registrar tu efectivo en ARS o USD. La app calcula cuánto falta para cubrir tus gastos con esos activos y te muestra tu avance hacia la libertad financiera — sin necesidad de conectar ningún broker. Conectar uno lo hace automático, pero no es obligatorio para empezar." },
   { q: "¿Mis datos se venden a terceros?", a: "No. Nunca. Usamos proveedores de infraestructura (Supabase, Railway, Vercel) pero no compartimos ni vendemos información personal o financiera." },
   { q: "¿Las sugerencias son asesoramiento financiero?", a: "No. Son sugerencias algorítmicas con fines educativos, basadas en tu perfil de riesgo. No constituyen asesoramiento financiero personalizado bajo la Ley 26.831. Toda decisión es tuya." },
 ];
