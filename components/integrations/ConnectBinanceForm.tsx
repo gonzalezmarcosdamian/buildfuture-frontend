@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Zap } from "lucide-react";
+import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Zap, ShieldCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 interface Props {
@@ -117,14 +117,19 @@ export function ConnectBinanceForm({ onSuccess }: Props) {
         </div>
       </div>
 
-      {/* Tooltip instrucciones */}
-      <p className="text-[10px] text-bf-text-3 leading-relaxed">
-        Generá tu API Key en Binance:{" "}
-        <span className="text-bf-text-3">Perfil → Gestión de API → Crear API</span>
-        {" "}y seleccioná únicamente{" "}
-        <span className="text-yellow-500 font-medium">&quot;Enable Reading&quot;</span>.
-        No actives permisos de trading.
-      </p>
+      {/* Instrucción seguridad */}
+      <div className="flex items-start gap-2 bg-emerald-950/30 border border-emerald-900/40 rounded-xl px-3 py-2.5">
+        <ShieldCheck size={13} className="text-emerald-400 shrink-0 mt-0.5" />
+        <div className="space-y-0.5">
+          <p className="text-[11px] font-medium text-emerald-300">
+            Creá la API Key con solo <span className="text-yellow-400">&quot;Enable Reading&quot;</span>
+          </p>
+          <p className="text-[10px] text-emerald-400/70 leading-snug">
+            En Binance: <span className="text-emerald-300 font-medium">Perfil → Gestión de API → Crear API</span>.
+            Activá únicamente &quot;Enable Reading&quot; — sin trading, sin withdrawals. Con ese scope, nadie puede operar aunque la key sea comprometida.
+          </p>
+        </div>
+      </div>
 
       {/* Error / éxito */}
       {error && (

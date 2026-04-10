@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Zap, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Zap, RefreshCw, ShieldCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 interface Props {
@@ -114,9 +114,15 @@ export function ConnectCocosForm({ onSuccess }: Props) {
 
   return (
     <div className="mt-3 space-y-3">
-      <p className="text-xs text-bf-text-3">
-        Usamos tus credenciales solo para leer tu portafolio. Nunca operamos en tu nombre.
-      </p>
+      <div className="flex items-start gap-2 bg-blue-950/30 border border-blue-900/40 rounded-xl px-3 py-2.5">
+        <ShieldCheck size={13} className="text-blue-400 shrink-0 mt-0.5" />
+        <div className="space-y-0.5">
+          <p className="text-[11px] font-medium text-blue-300">Solo lectura — BuildFuture nunca opera en tu nombre</p>
+          <p className="text-[10px] text-blue-400/70 leading-snug">
+            Cocos no permite crear credenciales con permisos limitados. Usamos tu usuario y contraseña únicamente para leer tu portafolio. El código 2FA confirma tu identidad — nunca se usa para ejecutar órdenes.
+          </p>
+        </div>
+      </div>
 
       {/* Indicador de pasos */}
       <div className="flex items-center gap-2">
