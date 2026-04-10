@@ -177,7 +177,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
           sub={hint(inst.current_value_usd)}
         />
         <MetricRow
-          label="Renta mensual estimada"
+          label="Renta estimada / mes"
           value={`${FLAG.USD} ${fmt(monthlyRent)}`}
           sub={`Yield anual: ${yieldPct.toFixed(2)}%`}
           highlight={monthlyRent > 0 ? "green" : null}
@@ -231,7 +231,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
           highlight={inst.pnl_usd >= 0 ? "green" : "red"}
         />
         <MetricRow
-          label="Renta mensual estimada"
+          label="Renta estimada / mes *"
           value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
           sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`}
           highlight={inst.monthly_return_usd > 0 ? "green" : null}
@@ -248,7 +248,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   const rentaSub = isLETRA
     ? `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%${maturitySub ? ` · ${maturitySub}` : ""}`
     : inst.asset_type === "BOND"
-    ? `YTM ${(inst.annual_yield_pct * 100).toFixed(2)}% · cupones semestrales`
+    ? `YTM ${(inst.annual_yield_pct * 100).toFixed(2)}%`
     : `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`;
 
   return (
@@ -294,12 +294,14 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
         sub={`${formatPct(inst.performance_pct, 2, true)} · ${hint(inst.pnl_usd)}`}
         highlight={inst.pnl_usd >= 0 ? "green" : "red"}
       />
-      <MetricRow
-        label="Renta mensual estimada"
-        value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
-        sub={rentaSub}
-        highlight={inst.monthly_return_usd > 0 ? "green" : null}
-      />
+      {inst.asset_type !== "CASH" && (
+        <MetricRow
+          label="Renta estimada / mes *"
+          value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
+          sub={rentaSub}
+          highlight={inst.monthly_return_usd > 0 ? "green" : null}
+        />
+      )}
     </>
   );
 }
@@ -361,7 +363,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
               {inst.asset_type === "LETRA" && inst.days_to_maturity !== null && inst.days_to_maturity <= 60 && inst.days_to_maturity > 0 && (
                 <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium bg-amber-900/60 text-amber-300 border border-amber-700/40">
                   <AlertTriangle size={9} />
-                  Rolleo en {inst.days_to_maturity}d
+                  Vence en {inst.days_to_maturity}d
                 </span>
               )}
               {inst.asset_type === "LETRA" && inst.days_to_maturity !== null && inst.days_to_maturity <= 0 && (
@@ -410,7 +412,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
               </div>
             </div>
             <div>
-              <p className="text-[10px] text-bf-text-3 text-right">Rendimiento</p>
+              <p className="text-[10px] text-bf-text-3 text-right">% desde compra</p>
               <p className={`text-sm font-bold ${positive ? "text-emerald-400" : "text-red-400"}`}>
                 {formatPct(inst.performance_pct, 2, true)}
               </p>
@@ -424,7 +426,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
             <div className="flex items-center gap-2">
               <TrendingUp size={16} className="text-emerald-400" />
               <div>
-                <p className="text-[10px] text-bf-text-3">Renta mensual estimada</p>
+                <p className="text-[10px] text-bf-text-3">Renta estimada / mes</p>
                 <p className="text-sm font-bold text-emerald-400">
                   +{FLAG[currency]} {fmt(inst.monthly_return_usd)}
                 </p>
@@ -468,6 +470,9 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
       <div className="bg-bf-surface rounded-2xl border border-bf-border p-4">
         <p className="text-[10px] text-bf-text-3 uppercase tracking-wider mb-1">Mi posición</p>
         <PositionMetrics inst={inst} fmt={fmt} hint={hint} currency={currency} />
+        {inst.asset_type !== "CASH" && !isRealEstate && (
+          <p className="text-[10px] text-bf-text-4 mt-2 px-0.5">* Proyección basada en TNA/YTM. No garantiza rendimiento futuro.</p>
+        )}
       </div>
 
       {/* Mapa para REAL_ESTATE */}
@@ -532,7 +537,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
             <div className="flex items-start gap-2">
               <Zap size={12} className="text-yellow-500 mt-0.5 shrink-0" />
               <p className="text-[11px] text-bf-text-3">
-                <span className="text-bf-text-3">Fuente de datos:</span> {inst.source}
+                <span className="text-bf-text-3">Broker:</span> {inst.source === "IOL" ? "InvertirOnline" : inst.source === "COCOS" ? "Cocos Capital" : inst.source === "PPI" ? "Portfolio Personal" : inst.source === "BINANCE" ? "Binance" : inst.source === "MANUAL" ? "Carga manual" : inst.source}
               </p>
             </div>
           </>

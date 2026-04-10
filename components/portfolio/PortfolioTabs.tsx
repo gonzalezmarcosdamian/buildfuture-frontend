@@ -456,7 +456,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                                 </span>
                               </div>
                               <p className="text-[10px] text-bf-text-3">
-                                {p.asset_type === "REAL_ESTATE" ? "Inmueble manual" : `${p.quantity.toLocaleString("es-AR")} u.`}
+                                {p.asset_type === "REAL_ESTATE" ? "Inmueble" : `${p.quantity.toLocaleString("es-AR")} u.`}
                               </p>
                             </div>
                             <div className="flex items-center gap-1">
