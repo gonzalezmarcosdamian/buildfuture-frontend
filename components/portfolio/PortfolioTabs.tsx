@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { TrendingUp, TrendingDown, ChevronRight, ChevronDown, Trash2, Pencil, Check, X } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
+import { assetLabelWithEmoji, assetLabel } from "@/lib/assetLabels";
 import { useCurrency } from "@/lib/currency-context";
 import { SyncButton } from "@/components/portfolio/SyncButton";
 import { supabase } from "@/lib/supabase";
@@ -454,11 +455,11 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                                   {p.asset_type === "REAL_ESTATE" ? p.description : p.ticker}
                                 </span>
                                 <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
-                                  {p.asset_type === "REAL_ESTATE" ? "🏠 Inmueble" : p.asset_type}
+                                  {p.asset_type === "REAL_ESTATE" ? assetLabelWithEmoji("REAL_ESTATE") : p.asset_type}
                                 </span>
                               </div>
                               <p className="text-[10px] text-bf-text-3">
-                                {p.asset_type === "REAL_ESTATE" ? "Inmueble" : `${p.quantity.toLocaleString("es-AR")} u.`}
+                                {p.asset_type === "REAL_ESTATE" ? assetLabel("REAL_ESTATE") : `${p.quantity.toLocaleString("es-AR")} u.`}
                               </p>
                             </div>
                             <div className="flex items-center gap-1">
@@ -546,7 +547,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                                 {p.asset_type === "REAL_ESTATE" ? p.description : p.ticker}
                               </span>
                               <p className="text-[10px] text-bf-text-3">
-                                {p.asset_type === "REAL_ESTATE" ? "🏠 Inmueble" : p.description.split(" ").slice(0, 3).join(" ")}
+                                {p.asset_type === "REAL_ESTATE" ? assetLabelWithEmoji("REAL_ESTATE") : p.description.split(" ").slice(0, 3).join(" ")}
                               </p>
                             </div>
                             <div className="flex items-center gap-1">

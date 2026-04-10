@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle, Pencil, Trash2, Loader2, MapPin, ExternalLink } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
+import { assetBadgeClass } from "@/lib/assetLabels";
 import { useCurrency } from "@/lib/currency-context";
 import { supabase } from "@/lib/supabase";
 
@@ -63,15 +64,7 @@ interface InstrumentData {
   };
 }
 
-const ASSET_BADGES: Record<string, string> = {
-  CEDEAR:      "bg-blue-900 text-blue-300",
-  BOND:        "bg-purple-900 text-purple-300",
-  LETRA:       "bg-yellow-900 text-yellow-300",
-  CRYPTO:      "bg-orange-900 text-orange-300",
-  FCI:         "bg-green-900 text-green-300",
-  CASH:        "bg-bf-surface-3 text-bf-text-2",
-  REAL_ESTATE: "bg-amber-900/60 text-amber-300",
-};
+// Badge classes centralizadas en lib/assetLabels.ts
 
 const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" };
 
@@ -424,8 +417,8 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
               <h1 className="text-xl font-bold text-bf-text">
                 {isRealEstate ? (restateName ?? inst.ticker) : inst.ticker}
               </h1>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[inst.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
-                {isRealEstate ? "🏠 Inmueble" : inst.context.type_label}
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${assetBadgeClass(inst.asset_type)}`}>
+                {isRealEstate ? assetLabelWithEmoji("REAL_ESTATE") : inst.context.type_label}
               </span>
               {inst.asset_type === "LETRA" && inst.days_to_maturity !== null && inst.days_to_maturity <= 60 && inst.days_to_maturity > 0 && (
                 <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium bg-amber-900/60 text-amber-300 border border-amber-700/40">
