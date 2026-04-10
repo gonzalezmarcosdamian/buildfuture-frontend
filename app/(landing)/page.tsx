@@ -814,6 +814,98 @@ function SectionComoFunciona() {
   );
 }
 
+// ── Sección Testimonios ───────────────────────────────────────────────────────
+
+const TESTIMONIOS = [
+  {
+    name: "Marcelo",
+    role: "Inversor particular",
+    quote: "Está buena la idea. Soluciona un problema real.",
+    accent: "emerald",
+    highlight: "un problema real",
+    emoji: "💡",
+  },
+  {
+    name: "Matías",
+    role: "Inversor multi-broker",
+    quote: "Uno mueve sus inversiones de broker en broker, o a distintos tipos. Acá sería todo transparente.",
+    accent: "blue",
+    highlight: "todo transparente",
+    emoji: "🔍",
+  },
+  {
+    name: "Jero",
+    role: "Inversor en real estate",
+    quote: "Para real estate no hay nada. Y es una de mis inversiones principales.",
+    accent: "violet",
+    highlight: "no hay nada",
+    emoji: "🏠",
+  },
+];
+
+function SectionTestimonios() {
+  return (
+    <section className="py-20 border-t border-slate-800/60">
+      <div className="max-w-6xl mx-auto px-5 space-y-12">
+        <div className="text-center space-y-2">
+          <p className="text-[11px] uppercase tracking-widest text-slate-600">Lo que dicen los primeros usuarios</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">
+            El problema es real.<br />
+            <span className="text-emerald-400">Ellos lo viven.</span>
+          </h2>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-5">
+          {TESTIMONIOS.map((t) => {
+            const accentMap: Record<string, { border: string; bg: string; text: string; badge: string }> = {
+              emerald: { border: "border-emerald-900/50", bg: "bg-emerald-950/20", text: "text-emerald-400", badge: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400" },
+              blue:    { border: "border-blue-900/50",    bg: "bg-blue-950/20",    text: "text-blue-400",    badge: "bg-blue-950/60 border-blue-800/50 text-blue-400" },
+              violet:  { border: "border-violet-900/50",  bg: "bg-violet-950/20",  text: "text-violet-400",  badge: "bg-violet-950/60 border-violet-800/50 text-violet-400" },
+            };
+            const c = accentMap[t.accent];
+            // Split quote to highlight the key phrase
+            const parts = t.quote.split(t.highlight);
+            return (
+              <div
+                key={t.name}
+                className={`bg-slate-900 border ${c.border} rounded-2xl p-6 space-y-5 flex flex-col`}
+              >
+                <div className={`w-10 h-10 rounded-xl ${c.bg} border ${c.border} flex items-center justify-center text-xl`}>
+                  {t.emoji}
+                </div>
+                <blockquote className="flex-1">
+                  <p className="text-base text-slate-200 font-medium leading-relaxed">
+                    &ldquo;{parts[0]}
+                    <span className={`${c.text} font-semibold`}>{t.highlight}</span>
+                    {parts[1]}&rdquo;
+                  </p>
+                </blockquote>
+                <div className="flex items-center gap-3 pt-2 border-t border-slate-800">
+                  <div className={`w-8 h-8 rounded-full ${c.bg} border ${c.border} flex items-center justify-center`}>
+                    <span className={`text-xs font-bold ${c.text}`}>{t.name[0]}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-200">{t.name}</p>
+                    <p className="text-[11px] text-slate-500">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="border border-slate-800 rounded-2xl p-6 bg-slate-900/60 text-center space-y-2 max-w-xl mx-auto">
+          <p className="text-sm font-semibold text-slate-200">Beta cerrada — acceso por invitación personal</p>
+          <p className="text-[13px] text-slate-500">
+            Cada usuario es bienvenido por Damián. Si tu situación resuena con la de Marcelo, Matías o Jero,{" "}
+            <a href="#contacto" className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium">escribime</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Sección Visión ────────────────────────────────────────────────────────────
 
 const ROADMAP = [
@@ -1176,6 +1268,7 @@ export default function LandingPage() {
       <SectionPresupuesto />
       <SectionIntegraciones />
       <SectionComoFunciona />
+      <SectionTestimonios />
       <SectionFounder />
       <SectionFAQ />
       <SectionContacto />
