@@ -266,7 +266,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   const rentaSub = isCERLetter
     ? `TIR real ${Number(yieldPct) >= 0 ? "+" : ""}${yieldPct}% sobre CER${maturitySub ? ` · ${maturitySub}` : ""}`
     : isLETRA
-    ? `TNA ${yieldPct}%${maturitySub ? ` · ${maturitySub}` : ""}`
+    ? `TEA ${yieldPct}%${maturitySub ? ` · ${maturitySub}` : ""}`
     : inst.asset_type === "BOND"
     ? `YTM ${yieldPct}%`
     : inst.asset_type === "ON"
@@ -538,7 +538,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         <p className="text-[10px] text-bf-text-3 uppercase tracking-wider mb-1">Mi posición</p>
         <PositionMetrics inst={inst} fmt={fmt} hint={hint} currency={currency} />
         {!isRealEstate && ["LETRA", "BOND", "ON", "FCI", "CAUCION"].includes(inst.asset_type) && (
-          <p className="text-[10px] text-bf-text-4 mt-2 px-0.5">* Proyección basada en TNA/YTM. No garantiza rendimiento futuro.</p>
+          <p className="text-[10px] text-bf-text-4 mt-2 px-0.5">* Proyección basada en TEA/TNA/YTM/TIR. No garantiza rendimiento futuro.</p>
         )}
       </div>
 
