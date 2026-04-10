@@ -390,14 +390,14 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                                     <div className="flex flex-col gap-1 shrink-0">
                                       <button
                                         onClick={() => { setEditingId(p.id); setEditAmount(String(p.ticker === "CASH_ARS" ? Math.round(p.current_value_usd * mep) : p.current_value_usd)); }}
-                                        className="p-1 text-bf-text-4 hover:text-bf-text-2 transition-colors"
+                                        className="p-2.5 text-bf-text-4 hover:text-bf-text-2 transition-colors"
                                         title="Editar"
                                       >
                                         <Pencil size={12} />
                                       </button>
                                       <button
                                         onClick={() => deletePosition(p.id)}
-                                        className="p-1 text-bf-text-4 hover:text-red-400 transition-colors"
+                                        className="p-2.5 text-bf-text-4 hover:text-red-400 transition-colors"
                                         title="Eliminar"
                                       >
                                         <Trash2 size={12} />
@@ -407,7 +407,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                                 </div>
                               </div>
                               {isEditing && (
-                                <div className="flex items-center gap-2 mt-2">
+                                <div className="flex items-center gap-3 mt-2">
                                   <input
                                     type="text"
                                     inputMode="decimal"
@@ -424,13 +424,13 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                                   <button
                                     onClick={() => saveEdit(p.id, p.ticker)}
                                     disabled={savingEdit}
-                                    className="p-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-40"
+                                    className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-40"
                                   >
                                     <Check size={12} />
                                   </button>
                                   <button
                                     onClick={() => setEditingId(null)}
-                                    className="p-1.5 text-bf-text-3 hover:text-bf-text-2 transition-colors"
+                                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-bf-text-3 hover:text-bf-text-2 transition-colors"
                                   >
                                     <X size={12} />
                                   </button>

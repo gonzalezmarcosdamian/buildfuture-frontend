@@ -44,6 +44,8 @@ interface InstrumentData {
   mep: number;
   maturity_date: string | null;
   days_to_maturity: number | null;
+  projected_price_at_maturity_ars?: number | null;
+  paridad_pct?: number | null;
   context: {
     type_label: string;
     full_name: string;
@@ -300,12 +302,32 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
         value={`${FLAG[currency]} ${fmt(inst.current_value_usd)}`}
         sub={hint(inst.current_value_usd)}
       />
+      {inst.asset_type === "BOND" && inst.paridad_pct != null && inst.paridad_pct > 0 && (
+        <MetricRow
+          label="Paridad"
+          value={`${inst.paridad_pct.toFixed(1)}%`}
+          sub="precio como % del valor nominal"
+        />
+      )}
       <MetricRow
         label="Ganancia neta"
         value={`${inst.pnl_usd >= 0 ? "+" : ""}${FLAG[currency]} ${fmt(inst.pnl_usd)}`}
         sub={`${formatPct(inst.performance_pct, 2, true)} · ${hint(inst.pnl_usd)}`}
         highlight={inst.pnl_usd >= 0 ? "green" : "red"}
       />
+      {inst.asset_type === "ON" && inst.description && (
+        <MetricRow
+          label="Emisor"
+          value={inst.description}
+        />
+      )}
+      {isLETRA && inst.projected_price_at_maturity_ars && inst.projected_price_at_maturity_ars > 0 && (
+        <MetricRow
+          label="Precio proyectado al vto."
+          value={`$${inst.projected_price_at_maturity_ars.toLocaleString("es-AR", { maximumFractionDigits: 2 })} ARS`}
+          sub="por cada 100 nominales"
+        />
+      )}
       {isIncomeAsset && (
         <MetricRow
           label="Renta estimada / mes *"
