@@ -339,7 +339,9 @@ function GoalCard({
       {/* Tiempo estimado + aporte */}
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-bf-surface-2/60 rounded-xl px-3 py-2.5 text-center">
-          <p className="text-sm font-bold text-bf-text leading-tight">{monthsLabel(goal.months_to_goal, goal.monthly_savings_usd > 0)}</p>
+          <p className="text-sm font-bold text-bf-text leading-tight">
+            {goal.progress_pct >= 100 ? "¡Ya llegaste!" : monthsLabel(goal.months_to_goal, goal.monthly_savings_usd > 0)}
+          </p>
           <p className="text-[10px] text-bf-text-3 mt-0.5">para llegar</p>
         </div>
         <div className="bg-bf-surface-2/60 rounded-xl px-3 py-2.5 text-center">
@@ -520,7 +522,7 @@ export function CapitalGoals({
       )}
 
       {/* Recomendación: Fondo de reserva — visible hasta que se crea esa meta específica */}
-      {!goals.some((g) => g.name.toLowerCase() === "fondo de reserva") && !initialForm && (
+      {!goals.some((g) => g.name.toLowerCase() === "fondo de reserva" || g.emoji === "🛡️") && !initialForm && (
         <div className="bg-bf-surface rounded-2xl border border-dashed border-violet-900/50 p-4 space-y-2">
           <div className="flex items-center gap-2">
             <span className="text-xl">🛡️</span>
