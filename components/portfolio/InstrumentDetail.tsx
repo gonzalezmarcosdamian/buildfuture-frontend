@@ -46,6 +46,14 @@ interface InstrumentData {
   days_to_maturity: number | null;
   projected_price_at_maturity_ars?: number | null;
   paridad_pct?: number | null;
+  cedear_market?: {
+    price_ars: number;
+    prev_close_ars: number | null;
+    high_ars: number | null;
+    low_ars: number | null;
+    variation_pct: number | null;
+  } | null;
+  ccl_compra_usd?: number | null;
   context: {
     type_label: string;
     full_name: string;
@@ -307,6 +315,31 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
           label="Paridad"
           value={`${inst.paridad_pct.toFixed(1)}%`}
           sub="precio como % del valor nominal"
+        />
+      )}
+      {inst.asset_type === "CEDEAR" && inst.cedear_market && (
+        <>
+          {inst.cedear_market.variation_pct != null && (
+            <MetricRow
+              label="Variación hoy"
+              value={`${inst.cedear_market.variation_pct >= 0 ? "+" : ""}${inst.cedear_market.variation_pct.toFixed(2)}%`}
+              sub="20 min delay · BYMA"
+              highlight={inst.cedear_market.variation_pct >= 0 ? "green" : "red"}
+            />
+          )}
+          {inst.cedear_market.high_ars != null && inst.cedear_market.low_ars != null && (
+            <MetricRow
+              label="Máx / Mín del día"
+              value={`$${inst.cedear_market.high_ars.toLocaleString("es-AR", { maximumFractionDigits: 0 })} / $${inst.cedear_market.low_ars.toLocaleString("es-AR", { maximumFractionDigits: 0 })} ARS`}
+            />
+          )}
+        </>
+      )}
+      {inst.asset_type === "CEDEAR" && inst.ccl_compra_usd != null && (
+        <MetricRow
+          label="CCL de compra"
+          value={`$${inst.ccl_compra_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} ARS/USD`}
+          sub="tipo de cambio implícito al momento de la compra"
         />
       )}
       <MetricRow
