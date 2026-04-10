@@ -253,6 +253,8 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
     ? `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%${maturitySub ? ` · ${maturitySub}` : ""}`
     : inst.asset_type === "BOND"
     ? `YTM ${(inst.annual_yield_pct * 100).toFixed(2)}%`
+    : inst.asset_type === "ON"
+    ? `TIR ${(inst.annual_yield_pct * 100).toFixed(2)}%`
     : `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`;
 
   return (

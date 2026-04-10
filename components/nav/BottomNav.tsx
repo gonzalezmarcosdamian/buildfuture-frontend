@@ -40,7 +40,7 @@ export function BottomNav() {
       >
         <div className="flex items-center justify-around h-14 max-w-lg mx-auto px-2">
           {navItems.map(({ href, icon: Icon, label }) => {
-            const active = pathname === href;
+            const active = href === "/dashboard" ? pathname === href : pathname.startsWith(href);
             const isPending = pending === href;
             return (
               <Link
