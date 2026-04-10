@@ -3,6 +3,7 @@ import { CurrencyProvider } from "@/lib/currency-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { TosGate } from "@/components/ui/TosGate";
+import { Toaster } from "sonner";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {children}
             </main>
             <BottomNav />
+            <Toaster position="bottom-center" offset={100} richColors />
           </TosGate>
         </CurrencyProvider>
       </AuthProvider>

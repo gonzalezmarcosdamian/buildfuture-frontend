@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { TrendingUp, TrendingDown, ChevronRight, ChevronDown, Trash2, Pencil, Check, X } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { useCurrency } from "@/lib/currency-context";
@@ -211,6 +212,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
         method: "PATCH",
         body: JSON.stringify({ quantity: qtyUsd, ppc_ars: isARS ? num : num * mepRate, purchase_fx_rate: mepRate }),
       });
+      toast.success("Saldo actualizado");
     } finally {
       setSavingEdit(false);
       setEditingId(null);

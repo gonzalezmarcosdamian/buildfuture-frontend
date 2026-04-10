@@ -97,7 +97,13 @@ export function PortfolioHeader({
             <p className="text-sm font-semibold text-bf-renta">{fmt(monthlyReturnUsd * 12)}</p>
           </div>
           <div className="bg-bf-surface-2/40 rounded-xl px-3 py-2 text-center">
-            <p className="text-[9px] text-bf-text-3 mb-0.5">Cobertura gastos</p>
+            <p className="text-[9px] text-bf-text-3 mb-0.5 flex items-center justify-center gap-1">
+              Cobertura gastos
+              <span
+                title="% de tus gastos mensuales cubiertos por la renta de tu portafolio. 100% = libertad financiera."
+                className="inline-flex items-center justify-center w-3 h-3 rounded-full border border-bf-text-3 text-bf-text-3 cursor-help leading-none text-[7px]"
+              >?</span>
+            </p>
             <p className="text-sm font-semibold text-bf-capital">{formatPct(freedomPct)}</p>
           </div>
         </div>
