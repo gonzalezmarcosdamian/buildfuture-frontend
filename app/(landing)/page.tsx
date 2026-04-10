@@ -493,6 +493,188 @@ function SectionSolucion() {
   );
 }
 
+// ── Sección Presupuesto ───────────────────────────────────────────────────────
+
+function BudgetMockup() {
+  const items = [
+    { label: "Sueldo mensual", value: "USD 2.800", type: "income" },
+    { label: "Gastos fijos", value: "− USD 980", type: "expense" },
+    { label: "Gastos variables", value: "− USD 620", type: "expense" },
+  ];
+  return (
+    <div className="relative">
+      <div className="mx-auto w-[280px] sm:w-[320px] bg-slate-900 rounded-[2.5rem] border border-slate-700/60 shadow-2xl overflow-hidden">
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-20 h-1.5 bg-slate-700 rounded-full" />
+        </div>
+        <div className="px-4 pb-6 pt-3 space-y-3">
+          <p className="text-sm font-bold text-slate-100">Tu presupuesto</p>
+          <div className="space-y-2">
+            {items.map((item) => (
+              <div key={item.label} className="flex items-center justify-between bg-slate-800/50 rounded-xl px-3 py-2.5">
+                <span className="text-[11px] text-slate-400">{item.label}</span>
+                <span className={`text-[11px] font-semibold ${item.type === "income" ? "text-emerald-400" : "text-slate-500"}`}>
+                  {item.value}
+                </span>
+              </div>
+            ))}
+          </div>
+          {/* Divisor */}
+          <div className="border-t border-slate-700 pt-3">
+            <div className="bg-emerald-950/60 border border-emerald-800/60 rounded-xl px-3 py-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-emerald-400/70 uppercase tracking-wider">Podés invertir</p>
+                <p className="text-xl font-extrabold text-emerald-400">USD 1.200</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-slate-500">este mes</p>
+                <p className="text-[11px] font-semibold text-slate-300">43% del sueldo</p>
+              </div>
+            </div>
+          </div>
+          {/* Mini proyección */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <p className="text-[10px] text-slate-500">Libertad financiera</p>
+              <p className="text-[10px] font-semibold text-slate-400">en ~4.2 años</p>
+            </div>
+            <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full w-[28%] rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute -inset-8 -z-10 bg-emerald-600/8 blur-3xl rounded-full" />
+    </div>
+  );
+}
+
+function SectionPresupuesto() {
+  return (
+    <section className="py-24 border-t border-slate-800/60 bg-slate-900/20">
+      <div className="max-w-6xl mx-auto px-5 space-y-20">
+
+        {/* Header */}
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-6">
+            <p className="text-[11px] uppercase tracking-widest text-slate-600">Presupuesto · Gastos · Inversión</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100 leading-tight">
+              Primero entendés<br />
+              <span className="text-emerald-400">cuánto podés mover.</span><br />
+              Después decidís a dónde.
+            </h2>
+            <p className="text-slate-400 leading-relaxed">
+              La mayoría invierte &ldquo;lo que sobra&rdquo; sin saber cuánto es eso.
+              BuildFuture lo calcula: ingresos menos gastos fijos y variables = tu capacidad de inversión real, mes a mes.
+            </p>
+            <div className="space-y-3">
+              {[
+                { icon: "📉", text: "Bajás un gasto fijo → sube tu capacidad de inversión y cae el capital que necesitás para ser libre." },
+                { icon: "🔄", text: "Invertís todos los meses, aunque sea poco → el tiempo compuesto hace el trabajo por vos." },
+                { icon: "📊", text: "BuildFuture proyecta cuándo llegás al 100% de libertad con tu ritmo actual." },
+              ].map((item) => (
+                <div key={item.text} className="flex items-start gap-3">
+                  <span className="text-lg leading-none mt-0.5">{item.icon}</span>
+                  <p className="text-[13px] text-slate-400 leading-relaxed">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-center lg:justify-end">
+            <BudgetMockup />
+          </div>
+        </div>
+
+        {/* ¿Y ahora qué? */}
+        <div className="space-y-8">
+          <div className="text-center space-y-2">
+            <p className="text-[11px] uppercase tracking-widest text-slate-600">¿Y ahora qué hago con eso?</p>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-100">
+              Dos caminos. BuildFuture te acompaña en los dos.
+            </h3>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-6">
+            {/* Path A: Generar renta */}
+            <div className="bg-slate-900 border border-emerald-900/50 rounded-2xl p-6 space-y-5 hover:border-emerald-700/60 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-emerald-950/60 border border-emerald-800/50 flex items-center justify-center text-xl">
+                💰
+              </div>
+              <div className="space-y-2">
+                <p className="text-base font-bold text-slate-100">Quiero generar renta</p>
+                <p className="text-[13px] text-slate-500 leading-relaxed">
+                  Invertís con disciplina todos los meses. Los rendimientos de tus LECAPs, bonos, FCIs e inmuebles se acumulan.
+                  La barra de libertad sube hasta que tu renta cubre tus gastos — y ya no dependés del sueldo.
+                </p>
+              </div>
+              <div className="bg-slate-800/60 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">Renta mensual actual</p>
+                  <p className="text-[10px] font-semibold text-emerald-400">USD 378 / mes</p>
+                </div>
+                <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                  <div className="h-full w-[63%] rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-slate-600">63% de tus gastos cubiertos</p>
+                  <p className="text-[10px] font-semibold text-slate-400">meta: USD 600</p>
+                </div>
+              </div>
+              <p className="text-[12px] text-emerald-400 font-medium">
+                BuildFuture te dice cuánto tiempo falta → y qué instrumentos usar hoy.
+              </p>
+            </div>
+
+            {/* Path B: Comprar un depto */}
+            <div className="bg-slate-900 border border-violet-900/50 rounded-2xl p-6 space-y-5 hover:border-violet-700/60 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-violet-950/60 border border-violet-800/50 flex items-center justify-center text-xl">
+                🏠
+              </div>
+              <div className="space-y-2">
+                <p className="text-base font-bold text-slate-100">Quiero comprarme un depto</p>
+                <p className="text-[13px] text-slate-500 leading-relaxed">
+                  Definís el objetivo en USD, cuánto podés aportar por mes y BuildFuture proyecta cuándo llegás.
+                  Conforme acumulás capital, el número deja de ser abstracto — lo ves avanzar.
+                </p>
+              </div>
+              <div className="bg-slate-800/60 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">Capital acumulado</p>
+                  <p className="text-[10px] font-semibold text-violet-400">USD 18.450</p>
+                </div>
+                <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                  <div className="h-full w-[37%] rounded-full bg-gradient-to-r from-violet-700 to-violet-400" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-slate-600">37% del objetivo</p>
+                  <p className="text-[10px] font-semibold text-slate-400">meta: USD 50.000</p>
+                </div>
+              </div>
+              <p className="text-[12px] text-violet-400 font-medium">
+                BuildFuture te proyecta cuándo llegás → y qué rendimiento necesitás para acortarlo.
+              </p>
+            </div>
+          </div>
+
+          {/* Cierre */}
+          <div className="border border-slate-800 rounded-2xl p-6 bg-slate-900/60 flex items-start gap-4 max-w-2xl mx-auto">
+            <BookOpen size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-slate-200">
+                No es asesoramiento. Es claridad.
+              </p>
+              <p className="text-[13px] text-slate-500 leading-relaxed">
+                BuildFuture no te dice qué hacer con tu plata. Te dice exactamente <em>dónde estás</em> y
+                qué pasa si movés una palanca. La decisión siempre es tuya.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Sección Cómo funciona ─────────────────────────────────────────────────────
 
 const PASOS = [
@@ -925,6 +1107,7 @@ export default function LandingPage() {
       <SectionHero />
       <SectionProblema />
       <SectionSolucion />
+      <SectionPresupuesto />
       <SectionIntegraciones />
       <SectionComoFunciona />
       <SectionFounder />
