@@ -412,7 +412,7 @@ export function CapitalGoals({
     setSaving(true);
     try {
       const token = await getToken();
-      await fetch(`${API_URL}/portfolio/capital-goals`, {
+      const res = await fetch(`${API_URL}/portfolio/capital-goals`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -426,6 +426,7 @@ export function CapitalGoals({
           backing_position_id: form.backing_position_id ?? null,
         }),
       });
+      if (!res.ok) return;
       setInitialForm(null);
       await fetchGoals();
     } finally {
@@ -437,7 +438,7 @@ export function CapitalGoals({
     setSaving(true);
     try {
       const token = await getToken();
-      await fetch(`${API_URL}/portfolio/capital-goals/${id}`, {
+      const res = await fetch(`${API_URL}/portfolio/capital-goals/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -451,6 +452,7 @@ export function CapitalGoals({
           backing_position_id: form.backing_position_id ?? null,
         }),
       });
+      if (!res.ok) return;
       setEditingId(null);
       await fetchGoals();
     } finally {
@@ -460,10 +462,11 @@ export function CapitalGoals({
 
   async function handleDelete(id: number) {
     const token = await getToken();
-    await fetch(`${API_URL}/portfolio/capital-goals/${id}`, {
+    const res = await fetch(`${API_URL}/portfolio/capital-goals/${id}`, {
       method: "DELETE",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
+    if (!res.ok) return;
     setGoals((prev) => prev.filter((g) => g.id !== id));
   }
 

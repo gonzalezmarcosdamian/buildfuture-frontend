@@ -97,6 +97,7 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
     setFxLoading(true);
     try {
       const res = await fetch(`${API_URL}/budget/fx-rate`);
+      if (!res.ok) { setFxRate(1430); return; }
       const data = await res.json();
       setFxRate(data.fx_rate);
       setFxDirty(true);

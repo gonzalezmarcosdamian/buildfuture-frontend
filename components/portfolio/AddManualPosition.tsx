@@ -284,6 +284,7 @@ function RealEstateForm({ onSuccess, initialEditId }: { onSuccess: () => void; i
   const [editingId, setEditingId] = useState<number | null>(null);
   const autoOpenedRef = useRef(false);
   const [editValuation, setEditValuation] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [editRent, setEditRent] = useState("");
   const [editRentMode, setEditRentMode] = useState<RentMode>("rent");
   const [editYieldPct, setEditYieldPct] = useState("");
@@ -371,6 +372,7 @@ function RealEstateForm({ onSuccess, initialEditId }: { onSuccess: () => void; i
   function startEdit(prop: ExistingRestate) {
     setEditingId(prop.id);
     setEditValuation(prop.current_value_usd.toString());
+    setEditDescription(prop.description);
     // Pre-cargar renta mensual si existe
     if (prop.monthly_return_usd > 0) {
       setEditRentMode("rent");
@@ -392,7 +394,8 @@ function RealEstateForm({ onSuccess, initialEditId }: { onSuccess: () => void; i
     if (!editingId) return;
     setUpdateSaving(true); setUpdateError("");
     try {
-      const body: Record<string, number> = { purchase_price_usd: editValNum };
+      const body: Record<string, number | string> = { purchase_price_usd: editValNum };
+      if (editDescription.trim()) body.description = editDescription.trim().slice(0, 80);
       if (editRentMode === "rent" && editRentNum > 0) {
         body.monthly_rent_usd = editRentNum;
       } else if (editRentMode === "yield" && parseFloat(editYieldPct) > 0) {
@@ -458,7 +461,13 @@ function RealEstateForm({ onSuccess, initialEditId }: { onSuccess: () => void; i
             <div key={prop.id} className="bg-bf-surface-2 border border-bf-border-2 rounded-xl px-4 py-3">
               {editingId === prop.id ? (
                 <div className="space-y-3">
-                  <p className="text-xs text-bf-text-2 font-medium truncate">{prop.description}</p>
+                  <div>
+                    <label className="text-[11px] text-bf-text-3 mb-1 block">Nombre del inmueble</label>
+                    <input type="text" value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      maxLength={80}
+                      className="w-full bg-bf-surface border border-bf-border rounded-lg px-3 py-2 text-bf-text text-sm focus:outline-none focus:border-blue-500" />
+                  </div>
                   {/* Valuation */}
                   <div>
                     <label className="text-[11px] text-bf-text-3 mb-1 block">Nueva valuación (USD)</label>
