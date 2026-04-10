@@ -344,6 +344,9 @@ export function CocosSyncModal({ onSync, onClose }: SyncModalProps) {
           </div>
         </div>
 
+        <p className="text-[11px] text-bf-text-3 leading-snug">
+          Abrí Cocos → <strong className="text-bf-text-2">Seguridad</strong> → Código de verificación (6 dígitos, se renueva cada 30 seg).
+        </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="text"

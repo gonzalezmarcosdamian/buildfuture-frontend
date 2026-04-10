@@ -69,6 +69,16 @@ export function TosModal({ version, summary, onAccepted }: Props) {
             .
           </p>
 
+          <div className="bg-amber-950/30 border border-amber-800/40 rounded-xl px-4 py-3 space-y-1">
+            <p className="text-[10px] text-amber-300 font-semibold uppercase tracking-wider">Modelo de acceso a brokers</p>
+            <p className="text-xs text-bf-text-3 leading-relaxed">
+              Cuando conectás IOL, Cocos o PPI, BuildFuture almacena tus credenciales de forma cifrada <strong className="text-bf-text-2">solo para lectura</strong>. Nunca operamos en tu nombre ni enviamos órdenes. Las credenciales se usan exclusivamente para sincronizar el saldo de tu portafolio.
+            </p>
+            <p className="text-xs text-bf-text-3 leading-relaxed">
+              Para Binance: generá tu API Key con <strong className="text-bf-text-2">solo lectura habilitada</strong> (sin trading ni retiros).
+            </p>
+          </div>
+
           <p className="text-xs text-bf-text-3 leading-relaxed">
             BuildFuture no brinda asesoramiento financiero. Las sugerencias son
             orientativas y no constituyen recomendación de inversión en los términos de

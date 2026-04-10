@@ -10,6 +10,14 @@ import { supabase } from "@/lib/supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
 
+function syncErrorMsg(status: number, detail?: string): string {
+  if (status === 401) return "Credencial inválida — revisá tu usuario y contraseña en Configuración.";
+  if (status === 403) return "El broker rechazó el acceso. Verificá que tu cuenta esté activa.";
+  if (status === 0)   return "Sin conexión — verificá tu red e intentá de nuevo.";
+  if (status >= 500)  return "Error del servidor — intentá de nuevo en unos minutos.";
+  return detail || `Error ${status}`;
+}
+
 const providerMeta: Record<string, { label: string; description: string; color: string }> = {
   IOL: {
     label: "InvertirOnline",
@@ -81,10 +89,10 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
         router.refresh();
       } else {
         const d = await res.json().catch(() => ({}));
-        setSyncError(d.detail || `Error ${res.status}`);
+        setSyncError(syncErrorMsg(res.status, d.detail));
       }
     } catch {
-      setSyncError("No se pudo conectar con el servidor");
+      setSyncError(syncErrorMsg(0));
     } finally {
       setSyncing(false);
     }
@@ -97,7 +105,7 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
     });
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
-      throw new Error(d.detail || `Error ${res.status}`);
+      throw new Error(syncErrorMsg(res.status, d.detail));
     }
     setLastSynced(new Date().toISOString());
     router.refresh();
@@ -121,11 +129,11 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
         router.refresh();
       } else {
         const d = await res.json().catch(() => ({}));
-        setSyncError(d.detail || `Error ${res.status}`);
+        setSyncError(syncErrorMsg(res.status, d.detail));
         setShowDisconnectModal(false);
       }
     } catch {
-      setSyncError("No se pudo conectar con el servidor");
+      setSyncError(syncErrorMsg(0));
       setShowDisconnectModal(false);
     } finally {
       setDisconnecting(false);
