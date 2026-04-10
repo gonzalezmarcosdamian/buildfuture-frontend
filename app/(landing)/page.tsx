@@ -836,9 +836,9 @@ const TESTIMONIOS = [
   {
     name: "Jero",
     role: "Inversor en real estate",
-    quote: "Mi depto alquila hace años y nunca apareció en ninguna herramienta. Es mi inversión más grande y era invisible.",
+    quote: "Tengo un depto alquilado hace años. Nunca existió una sola app que lo tuviera en cuenta. Es mi activo más grande y para el mundo financiero no existía.",
     accent: "violet",
-    highlight: "era invisible",
+    highlight: "para el mundo financiero no existía",
     emoji: "🏠",
   },
 ];
