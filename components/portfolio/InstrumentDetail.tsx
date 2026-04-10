@@ -148,6 +148,10 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
   const isLETRA = inst.asset_type === "LETRA";
   const isCEDEAR = inst.asset_type === "CEDEAR";
 
+  // Tipos que generan renta genuina (intereses, cupones, dividendos).
+  // CEDEAR, ETF, STOCK, CRYPTO, OPTION → capital, no renta. No mostrar "Renta estimada / mes".
+  const isIncomeAsset = ["LETRA", "BOND", "ON", "FCI", "CAUCION"].includes(inst.asset_type);
+
   // Para FCI: current_price_usd = vcp / mep → vcp_ars = current_price_usd * mep
   const vcp_ars = isFCI ? inst.current_price_usd * inst.mep : null;
   // Para FCI: ppc_ars es el VCP al momento de la compra
@@ -294,7 +298,7 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
         sub={`${formatPct(inst.performance_pct, 2, true)} · ${hint(inst.pnl_usd)}`}
         highlight={inst.pnl_usd >= 0 ? "green" : "red"}
       />
-      {inst.asset_type !== "CASH" && (
+      {isIncomeAsset && (
         <MetricRow
           label="Renta estimada / mes *"
           value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
@@ -470,7 +474,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
       <div className="bg-bf-surface rounded-2xl border border-bf-border p-4">
         <p className="text-[10px] text-bf-text-3 uppercase tracking-wider mb-1">Mi posición</p>
         <PositionMetrics inst={inst} fmt={fmt} hint={hint} currency={currency} />
-        {inst.asset_type !== "CASH" && !isRealEstate && (
+        {!isRealEstate && ["LETRA", "BOND", "ON", "FCI", "CAUCION"].includes(inst.asset_type) && (
           <p className="text-[10px] text-bf-text-4 mt-2 px-0.5">* Proyección basada en TNA/YTM. No garantiza rendimiento futuro.</p>
         )}
       </div>
