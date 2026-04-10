@@ -32,17 +32,25 @@ function DashboardMockup() {
             </div>
           </div>
 
+          {/* Tooltip educativo freedom bar */}
+          <div className="bg-blue-950/60 border border-blue-800/60 rounded-xl p-2.5 flex items-start gap-2">
+            <span className="text-[11px] leading-none shrink-0 mt-0.5">💡</span>
+            <p className="text-[8px] text-blue-300/80 leading-snug">
+              Esta barra muestra cuánto de tus gastos cubrís con rentas. Al <span className="text-blue-200 font-semibold">100%</span>, no necesitás más el sueldo.
+            </p>
+          </div>
+
           {/* Barra renta */}
           <div className="bg-slate-800/60 rounded-xl p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider">💰 Renta mensual</p>
-              <p className="text-[9px] font-bold text-slate-400">63%</p>
+              <p className="text-[9px] text-slate-500 uppercase tracking-wider">💰 Libertad financiera</p>
+              <p className="text-[9px] font-bold text-emerald-400">63%</p>
             </div>
             <p className="text-base font-extrabold text-emerald-400">USD 378/mes</p>
             <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <div className="h-full w-[63%] rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400" />
             </div>
-            <p className="text-[9px] text-slate-600">meta USD 600/mes</p>
+            <p className="text-[9px] text-slate-600">meta USD 600/mes · faltan 18 meses</p>
           </div>
 
           {/* Barra capital */}
@@ -677,71 +685,129 @@ function SectionPresupuesto() {
 
 // ── Sección Cómo funciona ─────────────────────────────────────────────────────
 
-const PASOS = [
-  {
-    num: "01",
-    icon: "✉️",
-    title: "Recibí tu invitación",
-    body: "Escribime directamente. Si tu perfil encaja con la beta, te mando un link de acceso personal en menos de 24hs.",
-    detail: "La beta es cerrada — cada usuario es bienvenido por Damián personalmente. Sin registro público.",
-  },
-  {
-    num: "02",
-    icon: "🔌",
-    title: "Conectá tus brokers",
-    body: "Ingresás tus credenciales de solo lectura de IOL, Cocos, PPI o Binance. Nosotros sincronizamos el resto.",
-    detail: "Acceso de solo lectura — nunca podemos ejecutar órdenes. Credenciales encriptadas AES-256.",
-  },
-  {
-    num: "03",
-    icon: "🎯",
-    title: "Completá tu perfil",
-    body: "Tu presupuesto mensual, tu perfil de riesgo, tus metas de capital. BuildFuture hace los cálculos.",
-    detail: "Con esto calibramos la barra de libertad, las sugerencias de inversión y tu proyección a largo plazo.",
-  },
-];
+function OnboardingMockup() {
+  return (
+    <div className="relative">
+      <div className="mx-auto w-[260px] sm:w-[300px] bg-slate-900 rounded-[2.5rem] border border-slate-700/60 shadow-2xl overflow-hidden">
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-20 h-1.5 bg-slate-700 rounded-full" />
+        </div>
+        <div className="px-4 pb-6 pt-3 space-y-3">
+          <div>
+            <p className="text-sm font-bold text-slate-100">Casi listo</p>
+            <p className="text-[9px] text-slate-500 mt-0.5">¿Cuál es tu objetivo principal?</p>
+          </div>
+          {/* Paso objetivo */}
+          <div className="space-y-1.5">
+            {[
+              { emoji: "💰", label: "Generar renta mensual", desc: "Quiero vivir de mis inversiones", active: true, color: "border-blue-700 bg-blue-950/40" },
+              { emoji: "🏠", label: "Comprarme un depto", desc: "Quiero acumular capital", active: false, color: "border-slate-700 bg-slate-800/40" },
+              { emoji: "🎯", label: "Ambos, según la etapa", desc: "Capital primero, renta después", active: false, color: "border-slate-700 bg-slate-800/40" },
+            ].map((opt) => (
+              <div key={opt.label} className={`border rounded-xl px-2.5 py-2 ${opt.color}`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">{opt.emoji}</span>
+                  <div>
+                    <p className={`text-[10px] font-semibold ${opt.active ? "text-blue-200" : "text-slate-400"}`}>{opt.label}</p>
+                    <p className="text-[8px] text-slate-600">{opt.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="bg-blue-600 rounded-xl py-2 text-center">
+            <p className="text-[10px] font-semibold text-white">Continuar →</p>
+          </div>
+        </div>
+      </div>
+      <div className="absolute -inset-8 -z-10 bg-blue-600/8 blur-3xl rounded-full" />
+    </div>
+  );
+}
 
 function SectionComoFunciona() {
+  const pasos = [
+    {
+      num: "01",
+      icon: "✉️",
+      title: "Recibí tu invitación",
+      body: "Escribime directamente. Si tu perfil encaja con la beta, te mando acceso personal en menos de 24hs.",
+      detail: "La beta es cerrada — cada usuario es bienvenido por Damián. Sin registro público.",
+    },
+    {
+      num: "02",
+      icon: "🎯",
+      title: "Elegís tu objetivo",
+      body: "Lo primero que te preguntamos: ¿qué querés lograr? Generar renta, comprar un depto, o los dos. Eso define qué métricas te mostramos.",
+      detail: "Después conectás tus brokers, configurás presupuesto y perfil de riesgo. Todo a tu ritmo.",
+      mockup: true,
+    },
+    {
+      num: "03",
+      icon: "📊",
+      title: "Tu dashboard está vivo",
+      body: "BuildFuture calcula cuánto podés invertir, cuánto generan tus activos y cuándo llegás a tu meta — con tus números reales.",
+      detail: "Se actualiza solo cuando sync con tu broker. Sin planillas, sin cálculos manuales.",
+    },
+  ];
+
   return (
     <section className="py-24 bg-slate-900/40 border-t border-slate-800/60">
       <div className="max-w-6xl mx-auto px-5 space-y-16">
         <div className="space-y-3 text-center">
           <p className="text-[11px] uppercase tracking-widest text-slate-600">Cómo funciona</p>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100">
-            Estar en BuildFuture toma{" "}
-            <span className="text-emerald-400">5 minutos.</span>
+            De cero a dashboard vivo{" "}
+            <span className="text-emerald-400">en 5 minutos.</span>
           </h2>
           <p className="text-slate-500 max-w-lg mx-auto">
-            Acceso personal. Sin fricciones. Sin datos bancarios. Sin riesgos.
+            Acceso personal. Sin datos bancarios. Sin riesgos. Sin planillas.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-6 relative">
-          {/* Línea conectora desktop */}
-          <div className="hidden sm:block absolute top-8 left-[calc(16.7%+16px)] right-[calc(16.7%+16px)] h-px bg-slate-800" />
-
-          {PASOS.map((paso) => (
-            <div key={paso.num} className="relative space-y-4">
-              {/* Número + icono */}
-              <div className="flex items-center gap-3">
-                <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-700 flex flex-col items-center justify-center shrink-0 relative z-10">
-                  <span className="text-xl">{paso.icon}</span>
-                  <span className="text-[9px] text-slate-600 font-mono mt-0.5">{paso.num}</span>
+        <div className="space-y-8">
+          {pasos.map((paso, idx) => (
+            <div key={paso.num} className={`grid ${paso.mockup ? "lg:grid-cols-2" : "lg:grid-cols-[auto_1fr]"} gap-8 items-center`}>
+              {/* Left: número + contenido */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-700 flex flex-col items-center justify-center shrink-0">
+                    <span className="text-xl">{paso.icon}</span>
+                    <span className="text-[9px] text-slate-600 font-mono mt-0.5">{paso.num}</span>
+                  </div>
+                  {idx < pasos.length - 1 && (
+                    <div className="hidden lg:block text-slate-700 text-lg">→</div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-slate-100">{paso.title}</h3>
+                  <p className="text-slate-400 leading-relaxed">{paso.body}</p>
+                </div>
+                <div className="bg-slate-800/50 border border-slate-800 rounded-xl px-4 py-3">
+                  <p className="text-[12px] text-slate-500 leading-relaxed">{paso.detail}</p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-slate-100">{paso.title}</h3>
-                <p className="text-[13px] text-slate-400 leading-relaxed">{paso.body}</p>
-              </div>
-              <div className="bg-slate-800/50 border border-slate-800 rounded-xl px-3 py-2.5">
-                <p className="text-[11px] text-slate-500 leading-relaxed">{paso.detail}</p>
-              </div>
+              {/* Right: mockup solo en paso 2 */}
+              {paso.mockup && (
+                <div className="flex justify-center lg:justify-end">
+                  <OnboardingMockup />
+                </div>
+              )}
             </div>
           ))}
         </div>
 
-        <div className="text-center">
-          <p className="text-slate-500 text-sm">Listo. Tu dashboard está vivo.</p>
+        <div className="border border-slate-800 rounded-2xl p-6 bg-slate-900/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-base font-bold text-slate-100">¿Tu objetivo es claro pero no sabés por dónde empezar?</p>
+            <p className="text-[13px] text-slate-500">Escribile a Damián — te orienta antes de que entres a la app.</p>
+          </div>
+          <a
+            href="#contacto"
+            className="shrink-0 inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl transition-colors text-sm"
+          >
+            Quiero acceso <ArrowRight size={14} />
+          </a>
         </div>
       </div>
     </section>
