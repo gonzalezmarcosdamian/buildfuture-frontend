@@ -445,7 +445,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                           <button
                             key={p.id}
                             onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
-                            className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-bf-surface-2/60 transition-colors text-left"
+                            className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-bf-surface-2/60 active:bg-bf-surface-2/80 active:scale-[0.98] transition-all duration-75 text-left"
                           >
                             <div>
                               <div className="flex items-center gap-1.5">
@@ -538,7 +538,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
                         <button
                           key={p.id}
                           onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
-                          className="w-full text-left space-y-1 hover:opacity-80 transition-opacity"
+                          className="w-full text-left space-y-1 hover:opacity-80 active:scale-[0.98] active:opacity-60 transition-all duration-75"
                         >
                           <div className="flex items-center justify-between">
                             <div>
