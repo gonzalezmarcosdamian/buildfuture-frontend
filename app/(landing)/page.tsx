@@ -820,7 +820,7 @@ const TESTIMONIOS = [
   {
     name: "Marcelo",
     role: "Inversor particular",
-    quote: "Somos muchos los que tenemos inversiones repartidas en varios lados. El problema es que nunca tenés una foto real de dónde estás parado.",
+    quote: "Somos muchos los que tenemos inversiones distribuidas entre brokers, activos y monedas. El problema es que nunca tenés una foto real de dónde estás parado.",
     accent: "emerald",
     highlight: "nunca tenés una foto real",
     emoji: "💡",
