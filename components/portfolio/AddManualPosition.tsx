@@ -277,11 +277,12 @@ interface ExistingRestate {
 
 type RentMode = "rent" | "yield";
 
-function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
+function RealEstateForm({ onSuccess, initialEditId }: { onSuccess: () => void; initialEditId?: number }) {
   // Existing properties
   const [existing, setExisting] = useState<ExistingRestate[]>([]);
   const [loadingExisting, setLoadingExisting] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const autoOpenedRef = useRef(false);
   const [editValuation, setEditValuation] = useState("");
   const [editRent, setEditRent] = useState("");
   const [editRentMode, setEditRentMode] = useState<RentMode>("rent");
@@ -307,10 +308,18 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
     authFetch("/positions/manual")
       .then((r) => r.json())
       .then((data: ExistingRestate[]) => {
-        setExisting(data.filter((p) => p.ticker.startsWith("RESTATE")));
+        const filtered = (data as ExistingRestate[]).filter((p) => p.ticker.startsWith("RESTATE"));
+        setExisting(filtered);
+        // Auto-abrir edición si llega con un ID específico desde InstrumentDetail
+        if (initialEditId && !autoOpenedRef.current) {
+          autoOpenedRef.current = true;
+          const target = filtered.find((p) => p.id === initialEditId);
+          if (target) startEdit(target);
+        }
       })
       .catch(() => {})
       .finally(() => setLoadingExisting(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleAddressChange(val: string) {
@@ -394,6 +403,11 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
         body: JSON.stringify(body),
       });
       if (!res.ok) { const d = await res.json().catch(() => ({})); setUpdateError(d.detail || `Error ${res.status}`); return; }
+      // Si venía desde InstrumentDetail (initialEditId), redirigir con feedback de éxito
+      if (initialEditId) {
+        onSuccess();
+        return;
+      }
       setEditingId(null);
       // Refresh list
       const fresh = await authFetch("/positions/manual").then((r) => r.json());
@@ -514,120 +528,127 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
               )}
             </div>
           ))}
-          <div className="border-t border-bf-border pt-4">
-            <p className="text-xs font-semibold text-bf-text-2 uppercase tracking-wide mb-3">Agregar otro inmueble</p>
-          </div>
-        </div>
-      )}
-
-      {/* Nombre del inmueble */}
-      <div>
-        <label className="text-xs text-bf-text-3 mb-1.5 block">Nombre del inmueble *</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Ej: Departamento en Córdoba, Local comercial"
-          className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl px-4 py-3 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
-        />
-        <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">Este nombre aparecerá en tu listado de posiciones</p>
-      </div>
-
-      {/* Dirección con autocomplete */}
-      <div className="relative">
-        <label className="text-xs text-bf-text-3 mb-1.5 block">Ubicación del inmueble *</label>
-        <div className="relative">
-          <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-bf-text-3 pointer-events-none" />
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => handleAddressChange(e.target.value)}
-            placeholder="Av. Corrientes 1234, CABA"
-            className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-9 pr-4 py-3 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
-          />
-          {loadingAddress && (
-            <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 animate-spin" />
+          {!initialEditId && (
+            <div className="border-t border-bf-border pt-4">
+              <p className="text-xs font-semibold text-bf-text-2 uppercase tracking-wide mb-3">Agregar otro inmueble</p>
+            </div>
           )}
         </div>
-        {addressSuggestions.length > 0 && (
-          <div className="absolute z-20 mt-1 w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl overflow-hidden shadow-xl max-h-48 overflow-y-auto">
-            {addressSuggestions.map((place) => (
-              <button key={place.place_id} onClick={() => selectAddress(place)}
-                className="w-full flex items-start gap-2.5 px-4 py-3 hover:bg-bf-surface-3 transition-colors text-left">
-                <MapPin size={12} className="text-bf-text-4 mt-0.5 flex-shrink-0" />
-                <span className="text-xs text-bf-text-2 leading-tight">{place.display_name}</span>
-              </button>
-            ))}
-          </div>
-        )}
-        {addressSelected && (
-          <p className="text-[11px] text-emerald-400 mt-1.5 px-1">✓ Dirección confirmada</p>
-        )}
-      </div>
-
-      {/* Valuación */}
-      <div>
-        <label className="text-xs text-bf-text-3 mb-1.5 block">Valuación del inmueble (USD) *</label>
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">$</span>
-          <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={valuation}
-            onChange={(e) => { setValuation(e.target.value); setError(""); }}
-            placeholder="120.000"
-            className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-4 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
-        </div>
-        <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">Tu estimación del valor de mercado en dólares</p>
-      </div>
-
-      {/* Renta / Yield toggle */}
-      <div className="space-y-2">
-        <label className="text-xs text-bf-text-3 block">Rentabilidad *</label>
-        <div className="flex gap-2">
-          {(["rent", "yield"] as RentMode[]).map((m) => (
-            <button key={m} onClick={() => { setRentMode(m); setRent(""); setYieldInput(""); }}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border ${rentMode === m ? "bg-blue-600 text-white border-blue-500" : "bg-bf-surface border-bf-border text-bf-text-3"}`}>
-              {m === "rent" ? "Renta mensual (USD)" : "Yield anual (%)"}
-            </button>
-          ))}
-        </div>
-        {rentMode === "rent" ? (
-          <div>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">$</span>
-              <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={rent}
-                onChange={(e) => { setRent(e.target.value); setError(""); }}
-                placeholder="600"
-                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-4 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
-            </div>
-            {displayYield !== null && (
-              <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">≈ {displayYield.toFixed(2)}% anual</p>
-            )}
-          </div>
-        ) : (
-          <div>
-            <div className="relative">
-              <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={yieldInput}
-                onChange={(e) => { setYieldInput(e.target.value); setError(""); }}
-                placeholder="6.0"
-                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-4 pr-8 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">%</span>
-            </div>
-            {displayRent !== null && (
-              <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">≈ USD {displayRent.toFixed(0)}/mes</p>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Yield preview */}
-      {displayYield !== null && displayYield > 0 && (
-        <div className="bg-emerald-950/30 border border-emerald-900/50 rounded-xl px-4 py-3 flex justify-between items-center">
-          <span className="text-xs text-bf-text-3">Yield anual estimado</span>
-          <span className="text-sm font-bold text-emerald-400">{displayYield.toFixed(2)}% anual</span>
-        </div>
       )}
 
-      {error && <ErrorBanner msg={error} />}
-      <SaveButton onClick={save} saving={saving} disabled={!valid} label="Agregar inmueble" />
+      {/* Form para agregar nuevo inmueble — se oculta cuando se viene a editar uno existente */}
+      {!initialEditId && (
+        <>
+          {/* Nombre del inmueble */}
+          <div>
+            <label className="text-xs text-bf-text-3 mb-1.5 block">Nombre del inmueble *</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ej: Departamento en Córdoba, Local comercial"
+              className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl px-4 py-3 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
+            />
+            <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">Este nombre aparecerá en tu listado de posiciones</p>
+          </div>
+
+          {/* Dirección con autocomplete */}
+          <div className="relative">
+            <label className="text-xs text-bf-text-3 mb-1.5 block">Ubicación del inmueble *</label>
+            <div className="relative">
+              <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-bf-text-3 pointer-events-none" />
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => handleAddressChange(e.target.value)}
+                placeholder="Av. Corrientes 1234, CABA"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-9 pr-4 py-3 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
+              />
+              {loadingAddress && (
+                <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 animate-spin" />
+              )}
+            </div>
+            {addressSuggestions.length > 0 && (
+              <div className="absolute z-20 mt-1 w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl overflow-hidden shadow-xl max-h-48 overflow-y-auto">
+                {addressSuggestions.map((place) => (
+                  <button key={place.place_id} onClick={() => selectAddress(place)}
+                    className="w-full flex items-start gap-2.5 px-4 py-3 hover:bg-bf-surface-3 transition-colors text-left">
+                    <MapPin size={12} className="text-bf-text-4 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs text-bf-text-2 leading-tight">{place.display_name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {addressSelected && (
+              <p className="text-[11px] text-emerald-400 mt-1.5 px-1">✓ Dirección confirmada</p>
+            )}
+          </div>
+
+          {/* Valuación */}
+          <div>
+            <label className="text-xs text-bf-text-3 mb-1.5 block">Valuación del inmueble (USD) *</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">$</span>
+              <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={valuation}
+                onChange={(e) => { setValuation(e.target.value); setError(""); }}
+                placeholder="120.000"
+                className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-4 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
+            </div>
+            <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">Tu estimación del valor de mercado en dólares</p>
+          </div>
+
+          {/* Renta / Yield toggle */}
+          <div className="space-y-2">
+            <label className="text-xs text-bf-text-3 block">Rentabilidad *</label>
+            <div className="flex gap-2">
+              {(["rent", "yield"] as RentMode[]).map((m) => (
+                <button key={m} onClick={() => { setRentMode(m); setRent(""); setYieldInput(""); }}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-colors border ${rentMode === m ? "bg-blue-600 text-white border-blue-500" : "bg-bf-surface border-bf-border text-bf-text-3"}`}>
+                  {m === "rent" ? "Renta mensual (USD)" : "Yield anual (%)"}
+                </button>
+              ))}
+            </div>
+            {rentMode === "rent" ? (
+              <div>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">$</span>
+                  <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={rent}
+                    onChange={(e) => { setRent(e.target.value); setError(""); }}
+                    placeholder="600"
+                    className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-7 pr-4 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
+                  {displayYield !== null && (
+                    <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">≈ {displayYield.toFixed(2)}% anual</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="relative">
+                  <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={yieldInput}
+                    onChange={(e) => { setYieldInput(e.target.value); setError(""); }}
+                    placeholder="6.0"
+                    className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-4 pr-8 py-3 text-bf-text text-lg focus:outline-none focus:border-blue-500 transition-colors" />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-bf-text-3 text-sm">%</span>
+                  {displayRent !== null && (
+                    <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">≈ USD {displayRent.toFixed(0)}/mes</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Yield preview */}
+          {displayYield !== null && displayYield > 0 && (
+            <div className="bg-emerald-950/30 border border-emerald-900/50 rounded-xl px-4 py-3 flex justify-between items-center">
+              <span className="text-xs text-bf-text-3">Yield anual estimado</span>
+              <span className="text-sm font-bold text-emerald-400">{displayYield.toFixed(2)}% anual</span>
+            </div>
+          )}
+
+          {error && <ErrorBanner msg={error} />}
+          <SaveButton onClick={save} saving={saving} disabled={!valid} label="Agregar inmueble" />
+        </>
+      )}
     </div>
   );
 }
@@ -656,7 +677,13 @@ function SaveButton({ onClick, saving, disabled, label = "Agregar al portafolio"
 
 // ── Main component ──────────────────────────────────────────────────────────
 
-export function AddManualPosition({ initialMode = "CASH" }: { initialMode?: AssetMode }) {
+export function AddManualPosition({
+  initialMode = "CASH",
+  initialEditId,
+}: {
+  initialMode?: AssetMode;
+  initialEditId?: number;
+}) {
   const router = useRouter();
   const mode: AssetMode = initialMode;
   const [success, setSuccess] = useState<AssetMode | null>(null);
@@ -664,7 +691,7 @@ export function AddManualPosition({ initialMode = "CASH" }: { initialMode?: Asse
   const SUCCESS_LABELS: Record<AssetMode, string> = {
     CASH: "Efectivo agregado",
     CRYPTO: "Cripto agregada",
-    REAL_ESTATE: "Inmueble agregado",
+    REAL_ESTATE: "Inmueble guardado",
   };
 
   if (success) {
@@ -688,7 +715,7 @@ export function AddManualPosition({ initialMode = "CASH" }: { initialMode?: Asse
       {/* Form by mode */}
       {mode === "CASH"        && <CashForm       onSuccess={handleSuccess} />}
       {mode === "CRYPTO"      && <CryptoForm     onSuccess={handleSuccess} />}
-      {mode === "REAL_ESTATE" && <RealEstateForm onSuccess={handleSuccess} />}
+      {mode === "REAL_ESTATE" && <RealEstateForm onSuccess={handleSuccess} initialEditId={initialEditId} />}
     </div>
   );
 }

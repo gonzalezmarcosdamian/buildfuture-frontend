@@ -13,10 +13,12 @@ const MODE_TITLES: Record<string, { label: string; icon: string }> = {
 export default async function AddManualPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; edit?: string }>;
 }) {
-  const { mode = "CASH" } = await searchParams;
+  const { mode = "CASH", edit } = await searchParams;
   const { label, icon } = MODE_TITLES[mode] ?? MODE_TITLES.CASH;
+  const editId = edit ? parseInt(edit) : undefined;
+  const isEditing = !!editId && mode === "REAL_ESTATE";
 
   return (
     <div className="px-4 pt-6 pb-24 space-y-4">
@@ -29,9 +31,14 @@ export default async function AddManualPage({
       </Link>
       <div className="flex items-center gap-2">
         <span className="text-2xl leading-none">{icon}</span>
-        <h1 className="text-xl font-bold text-bf-text">Agregar {label}</h1>
+        <h1 className="text-xl font-bold text-bf-text">
+          {isEditing ? `Editar ${label}` : `Agregar ${label}`}
+        </h1>
       </div>
-      <AddManualPosition initialMode={mode as "CASH" | "CRYPTO" | "REAL_ESTATE"} />
+      <AddManualPosition
+        initialMode={mode as "CASH" | "CRYPTO" | "REAL_ESTATE"}
+        initialEditId={editId}
+      />
     </div>
   );
 }

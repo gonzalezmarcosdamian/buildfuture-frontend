@@ -445,7 +445,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         {isManual && (
           <div className="flex gap-2 pt-1">
             <button
-              onClick={() => router.push(`/portfolio/add-manual?mode=${inst.asset_type}`)}
+              onClick={() => router.push(`/portfolio/add-manual?mode=${inst.asset_type}&edit=${inst.id}`)}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-blue-500 hover:text-blue-400 transition-colors"
             >
               <Pencil size={12} />
