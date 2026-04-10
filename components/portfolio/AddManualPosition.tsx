@@ -271,6 +271,8 @@ interface ExistingRestate {
   ticker: string;
   description: string;
   current_value_usd: number;
+  annual_yield_pct: number;
+  monthly_return_usd: number;
 }
 
 type RentMode = "rent" | "yield";
@@ -360,9 +362,20 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
   function startEdit(prop: ExistingRestate) {
     setEditingId(prop.id);
     setEditValuation(prop.current_value_usd.toString());
-    setEditRent("");
-    setEditYieldPct("");
-    setEditRentMode("rent");
+    // Pre-cargar renta mensual si existe
+    if (prop.monthly_return_usd > 0) {
+      setEditRentMode("rent");
+      setEditRent(prop.monthly_return_usd.toFixed(0));
+      setEditYieldPct("");
+    } else if (prop.annual_yield_pct > 0) {
+      setEditRentMode("yield");
+      setEditYieldPct((prop.annual_yield_pct * 100).toFixed(2));
+      setEditRent("");
+    } else {
+      setEditRentMode("rent");
+      setEditRent("");
+      setEditYieldPct("");
+    }
     setUpdateError("");
   }
 
@@ -385,7 +398,7 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
       // Refresh list
       const fresh = await authFetch("/positions/manual").then((r) => r.json());
       setExisting((fresh as ExistingRestate[]).filter((p) => p.ticker.startsWith("RESTATE")));
-    } catch { setUpdateError("No se pudo conectar con el servidor"); }
+    } catch (e) { setUpdateError(e instanceof Error ? e.message : "Error de conexión"); }
     finally { setUpdateSaving(false); }
   }
 
@@ -412,7 +425,7 @@ function RealEstateForm({ onSuccess }: { onSuccess: () => void }) {
       });
       if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || `Error ${res.status}`); return; }
       onSuccess();
-    } catch { setError("No se pudo conectar con el servidor"); }
+    } catch (e) { setError(e instanceof Error ? e.message : "Error de conexión"); }
     finally { setSaving(false); }
   }
 
