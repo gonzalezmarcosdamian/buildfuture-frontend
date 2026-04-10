@@ -447,6 +447,15 @@ export function RecommendationList({
           </button>
         </div>
 
+        {/* Contexto educativo */}
+        <div className="bg-bf-surface-2/40 border border-bf-border rounded-xl px-3 py-2.5 space-y-0.5">
+          <p className="text-[11px] font-semibold text-bf-text-2">¿Qué hago con mi capacidad de inversión?</p>
+          <p className="text-[10px] text-bf-text-3 leading-snug">
+            <span className="text-emerald-400 font-medium">Renta</span>: instrumentos que generan flujo mensual — suben tu barra de libertad.{" "}
+            <span className="text-violet-400 font-medium">Capital</span>: instrumentos de crecimiento — suben tu patrimonio hacia una meta.
+          </p>
+        </div>
+
         {/* Sección renta */}
         <RecSection job="renta" recs={data.renta} onInfo={setModalRec} refreshing={refreshing} />
 

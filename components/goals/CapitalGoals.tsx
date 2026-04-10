@@ -552,15 +552,41 @@ export function CapitalGoals({
 
       {/* Lista de metas */}
       {goals.length === 0 && !initialForm ? (
-        <div className="bg-bf-surface rounded-2xl border border-dashed border-bf-border-2 p-5 text-center space-y-2">
-          <p className="text-2xl">🎯</p>
-          <p className="text-sm font-medium text-bf-text-2">Agregá tu primera meta</p>
-          <p className="text-xs text-bf-text-3">Casa, auto, viaje — te mostramos cuándo llegás.</p>
+        <div className="space-y-3">
+          <p className="text-[11px] text-bf-text-3 text-center">¿Cuál es tu meta ahora?</p>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Path: Generar renta */}
+            <button
+              onClick={() => setInitialForm({ ...emptyForm(), name: "Libertad financiera", emoji: "💰" })}
+              className="bg-emerald-950/30 border border-emerald-900/50 hover:border-emerald-700/60 rounded-2xl p-4 text-left space-y-2 transition-colors"
+            >
+              <span className="text-2xl">💰</span>
+              <div>
+                <p className="text-xs font-semibold text-emerald-300">Generar renta</p>
+                <p className="text-[10px] text-emerald-400/60 leading-snug mt-0.5">
+                  Quiero que mis inversiones paguen mis gastos
+                </p>
+              </div>
+            </button>
+            {/* Path: Comprar depto */}
+            <button
+              onClick={() => setInitialForm({ ...emptyForm(), name: "Mi depto propio", emoji: "🏠" })}
+              className="bg-violet-950/30 border border-violet-900/50 hover:border-violet-700/60 rounded-2xl p-4 text-left space-y-2 transition-colors"
+            >
+              <span className="text-2xl">🏠</span>
+              <div>
+                <p className="text-xs font-semibold text-violet-300">Comprar un depto</p>
+                <p className="text-[10px] text-violet-400/60 leading-snug mt-0.5">
+                  Quiero acumular capital para una propiedad
+                </p>
+              </div>
+            </button>
+          </div>
           <button
             onClick={() => setInitialForm(emptyForm())}
-            className="mt-2 text-xs font-medium text-violet-400 hover:text-violet-300 underline"
+            className="w-full text-xs font-medium text-bf-text-3 hover:text-bf-text-2 transition-colors py-1"
           >
-            + Agregar meta personalizada
+            + Otra meta personalizada
           </button>
         </div>
       ) : (

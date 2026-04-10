@@ -453,6 +453,19 @@ export function BudgetEditor({ initial, onSaved }: { initial: Budget; onSaved?: 
         </div>
       )}
 
+      {/* Palanca: impacto de reducir gastos en libertad financiera */}
+      {savingsPct > 0.05 && savingsUSD > 50 && (
+        <div className="bg-violet-950/20 border border-violet-900/40 rounded-xl px-3 py-2.5 space-y-1">
+          <p className="text-[11px] font-semibold text-violet-300">💡 La palanca de los gastos</p>
+          <p className="text-[11px] text-violet-300/70 leading-snug">
+            Si reducís tus gastos en{" "}
+            <span className="font-semibold text-violet-200">USD {Math.round(savingsUSD * 0.1)}/mes</span>
+            {" "}tenés dos efectos a la vez: más capital para invertir Y menos meta de libertad financiera.
+            El impacto es doble — y se acumula mes a mes.
+          </p>
+        </div>
+      )}
+
       {/* Guardar */}
       <button
         onClick={handleSave}

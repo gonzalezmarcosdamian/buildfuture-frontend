@@ -4,6 +4,27 @@ import { useRouter } from "next/navigation";
 import { BarChart2, Wallet, ShieldCheck, ChevronRight, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
+const GOAL_OPTIONS = [
+  {
+    value: "renta",
+    emoji: "💰",
+    label: "Generar renta mensual",
+    description: "Quiero que mis inversiones paguen mis gastos — sin depender del sueldo.",
+  },
+  {
+    value: "depto",
+    emoji: "🏠",
+    label: "Comprarme un depto",
+    description: "Quiero acumular capital para una propiedad o una meta de capital grande.",
+  },
+  {
+    value: "ambos",
+    emoji: "🎯",
+    label: "Ambos, según la etapa",
+    description: "Primero capital, después renta — o las dos cosas a la vez.",
+  },
+];
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 async function authFetch(path: string, init: RequestInit = {}) {
@@ -48,6 +69,8 @@ interface Props {
 
 export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
   const router = useRouter();
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const [goalConfirmed, setGoalConfirmed] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<string | null>(null);
   const [savingRisk, setSavingRisk] = useState(false);
   const [riskSaved, setRiskSaved] = useState(hasRiskProfile);
@@ -100,6 +123,50 @@ export function FTUFlow({ hasBudget, hasPortfolio, hasRiskProfile }: Props) {
             }`}
           />
         ))}
+      </div>
+
+      {/* Objetivo principal — primera pregunta del onboarding */}
+      <div className={`bg-bf-surface rounded-2xl border p-4 space-y-3 ${goalConfirmed ? "border-emerald-800/40 opacity-60" : "border-bf-border"}`}>
+        <div className="flex items-start gap-3">
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-base ${goalConfirmed ? "bg-emerald-900/50" : "bg-bf-surface-2"}`}>
+            🎯
+          </div>
+          <div>
+            <p className={`text-sm font-semibold ${goalConfirmed ? "text-bf-text-3 line-through" : "text-bf-text"}`}>
+              ¿Cuál es tu objetivo principal?
+            </p>
+            <p className="text-xs text-bf-text-3 mt-0.5">
+              Esto nos ayuda a mostrarte las métricas que más te importan.
+            </p>
+          </div>
+        </div>
+        {!goalConfirmed && (
+          <div className="space-y-2">
+            {GOAL_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setSelectedGoal(opt.value)}
+                className={`w-full text-left p-3 rounded-xl border transition-colors ${
+                  selectedGoal === opt.value
+                    ? "border-blue-700 bg-blue-950/30"
+                    : "border-bf-border-2 bg-bf-surface-2/50 hover:border-bf-border"
+                }`}
+              >
+                <p className="text-xs font-semibold text-bf-text">
+                  <span className="mr-1.5">{opt.emoji}</span>{opt.label}
+                </p>
+                <p className="text-[11px] text-bf-text-3 mt-0.5 pl-5">{opt.description}</p>
+              </button>
+            ))}
+            <button
+              onClick={() => { if (selectedGoal) setGoalConfirmed(true); }}
+              disabled={!selectedGoal}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Continuar <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Budget card — opcional */}
