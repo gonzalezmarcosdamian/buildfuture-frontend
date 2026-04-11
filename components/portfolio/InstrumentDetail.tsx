@@ -40,6 +40,7 @@ interface InstrumentData {
   performance_pct: number;
   pnl_usd: number;
   annual_yield_pct: number;
+  yield_currency?: string;
   monthly_return_usd: number;
   last_updated: string | null;
   mep: number;
@@ -493,7 +494,9 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
               </div>
             </div>
             <div>
-              <p className="text-[10px] text-bf-text-3 text-right">Yield anual</p>
+              <p className="text-[10px] text-bf-text-3 text-right">
+                {inst.yield_currency === "USD" ? "Yield anual USD" : "Yield anual ARS"}
+              </p>
               <p className="text-sm font-bold text-emerald-400">
                 {(inst.annual_yield_pct * 100).toFixed(2)}%
               </p>
