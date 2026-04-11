@@ -7,6 +7,7 @@ import { ConnectCocosForm, CocosSyncModal } from "./ConnectCocosForm";
 import { ConnectBinanceForm } from "./ConnectBinanceForm";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8007";
 
@@ -86,13 +87,17 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
       });
       if (res.ok) {
         setLastSynced(new Date().toISOString());
+        toast.success(`${integration.provider} sincronizado`);
         router.refresh();
       } else {
         const d = await res.json().catch(() => ({}));
-        setSyncError(syncErrorMsg(res.status, d.detail));
+        const msg = syncErrorMsg(res.status, d.detail);
+        setSyncError(msg);
+        toast.error(msg);
       }
     } catch {
       setSyncError(syncErrorMsg(0));
+      toast.error(syncErrorMsg(0));
     } finally {
       setSyncing(false);
     }
@@ -126,10 +131,13 @@ export function IntegrationCard({ integration }: { integration: Integration }) {
       if (res.ok) {
         setConnected(false);
         setShowDisconnectModal(false);
+        toast.success(`${integration.provider} desconectado`);
         router.refresh();
       } else {
         const d = await res.json().catch(() => ({}));
-        setSyncError(syncErrorMsg(res.status, d.detail));
+        const msg = syncErrorMsg(res.status, d.detail);
+        setSyncError(msg);
+        toast.error(msg);
         setShowDisconnectModal(false);
       }
     } catch {

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Plus, Pencil, Trash2, X, Check, Target } from "lucide-react";
+import { toast } from "sonner";
 import { useCurrency } from "@/lib/currency-context";
 import { formatUSD, formatARS } from "@/lib/formatters";
 
@@ -428,7 +429,8 @@ export function CapitalGoals({
           backing_position_id: form.backing_position_id ?? null,
         }),
       });
-      if (!res.ok) return;
+      if (!res.ok) { toast.error("No se pudo crear el objetivo"); return; }
+      toast.success("Objetivo creado");
       setInitialForm(null);
       await fetchGoals();
     } finally {
@@ -454,7 +456,8 @@ export function CapitalGoals({
           backing_position_id: form.backing_position_id ?? null,
         }),
       });
-      if (!res.ok) return;
+      if (!res.ok) { toast.error("No se pudo actualizar el objetivo"); return; }
+      toast.success("Objetivo actualizado");
       setEditingId(null);
       await fetchGoals();
     } finally {
@@ -468,7 +471,8 @@ export function CapitalGoals({
       method: "DELETE",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
-    if (!res.ok) return;
+    if (!res.ok) { toast.error("No se pudo eliminar el objetivo"); return; }
+    toast.success("Objetivo eliminado");
     setGoals((prev) => prev.filter((g) => g.id !== id));
   }
 
