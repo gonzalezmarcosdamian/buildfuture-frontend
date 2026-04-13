@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle, Pencil, Trash2, Loader2, MapPin, ExternalLink } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
-import { assetBadgeClass } from "@/lib/assetLabels";
+import { assetBadgeClass, assetLabelWithEmoji } from "@/lib/assetLabels";
 import { useCurrency } from "@/lib/currency-context";
 import { supabase } from "@/lib/supabase";
 
@@ -56,6 +56,13 @@ interface InstrumentData {
     variation_pct: number | null;
   } | null;
   ccl_compra_usd?: number | null;
+  stock_market?: {
+    price_ars: number;
+    prev_close_ars: number | null;
+    high_ars: number | null;
+    low_ars: number | null;
+    variation_pct: number | null;
+  } | null;
   context: {
     type_label: string;
     full_name: string;
@@ -335,6 +342,24 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
           value={`$${inst.ccl_compra_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} ARS/USD`}
           sub="tipo de cambio implícito al momento de la compra"
         />
+      )}
+      {inst.asset_type === "STOCK" && inst.stock_market && (
+        <>
+          {inst.stock_market.variation_pct != null && (
+            <MetricRow
+              label="Variación hoy"
+              value={`${inst.stock_market.variation_pct >= 0 ? "+" : ""}${inst.stock_market.variation_pct.toFixed(2)}%`}
+              sub="20 min delay · BYMA Líderes"
+              highlight={inst.stock_market.variation_pct >= 0 ? "green" : "red"}
+            />
+          )}
+          {inst.stock_market.high_ars != null && inst.stock_market.low_ars != null && (
+            <MetricRow
+              label="Máx / Mín del día"
+              value={`$${inst.stock_market.high_ars.toLocaleString("es-AR", { maximumFractionDigits: 0 })} / $${inst.stock_market.low_ars.toLocaleString("es-AR", { maximumFractionDigits: 0 })} ARS`}
+            />
+          )}
+        </>
       )}
       <MetricRow
         label="Ganancia neta"
