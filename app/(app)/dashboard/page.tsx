@@ -64,7 +64,7 @@ export default async function Dashboard() {
         monthlyReturn={gamification.monthly_return_usd}
         monthlyExpenses={score.monthly_expenses_usd}
         covers={gamification.portfolio_covers}
-        portfolioTotal={score.portfolio_total_usd}
+        portfolioTotal={score.portfolio_total_usd || portfolio?.summary?.total_usd || 0}
         portfolioTotalArs={portfolio?.summary?.total_ars ?? null}
         capitalNumeratorUsd={
           portfolio?.summary
@@ -84,7 +84,7 @@ export default async function Dashboard() {
       />
 
       {/* 3 — Proyección DCA / interés compuesto (colapsada) */}
-      <ProjectionCard />
+      <ProjectionCard mep={mep} />
 
     </div>
   );

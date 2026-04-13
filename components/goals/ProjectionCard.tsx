@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useCurrency } from "@/lib/currency-context";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceLine,
@@ -37,8 +38,24 @@ function fmtK(usd: number): string {
   return `$${usd.toFixed(0)}`;
 }
 
+function makeFmtK(currency: "USD" | "ARS", mep: number): (usd: number) => string {
+  if (currency === "USD") return fmtK;
+  return (usd: number) => {
+    const ars = usd * mep;
+    if (ars >= 1_000_000_000) return `$${(ars / 1_000_000_000).toFixed(1)}B`;
+    if (ars >= 1_000_000) return `$${(ars / 1_000_000).toFixed(1)}M`;
+    if (ars >= 1_000)     return `$${(ars / 1_000).toFixed(0)}K`;
+    return `$${Math.round(ars)}`;
+  };
+}
+
 function fmtFull(usd: number): string {
   return `$${Math.round(usd).toLocaleString("es-AR")}`;
+}
+
+function makeFmtFull(currency: "USD" | "ARS", mep: number): (usd: number) => string {
+  if (currency === "USD") return fmtFull;
+  return (usd: number) => `$${Math.round(usd * mep).toLocaleString("es-AR")}`;
 }
 
 const YEARS = [1, 5, 10, 20, 30, 60];
@@ -64,7 +81,7 @@ function computePoints(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label, fmtTip }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-bf-surface-2 border border-bf-border-2 rounded-xl px-3 py-2 text-xs space-y-1 shadow-xl">
@@ -73,7 +90,7 @@ function CustomTooltip({ active, payload, label }: any) {
         <div key={p.name} className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
           <span className="text-bf-text-2">{p.name}:</span>
-          <span className="font-semibold text-bf-text">{fmtK(p.value)}</span>
+          <span className="font-semibold text-bf-text">{(fmtTip ?? fmtK)(p.value)}</span>
         </div>
       ))}
     </div>
@@ -284,7 +301,8 @@ async function getToken(): Promise<string | null> {
   return data.session?.access_token ?? null;
 }
 
-export function ProjectionCard() {
+export function ProjectionCard({ mep = 1430 }: { mep?: number }) {
+  const { currency } = useCurrency();
   const [data, setData] = useState<ProjectionData | null>(null);
   const [goals, setGoals] = useState<CapitalGoal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -322,6 +340,10 @@ export function ProjectionCard() {
     </div>
   );
 
+  const fmtC = makeFmtK(currency, mep);
+  const fmtFullC = makeFmtFull(currency, mep);
+  const currencyLabel = currency === "ARS" ? "ARS" : "USD";
+
   // Always compute up to 60 years so any selected horizon can filter from a single array
   const allPoints = computePoints(data.current_usd, data.monthly_savings_usd, customRatePct / 100, 60);
   const chartPoints = allPoints.filter((p) => p.year <= horizon);
@@ -349,7 +371,7 @@ export function ProjectionCard() {
             <div>
               <p className="text-xs font-semibold text-bf-text-2">Proyección a {horizon} años</p>
               <p className="text-[11px] text-emerald-400 font-medium">
-                {fmtK(last.with_savings_usd)} con aportes mensuales
+                {fmtC(last.with_savings_usd)} con aportes mensuales
               </p>
             </div>
           </div>
@@ -363,11 +385,11 @@ export function ProjectionCard() {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-bf-text">
-              Si seguís invirtiendo ${data.monthly_savings_usd.toLocaleString("es-AR", { maximumFractionDigits: 0 })} USD/mes
+              Si seguís invirtiendo {fmtFullC(data.monthly_savings_usd)} {currencyLabel}/mes
             </p>
             <p className="text-[11px] text-bf-text-3 mt-0.5">
               En {horizon} años tenés{" "}
-              <span className="text-emerald-400 font-semibold">{fmtK(extra)} más</span>
+              <span className="text-emerald-400 font-semibold">{fmtC(extra)} más</span>
               {" "}que si no aportás nada
             </p>
           </div>
@@ -387,7 +409,7 @@ export function ProjectionCard() {
                 className="w-5 h-5 flex items-center justify-center text-bf-text-3 hover:text-bf-text-2 transition-colors text-base leading-none"
               >+</button>
             </div>
-            <p className="text-[9px] text-bf-text-5 mt-0.5">anual USD</p>
+            <p className="text-[9px] text-bf-text-5 mt-0.5">anual {currencyLabel}</p>
           </div>
         </div>
 
@@ -424,8 +446,8 @@ export function ProjectionCard() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="label" tick={{ fill: "#64748b", fontSize: 9 }} axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={fmtK} tick={{ fill: "#64748b", fontSize: 9 }} axisLine={false} tickLine={false} width={36} />
-              <Tooltip content={<CustomTooltip />} />
+              <YAxis tickFormatter={fmtC} tick={{ fill: "#64748b", fontSize: 9 }} axisLine={false} tickLine={false} width={36} />
+              <Tooltip content={<CustomTooltip fmtTip={fmtC} />} />
 
               {visibleGoals.map((g, i) => (
                 <ReferenceLine
@@ -435,7 +457,7 @@ export function ProjectionCard() {
                   strokeDasharray="4 3"
                   strokeWidth={1.5}
                   label={{
-                    value: `${g.emoji} ${fmtK(g.target_usd)}`,
+                    value: `${g.emoji} ${fmtC(g.target_usd)}`,
                     position: "insideTopRight",
                     fontSize: 9,
                     fill: GOAL_COLORS[i % GOAL_COLORS.length],

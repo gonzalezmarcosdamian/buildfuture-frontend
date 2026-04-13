@@ -39,14 +39,18 @@ export function PortfolioHeader({
 }: Props) {
   const { currency } = useCurrency();
 
-  // Renta fija: LETRA/FCI/BOND con el yield real del instrumento (directo de IOL)
+  // Renta fija: LETRA/FCI/BOND con yield ajustado por DEVALUATION_PROXY (igual que servidor)
+  // Los yields IOL son TNA ARS nominales; aplicarlos directo a USD sobreestima la renta real.
+  // DEVALUATION_PROXY 15% = crawling peg ARG 2026 (~1%/mes). Misma lógica que split_portfolio_buckets.
+  const DEVALUATION_PROXY = 0.15;
   const monthlyRentaFija = positions
     .filter((p) => RENTA_TYPES.has(p.asset_type) || p.asset_type === "BOND")
     .reduce((s, p) => {
       const y = p.annual_yield_pct;
+      const realUsdYield = Math.max(0, (1 + y) / (1 + DEVALUATION_PROXY) - 1);
       const monthly = p.asset_type === "BOND"
-        ? (p.current_value_usd * y * 0.5) / 12   // BOND: 50% va a renta
-        : (p.current_value_usd * y) / 12;
+        ? (p.current_value_usd * realUsdYield * 0.5) / 12
+        : (p.current_value_usd * realUsdYield) / 12;
       return s + monthly;
     }, 0);
 
