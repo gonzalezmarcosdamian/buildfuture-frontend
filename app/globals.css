@@ -262,11 +262,11 @@
   }
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden; /* evita scroll horizontal por bleed del carousel */
+    /* overflow-x: hidden eliminado — crea scroll container en body y rompe `fixed` (navbar scrollea con el contenido) */
   }
   html {
     @apply font-sans;
-    overflow-x: clip; /* clip no crea nuevo scroll container — preserva anchor links */
+    overflow-x: clip; /* clip en html evita scroll horizontal sin crear scroll container — preserva fixed positioning */
     scroll-behavior: smooth;
   }
 }

@@ -40,6 +40,8 @@ interface InstrumentData {
   performance_pct: number;
   pnl_usd: number;
   annual_yield_pct: number;
+  real_yield_usd_pct?: number; // ajustado por devaluación (para ARS instruments en modo USD)
+  expected_devaluation_pct?: number;
   yield_currency?: string;
   monthly_return_usd: number;
   last_updated: string | null;
@@ -248,7 +250,9 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
         <MetricRow
           label="Renta estimada / mes *"
           value={`${FLAG[currency]} ${fmt(inst.monthly_return_usd)}`}
-          sub={`TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`}
+          sub={currency === "USD" && inst.real_yield_usd_pct != null
+            ? `Yield real USD ${(inst.real_yield_usd_pct * 100).toFixed(2)}%`
+            : `TNA ${(inst.annual_yield_pct * 100).toFixed(2)}%`}
           highlight={inst.monthly_return_usd > 0 ? "green" : null}
         />
       </>
@@ -263,16 +267,18 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
     ? `Vence ${new Date(inst.maturity_date + "T12:00:00").toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })}${inst.days_to_maturity !== null ? ` · ${inst.days_to_maturity} días` : ""}`
     : undefined;
 
-  const yieldPct = (inst.annual_yield_pct * 100).toFixed(2);
+  // Para ARS instruments (LECAP, FCI) en modo USD: mostrar yield real USD (ajustado por devaluación)
+  const isARSInstrument = isLETRA || inst.asset_type === "FCI";
+  const displayYield = (isARSInstrument && currency === "USD" && inst.real_yield_usd_pct != null)
+    ? inst.real_yield_usd_pct
+    : inst.annual_yield_pct;
+  const yieldPct = (displayYield * 100).toFixed(2);
+  const yieldLabel = (isARSInstrument && currency === "USD")
+    ? "Yield real USD"
+    : isLETRA ? "TEA" : inst.asset_type === "BOND" ? "YTM" : inst.asset_type === "ON" ? "TIR" : "TNA";
   const rentaSub = isCERLetter
     ? `TIR real ${Number(yieldPct) >= 0 ? "+" : ""}${yieldPct}% sobre CER${maturitySub ? ` · ${maturitySub}` : ""}`
-    : isLETRA
-    ? `TEA ${yieldPct}%${maturitySub ? ` · ${maturitySub}` : ""}`
-    : inst.asset_type === "BOND"
-    ? `YTM ${yieldPct}%`
-    : inst.asset_type === "ON"
-    ? `TIR ${yieldPct}%`
-    : `TNA ${yieldPct}%`;
+    : `${yieldLabel} ${yieldPct}%${maturitySub && isLETRA ? ` · ${maturitySub}` : ""}`;
 
   return (
     <>
