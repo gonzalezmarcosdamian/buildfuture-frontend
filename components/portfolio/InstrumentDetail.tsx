@@ -65,6 +65,29 @@ interface InstrumentData {
     low_ars: number | null;
     variation_pct: number | null;
   } | null;
+  crypto_market?: {
+    price_usd: number | null;
+    change_24h_pct: number | null;
+    high_24h: number | null;
+    low_24h: number | null;
+    market_cap: number | null;
+    market_cap_rank: number | null;
+    volume_24h: number | null;
+  } | null;
+  etf_market?: {
+    price_usd: number | null;
+    change_pct: number | null;
+    prev_close: number | null;
+    week52_high: number | null;
+    week52_low: number | null;
+    name: string | null;
+  } | null;
+  bond_market?: {
+    px_bid: number | null;
+    px_ask: number | null;
+    close: number | null;
+    pct_change: number | null;
+  } | null;
   context: {
     type_label: string;
     full_name: string;
@@ -363,6 +386,70 @@ function PositionMetrics({ inst, fmt, hint, currency }: {
             <MetricRow
               label="Máx / Mín del día"
               value={`$${inst.stock_market.high_ars.toLocaleString("es-AR", { maximumFractionDigits: 0 })} / $${inst.stock_market.low_ars.toLocaleString("es-AR", { maximumFractionDigits: 0 })} ARS`}
+            />
+          )}
+        </>
+      )}
+      {inst.asset_type === "CRYPTO" && inst.crypto_market && (
+        <>
+          {inst.crypto_market.change_24h_pct != null && (
+            <MetricRow
+              label="Variación 24h"
+              value={`${inst.crypto_market.change_24h_pct >= 0 ? "+" : ""}${inst.crypto_market.change_24h_pct.toFixed(2)}%`}
+              sub="CoinGecko"
+              highlight={inst.crypto_market.change_24h_pct >= 0 ? "green" : "red"}
+            />
+          )}
+          {inst.crypto_market.high_24h != null && inst.crypto_market.low_24h != null && (
+            <MetricRow
+              label="Máx / Mín 24h"
+              value={`${formatUSD(inst.crypto_market.high_24h)} / ${formatUSD(inst.crypto_market.low_24h)}`}
+            />
+          )}
+          {inst.crypto_market.market_cap_rank != null && (
+            <MetricRow
+              label="Rank mercado"
+              value={`#${inst.crypto_market.market_cap_rank}`}
+              sub={inst.crypto_market.market_cap != null
+                ? `Cap: $${(inst.crypto_market.market_cap / 1e9).toFixed(1)}B`
+                : undefined}
+            />
+          )}
+        </>
+      )}
+      {inst.asset_type === "ETF" && inst.etf_market && (
+        <>
+          {inst.etf_market.change_pct != null && (
+            <MetricRow
+              label="Variación hoy"
+              value={`${inst.etf_market.change_pct >= 0 ? "+" : ""}${inst.etf_market.change_pct.toFixed(2)}%`}
+              sub="Yahoo Finance"
+              highlight={inst.etf_market.change_pct >= 0 ? "green" : "red"}
+            />
+          )}
+          {inst.etf_market.week52_high != null && inst.etf_market.week52_low != null && (
+            <MetricRow
+              label="52w Máx / Mín"
+              value={`${formatUSD(inst.etf_market.week52_high)} / ${formatUSD(inst.etf_market.week52_low)}`}
+            />
+          )}
+        </>
+      )}
+      {(inst.asset_type === "BOND" || inst.asset_type === "ON") && inst.bond_market && (
+        <>
+          {inst.bond_market.pct_change != null && (
+            <MetricRow
+              label="Variación hoy"
+              value={`${inst.bond_market.pct_change >= 0 ? "+" : ""}${inst.bond_market.pct_change.toFixed(2)}%`}
+              sub="data912"
+              highlight={inst.bond_market.pct_change >= 0 ? "green" : "red"}
+            />
+          )}
+          {inst.bond_market.px_bid != null && inst.bond_market.px_ask != null && (
+            <MetricRow
+              label="Bid / Ask"
+              value={`$${inst.bond_market.px_bid.toLocaleString("es-AR")} / $${inst.bond_market.px_ask.toLocaleString("es-AR")}`}
+              sub="precio por VN 100"
             />
           )}
         </>
