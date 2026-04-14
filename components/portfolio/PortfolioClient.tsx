@@ -45,6 +45,7 @@ interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   history: { period: Period; points: any[]; has_data: boolean };
   connectedProviders?: string[];
+  expectedDevaluationPct?: number;
 }
 
 const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: string[] }> = {
@@ -72,7 +73,7 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export function PortfolioClient({ positions, totalUsd, mep, history, connectedProviders = [] }: Props) {
+export function PortfolioClient({ positions, totalUsd, mep, history, connectedProviders = [], expectedDevaluationPct = 0.20 }: Props) {
   const [mode, setMode] = useState<ViewMode>("composicion");
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
   const [period, setPeriod] = useState<Period>("daily");
@@ -216,6 +217,7 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
         period={period}
         positionDeltas={positionDeltas}
         deltasLoading={deltasLoading}
+        expectedDevaluationPct={expectedDevaluationPct}
       />
 
       {/* Agregar posición manual — carrusel */}

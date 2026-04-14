@@ -44,6 +44,7 @@ export default async function Portfolio() {
         mep={mep}
         history={history}
         connectedProviders={connectedALYCs}
+        expectedDevaluationPct={summary.expected_devaluation_pct ?? 0.20}
       />
     </div>
   );

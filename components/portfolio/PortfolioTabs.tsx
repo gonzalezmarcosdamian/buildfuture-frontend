@@ -65,6 +65,7 @@ interface Props {
   period?: string;
   positionDeltas?: PositionDelta[];
   deltasLoading?: boolean;
+  expectedDevaluationPct?: number;
 }
 
 // Propósito de cada tipo de activo: renta (flujo mensual) | capital (apreciación)
@@ -178,7 +179,7 @@ function SourceGroupHeader({
   );
 }
 
-export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedProviders = [], period = "daily", positionDeltas = [], deltasLoading = false }: Props) {
+export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedProviders = [], period = "daily", positionDeltas = [], deltasLoading = false, expectedDevaluationPct = 0.20 }: Props) {
   const tab = activeTab;
   const { currency } = useCurrency();
   const router = useRouter();
@@ -237,7 +238,13 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
   const rentaMonthly = positions
     .filter(p => (ASSET_JOB[p.asset_type] ?? "renta") !== "capital" && p.asset_type !== "CASH")
     .reduce((s, p) => {
-      const y = p.annual_yield_pct ?? 0;
+      const yRaw = p.annual_yield_pct ?? 0;
+      // FCI y LETRA tienen yield en TNA ARS nominal. Para expresar en USD real:
+      // yield_usd = max(0, (1 + tna_ars) / (1 + deval) - 1)
+      const isARS = p.asset_type === "FCI" || p.asset_type === "LETRA";
+      const y = isARS
+        ? Math.max(0, (1 + yRaw) / (1 + expectedDevaluationPct) - 1)
+        : yRaw;
       // BOND: 50% del valor va a renta (cupón), 50% a capital (apreciación)
       const monthly = p.asset_type === "BOND"
         ? (p.current_value_usd * y * 0.5) / 12
