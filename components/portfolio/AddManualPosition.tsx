@@ -37,7 +37,7 @@ interface NominatimResult {
 
 // ── Subcomponent: Cash form ─────────────────────────────────────────────────
 
-function CashForm({ onSuccess }: { onSuccess: () => void }) {
+function CashForm({ onSuccess, initialEditId }: { onSuccess: () => void; initialEditId?: number }) {
   const [currency, setCurrency] = useState<"USD" | "ARS">("USD");
   const [amount, setAmount] = useState("");
   const [mep, setMep] = useState(1430);
@@ -53,6 +53,28 @@ function CashForm({ onSuccess }: { onSuccess: () => void }) {
       .finally(() => setMepLoaded(true));
   }, []);
 
+  // Pre-llenar al editar
+  useEffect(() => {
+    if (!initialEditId) return;
+    authFetch("/positions/manual")
+      .then((r) => r.json())
+      .then((positions: { id: number; ticker: string; quantity: number }[]) => {
+        const pos = positions.find((p) => p.id === initialEditId);
+        if (!pos) return;
+        const isARS = pos.ticker === "CASH_ARS";
+        setCurrency(isARS ? "ARS" : "USD");
+        // quantity está en USD; para ARS mostramos el valor en pesos
+        fetch("https://dolarapi.com/v1/dolares/bolsa")
+          .then((r) => r.json())
+          .then((d) => {
+            const currentMep = d.venta ? parseFloat(d.venta) : 1430;
+            setAmount(isARS ? (pos.quantity * currentMep).toFixed(0) : pos.quantity.toString());
+          })
+          .catch(() => setAmount(pos.quantity.toString()));
+      })
+      .catch(() => {});
+  }, [initialEditId]);
+
   async function save() {
     const num = parseFloat(amount);
     if (!num || num <= 0) return;
@@ -60,20 +82,32 @@ function CashForm({ onSuccess }: { onSuccess: () => void }) {
     try {
       const isARS = currency === "ARS";
       const qtyUsd = isARS ? num / mep : num;
-      const res = await authFetch("/positions/manual", {
-        method: "POST",
-        body: JSON.stringify({
-          asset_type: "CASH",
-          ticker: isARS ? "CASH_ARS" : "CASH_USD",
-          description: isARS ? "Efectivo en pesos" : "Efectivo en dólares",
-          quantity: qtyUsd,
-          purchase_price_usd: 1.0,
-          ppc_ars: isARS ? num : num * mep,
-          purchase_fx_rate: mep,
-          external_id: null, fci_categoria: null, manual_yield_pct: null,
-        }),
-      });
-      if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || `Error ${res.status}`); return; }
+      if (initialEditId) {
+        const res = await authFetch(`/positions/manual/${initialEditId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            quantity: qtyUsd,
+            ppc_ars: isARS ? num : num * mep,
+            purchase_fx_rate: mep,
+          }),
+        });
+        if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || `Error ${res.status}`); return; }
+      } else {
+        const res = await authFetch("/positions/manual", {
+          method: "POST",
+          body: JSON.stringify({
+            asset_type: "CASH",
+            ticker: isARS ? "CASH_ARS" : "CASH_USD",
+            description: isARS ? "Efectivo en pesos" : "Efectivo en dólares",
+            quantity: qtyUsd,
+            purchase_price_usd: 1.0,
+            ppc_ars: isARS ? num : num * mep,
+            purchase_fx_rate: mep,
+            external_id: null, fci_categoria: null, manual_yield_pct: null,
+          }),
+        });
+        if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || `Error ${res.status}`); return; }
+      }
       onSuccess();
     } catch { setError("No se pudo conectar con el servidor"); }
     finally { setSaving(false); }
@@ -90,8 +124,8 @@ function CashForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <div className="flex gap-2">
         {(["USD", "ARS"] as const).map((c) => (
-          <button key={c} onClick={() => { setCurrency(c); setAmount(""); }}
-            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-colors ${currency === c ? "bg-blue-600 text-white" : "bg-bf-surface border border-bf-border text-bf-text-3"}`}>
+          <button key={c} onClick={() => { if (!initialEditId) { setCurrency(c); setAmount(""); } }}
+            className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-colors ${currency === c ? "bg-blue-600 text-white" : "bg-bf-surface border border-bf-border text-bf-text-3"} ${initialEditId ? "opacity-50 cursor-default" : ""}`}>
             {c}
           </button>
         ))}
@@ -111,14 +145,14 @@ function CashForm({ onSuccess }: { onSuccess: () => void }) {
         )}
       </div>
       {error && <ErrorBanner msg={error} />}
-      <SaveButton onClick={save} saving={saving} disabled={!valid} />
+      <SaveButton onClick={save} saving={saving} disabled={!valid} label={initialEditId ? "Guardar cambios" : "Guardar"} />
     </div>
   );
 }
 
 // ── Subcomponent: Crypto form ───────────────────────────────────────────────
 
-function CryptoForm({ onSuccess }: { onSuccess: () => void }) {
+function CryptoForm({ onSuccess, initialEditId }: { onSuccess: () => void; initialEditId?: number }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CryptoResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -128,6 +162,21 @@ function CryptoForm({ onSuccess }: { onSuccess: () => void }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Pre-llenar al editar
+  useEffect(() => {
+    if (!initialEditId) return;
+    authFetch("/positions/manual")
+      .then((r) => r.json())
+      .then((positions: { id: number; ticker: string; description: string; quantity: number; external_id: string | null }[]) => {
+        const pos = positions.find((p) => p.id === initialEditId);
+        if (!pos) return;
+        setSelected({ id: pos.external_id ?? pos.ticker, name: pos.description, symbol: pos.ticker, thumb: "", market_cap_rank: null });
+        setQuery(`${pos.description} (${pos.ticker})`);
+        setQuantity(pos.quantity.toString());
+      })
+      .catch(() => {});
+  }, [initialEditId]);
 
   const search = useCallback((q: string) => {
     if (!q.trim()) { setResults([]); return; }
@@ -161,22 +210,30 @@ function CryptoForm({ onSuccess }: { onSuccess: () => void }) {
     if (!selected || !quantity || parseFloat(quantity) <= 0) return;
     setSaving(true); setError("");
     try {
-      const res = await authFetch("/positions/manual", {
-        method: "POST",
-        body: JSON.stringify({
-          asset_type: "CRYPTO",
-          ticker: selected.symbol,
-          description: selected.name,
-          quantity: parseFloat(quantity),
-          purchase_price_usd: price ?? 0,
-          ppc_ars: 0,
-          purchase_fx_rate: 0,
-          external_id: selected.id,
-          fci_categoria: null,
-          manual_yield_pct: null,
-        }),
-      });
-      if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || `Error ${res.status}`); return; }
+      if (initialEditId) {
+        const res = await authFetch(`/positions/manual/${initialEditId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ quantity: parseFloat(quantity) }),
+        });
+        if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || `Error ${res.status}`); return; }
+      } else {
+        const res = await authFetch("/positions/manual", {
+          method: "POST",
+          body: JSON.stringify({
+            asset_type: "CRYPTO",
+            ticker: selected.symbol,
+            description: selected.name,
+            quantity: parseFloat(quantity),
+            purchase_price_usd: price ?? 0,
+            ppc_ars: 0,
+            purchase_fx_rate: 0,
+            external_id: selected.id,
+            fci_categoria: null,
+            manual_yield_pct: null,
+          }),
+        });
+        if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || `Error ${res.status}`); return; }
+      }
       onSuccess();
     } catch { setError("No se pudo conectar con el servidor"); }
     finally { setSaving(false); }
@@ -200,9 +257,10 @@ function CryptoForm({ onSuccess }: { onSuccess: () => void }) {
           <input
             type="text"
             value={query}
-            onChange={(e) => handleQueryChange(e.target.value)}
+            onChange={(e) => { if (!initialEditId) handleQueryChange(e.target.value); }}
+            readOnly={!!initialEditId}
             placeholder="Bitcoin, ETH, SOL..."
-            className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-9 pr-9 py-3 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
+            className={`w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl pl-9 pr-9 py-3 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors ${initialEditId ? "opacity-60 cursor-default" : ""}`}
           />
           {(query || searching) && (
             <button onClick={clear} className="absolute right-3 top-1/2 -translate-y-1/2 text-bf-text-3 hover:text-bf-text-2">
@@ -259,7 +317,7 @@ function CryptoForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       {error && <ErrorBanner msg={error} />}
-      <SaveButton onClick={save} saving={saving} disabled={!valid} />
+      <SaveButton onClick={save} saving={saving} disabled={!valid} label={initialEditId ? "Guardar cambios" : "Agregar al portafolio"} />
     </div>
   );
 }
@@ -722,8 +780,8 @@ export function AddManualPosition({
     <div className="space-y-5">
 
       {/* Form by mode */}
-      {mode === "CASH"        && <CashForm       onSuccess={handleSuccess} />}
-      {mode === "CRYPTO"      && <CryptoForm     onSuccess={handleSuccess} />}
+      {mode === "CASH"        && <CashForm       onSuccess={handleSuccess} initialEditId={initialEditId} />}
+      {mode === "CRYPTO"      && <CryptoForm     onSuccess={handleSuccess} initialEditId={initialEditId} />}
       {mode === "REAL_ESTATE" && <RealEstateForm onSuccess={handleSuccess} initialEditId={initialEditId} />}
     </div>
   );
