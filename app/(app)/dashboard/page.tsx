@@ -1,4 +1,4 @@
-import { fetchFreedomScore, fetchBudget, fetchGamification, fetchPortfolio, fetchProfile, fetchCapitalGoals } from "@/lib/api-server";
+import { fetchBudget, fetchGamification, fetchPortfolio, fetchProfile, fetchCapitalGoals } from "@/lib/api-server";
 import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
@@ -8,11 +8,10 @@ import { UserAvatar } from "@/components/ui/UserAvatar";
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  const [score, budget, gamification, portfolio, profile, capitalGoals] = await Promise.all([
-    fetchFreedomScore().catch(() => ({ portfolio_total_usd: 0, monthly_expenses_usd: 0 })),
+  const [budget, gamification, portfolio, profile, capitalGoals] = await Promise.all([
     fetchBudget().catch(() => null),
-    fetchGamification().catch(() => ({ monthly_return_usd: 0, portfolio_covers: 0 })),
-    fetchPortfolio().catch(() => []),
+    fetchGamification().catch(() => ({ portfolio_covers: [], streak: null })),
+    fetchPortfolio().catch(() => ({ positions: [], summary: null })),
     fetchProfile().catch(() => ({ risk_profile: null, available: false })),
     fetchCapitalGoals().catch(() => []),
   ]);
@@ -20,7 +19,7 @@ export default async function Dashboard() {
   const goalsTargetTotal = capitalGoals.reduce((sum: number, g: { target_usd: number }) => sum + g.target_usd, 0);
 
   const hasBudget = !!(budget && (budget.income_monthly_ars ?? 0) > 0);
-  const hasPortfolio = !!(score.portfolio_total_usd > 0) ||
+  const hasPortfolio = !!((portfolio?.summary?.total_usd ?? 0) > 0) ||
     (Array.isArray(portfolio?.positions) && portfolio.positions.length > 0);
   const hasRiskProfile = !!(profile?.risk_profile);
   const blockOnRisk = profile.available && !hasRiskProfile;
@@ -42,7 +41,9 @@ export default async function Dashboard() {
     );
   }
 
-  const mep = budget?.fx_rate ?? 1430;
+  // MEP: fuente única — summary del backend (calculado junto con total_ars).
+  // Fallback a budget.fx_rate si el backend aún no expone summary.mep.
+  const mep = portfolio?.summary?.mep ?? budget?.fx_rate ?? 1430;
   const savingsARS = budget?.savings_monthly_ars ?? 0;
 
   return (
@@ -60,17 +61,16 @@ export default async function Dashboard() {
       </div>
 
       {/* 1 — Hero: renta + capital + metas + racha */}
+      {/* Hero: fuente única portfolio.summary — mismo endpoint que PortfolioHeader.
+          monthly_return_usd, capital_total_usd, mep y total_ars vienen todos
+          del mismo GET /portfolio/ para garantizar consistencia. */}
       <DashboardHero
-        monthlyReturn={gamification.monthly_return_usd}
-        monthlyExpenses={score.monthly_expenses_usd}
+        monthlyReturn={portfolio?.summary?.monthly_return_usd ?? 0}
+        monthlyExpenses={portfolio?.summary?.monthly_expenses_usd ?? budget?.total_monthly_usd ?? 2000}
         covers={gamification.portfolio_covers}
-        portfolioTotal={score.portfolio_total_usd || portfolio?.summary?.total_usd || 0}
+        portfolioTotal={portfolio?.summary?.total_usd ?? 0}
         portfolioTotalArs={portfolio?.summary?.total_ars ?? null}
-        capitalNumeratorUsd={
-          portfolio?.summary
-            ? (portfolio.summary.cedear_total_usd ?? 0) + (portfolio.summary.crypto_total_usd ?? 0) + (portfolio.summary.cash_total_usd ?? 0)
-            : null
-        }
+        capitalNumeratorUsd={portfolio?.summary?.capital_total_usd ?? null}
         mep={mep}
         goalsTargetTotal={goalsTargetTotal > 0 ? goalsTargetTotal : null}
         goalsCount={capitalGoals.length}
