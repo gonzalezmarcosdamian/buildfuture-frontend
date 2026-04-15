@@ -18,7 +18,7 @@ export default async function AddManualPage({
   const { mode = "CASH", edit } = await searchParams;
   const { label, icon } = MODE_TITLES[mode] ?? MODE_TITLES.CASH;
   const editId = edit ? parseInt(edit) : undefined;
-  const isEditing = !!editId && mode === "REAL_ESTATE";
+  const isEditing = !!editId;
 
   return (
     <div className="px-4 pt-6 pb-24 space-y-4">
