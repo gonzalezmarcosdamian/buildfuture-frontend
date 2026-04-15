@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingUp, TrendingDown, Zap, Shield, Droplets, RefreshCw, AlertTriangle, Pencil, Trash2, Loader2, MapPin, ExternalLink } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
@@ -490,6 +490,9 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleteCountdown, setDeleteCountdown] = useState(3);
+  const deleteTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fmt = (usd: number) => currency === "USD" ? formatUSD(usd) : formatARS(usd * inst.mep);
   const hint = (usd: number) => currency === "USD"
@@ -515,8 +518,28 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
     ? "Ganancia / Pérdida vs PPC (ARS/MEP)"
     : "Ganancia / Pérdida vs precio compra";
 
-  async function handleDelete() {
-    if (!confirm("¿Eliminar esta posición? Esta acción no se puede deshacer.")) return;
+  function startDeleteConfirm() {
+    setDeleteConfirm(true);
+    setDeleteCountdown(3);
+    deleteTimerRef.current = setInterval(() => {
+      setDeleteCountdown((n) => {
+        if (n <= 1) {
+          clearInterval(deleteTimerRef.current!);
+          return 0;
+        }
+        return n - 1;
+      });
+    }, 1000);
+  }
+
+  function cancelDelete() {
+    setDeleteConfirm(false);
+    setDeleteCountdown(3);
+    if (deleteTimerRef.current) clearInterval(deleteTimerRef.current);
+  }
+
+  async function confirmDelete() {
+    if (deleteCountdown > 0) return;
     setDeleting(true); setDeleteError("");
     try {
       const res = await authFetch(`/positions/manual/${inst.id}`, { method: "DELETE" });
@@ -623,7 +646,7 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         )}
 
         {/* Edit / Delete para posiciones manuales */}
-        {isManual && (
+        {isManual && !deleteConfirm && (
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => router.push(`/portfolio/add-manual?mode=${inst.asset_type}&edit=${inst.id}`)}
@@ -633,15 +656,41 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
               Editar
             </button>
             <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-red-500 hover:text-red-400 transition-colors disabled:opacity-40"
+              onClick={startDeleteConfirm}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-red-500 hover:text-red-400 transition-colors"
             >
-              {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
-              {deleting ? "Eliminando..." : "Eliminar"}
+              <Trash2 size={12} />
+              Eliminar
             </button>
           </div>
         )}
+
+        {/* Confirmación inline con timer */}
+        {isManual && deleteConfirm && (
+          <div className="pt-1 space-y-2">
+            <p className="text-[11px] text-red-400 text-center">¿Eliminar esta posición? No se puede deshacer.</p>
+            <div className="flex gap-2">
+              <button
+                onClick={cancelDelete}
+                className="flex-1 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-bf-border-2 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleteCountdown > 0 || deleting}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold bg-red-600/20 border border-red-700 text-red-400 hover:bg-red-600/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting
+                  ? <><Loader2 size={12} className="animate-spin" /> Eliminando...</>
+                  : deleteCountdown > 0
+                  ? `Confirmar (${deleteCountdown}s)`
+                  : <><Trash2 size={12} /> Confirmar</>}
+              </button>
+            </div>
+          </div>
+        )}
+
         {deleteError && (
           <p className="text-[11px] text-red-400 text-center">{deleteError}</p>
         )}
