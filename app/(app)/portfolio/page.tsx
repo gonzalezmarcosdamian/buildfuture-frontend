@@ -19,7 +19,7 @@ export default async function Portfolio() {
     : [];
 
   const { positions, summary } = data;
-  const mep = budget?.fx_rate ?? 1430;
+  const mep = summary?.mep ?? budget?.fx_rate ?? 1430;
 
   return (
     <div className="px-4 pt-8 pb-24 space-y-4">
