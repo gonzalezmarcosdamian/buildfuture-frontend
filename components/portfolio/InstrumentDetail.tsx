@@ -645,52 +645,6 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
           </div>
         )}
 
-        {/* Edit / Delete para posiciones manuales */}
-        {isManual && !deleteConfirm && (
-          <div className="flex gap-2 pt-1">
-            <button
-              onClick={() => router.push(`/portfolio/add-manual?mode=${inst.asset_type}&edit=${inst.id}`)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-blue-500 hover:text-blue-400 transition-colors"
-            >
-              <Pencil size={12} />
-              Editar
-            </button>
-            <button
-              onClick={startDeleteConfirm}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-red-500 hover:text-red-400 transition-colors"
-            >
-              <Trash2 size={12} />
-              Eliminar
-            </button>
-          </div>
-        )}
-
-        {/* Confirmación inline con timer */}
-        {isManual && deleteConfirm && (
-          <div className="pt-1 space-y-2">
-            <p className="text-[11px] text-red-400 text-center">¿Eliminar esta posición? No se puede deshacer.</p>
-            <div className="flex gap-2">
-              <button
-                onClick={cancelDelete}
-                className="flex-1 py-2 rounded-xl text-xs font-medium border border-bf-border text-bf-text-3 hover:border-bf-border-2 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmDelete}
-                disabled={deleteCountdown > 0 || deleting}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold bg-red-600/20 border border-red-700 text-red-400 hover:bg-red-600/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {deleting
-                  ? <><Loader2 size={12} className="animate-spin" /> Eliminando...</>
-                  : deleteCountdown > 0
-                  ? `Confirmar (${deleteCountdown}s)`
-                  : <><Trash2 size={12} /> Confirmar</>}
-              </button>
-            </div>
-          </div>
-        )}
-
         {deleteError && (
           <p className="text-[11px] text-red-400 text-center">{deleteError}</p>
         )}
@@ -789,6 +743,55 @@ export function InstrumentDetail({ instrument: inst }: { instrument: InstrumentD
         <p className="text-[10px] text-bf-text-5 text-center">
           Última actualización: {new Date(inst.last_updated).toLocaleDateString("es-AR")}
         </p>
+      )}
+
+      {/* ── Acciones manuales — barra sticky fondo ──────────────────────────── */}
+      {isManual && (
+        <div className="fixed bottom-16 left-0 right-0 z-40 px-4 pb-2">
+          <div className="bg-bf-surface border border-bf-border rounded-2xl shadow-xl overflow-hidden">
+            {!deleteConfirm ? (
+              <div className="flex">
+                <button
+                  onClick={() => router.push(`/portfolio/add-manual?mode=${inst.asset_type}&edit=${inst.id}`)}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-blue-400 hover:bg-blue-600/10 transition-colors border-r border-bf-border"
+                >
+                  <Pencil size={15} />
+                  Editar
+                </button>
+                <button
+                  onClick={startDeleteConfirm}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold text-bf-text-3 hover:bg-red-600/10 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 size={15} />
+                  Eliminar
+                </button>
+              </div>
+            ) : (
+              <div className="p-3 space-y-2">
+                <p className="text-xs text-red-400 text-center font-medium">¿Eliminar esta posición? No se puede deshacer.</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={cancelDelete}
+                    className="flex-1 py-3 rounded-xl text-sm font-semibold border border-bf-border text-bf-text-3 hover:border-bf-border-2 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    disabled={deleteCountdown > 0 || deleting}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold bg-red-600/20 border border-red-700 text-red-400 hover:bg-red-600/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deleting
+                      ? <><Loader2 size={14} className="animate-spin" /> Eliminando...</>
+                      : deleteCountdown > 0
+                      ? `Confirmar (${deleteCountdown}s)`
+                      : <><Trash2 size={14} /> Confirmar</>}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
