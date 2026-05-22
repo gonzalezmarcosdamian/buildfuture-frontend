@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { TrendingUp, TrendingDown, ChevronRight, ChevronDown, Trash2, Pencil, Check, X } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
-import { assetLabelWithEmoji, assetLabel } from "@/lib/assetLabels";
+import { assetLabelWithEmoji } from "@/lib/assetLabels";
 import { useCurrency } from "@/lib/currency-context";
 import { SyncButton } from "@/components/portfolio/SyncButton";
 import { supabase } from "@/lib/supabase";
@@ -81,12 +81,6 @@ const ASSET_JOB: Record<string, "renta" | "capital" | "ambos"> = {
   CASH:   "renta",
 };
 
-function jobIcon(asset_type: string): string {
-  const job = ASSET_JOB[asset_type] ?? "renta";
-  if (job === "capital") return "📈";
-  if (job === "ambos")   return "⚖️";
-  return "💰";
-}
 
 const ASSET_COLORS: Record<string, string> = {
   CEDEAR: "#3b82f6",
@@ -179,7 +173,7 @@ function SourceGroupHeader({
   );
 }
 
-export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedProviders = [], period = "daily", positionDeltas = [], deltasLoading = false, expectedDevaluationPct = 0.20 }: Props) {
+export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "daily", positionDeltas = [], deltasLoading = false, expectedDevaluationPct = 0.20 }: Omit<Props, "connectedProviders"> & { connectedProviders?: string[] }) {
   const tab = activeTab;
   const { currency } = useCurrency();
   const router = useRouter();
@@ -270,226 +264,192 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, connectedPr
       .filter(([, ps]) => (ps as Position[]).length > 0)
   );
 
+  // Separar brokers conectados de manual
+  const brokerSources = Object.entries(bySource).filter(([src]) => src !== "MANUAL");
+  const manualPositions = bySource["MANUAL"] ?? [];
+
+  // Posición row — reutilizado en brokers y manual
+  function PositionRow({ p }: { p: Position }) {
+    if (p.asset_type === "CASH") {
+      const isManual = p.source === "MANUAL";
+      const isEditing = editingId === p.id;
+      return (
+        <div key={p.id} className="flex flex-col gap-1 py-2 px-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm leading-none">💵</span>
+              <div>
+                <p className="text-xs font-semibold text-bf-text-2">{cashLabel(p.ticker)}</p>
+                <p className="text-[10px] text-bf-text-4">{cashSubtitle(p.ticker)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-right">
+                <p className="text-xs font-medium text-bf-text-2">{FLAG[currency]} {fmt(p.current_value_usd)}</p>
+                <p className="text-[10px] text-bf-text-4">{hint(p.current_value_usd)}</p>
+              </div>
+              {isManual && !isEditing && (
+                <div className="flex gap-0.5">
+                  <button onClick={() => { setEditingId(p.id); setEditAmount(String(p.ticker === "CASH_ARS" ? Math.round(p.current_value_usd * mep) : p.current_value_usd)); }}
+                    className="p-2 text-bf-text-4 hover:text-bf-text-2"><Pencil size={12} /></button>
+                  <button onClick={() => deletePosition(p.id)}
+                    className="p-2 text-bf-text-4 hover:text-red-400"><Trash2 size={12} /></button>
+                </div>
+              )}
+            </div>
+          </div>
+          {isEditing && (
+            <div className="flex items-center gap-2 mt-1">
+              <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*"
+                value={editAmount} onChange={(e) => setEditAmount(e.target.value)}
+                autoFocus placeholder="0"
+                className="flex-1 bg-bf-surface-2 border border-bf-border-2 rounded-lg px-2 py-1.5 text-[16px] text-bf-text focus:outline-none focus:border-blue-500" />
+              <span className="text-[10px] text-bf-text-3 shrink-0">{p.ticker === "CASH_ARS" ? "ARS" : "USD"}</span>
+              <button onClick={() => saveEdit(p.id, p.ticker)} disabled={savingEdit}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-600 rounded-lg disabled:opacity-40"><Check size={12} /></button>
+              <button onClick={() => setEditingId(null)}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-bf-text-3"><X size={12} /></button>
+            </div>
+          )}
+        </div>
+      );
+    }
+    return (
+      <button onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
+        className="w-full flex items-center justify-between py-2 px-2 rounded-xl hover:bg-bf-surface-2/60 active:scale-[0.98] transition-all duration-75 text-left">
+        <div className="flex items-center gap-2 min-w-0">
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-bf-text-2 truncate">
+                {p.asset_type === "REAL_ESTATE" ? p.description : p.ticker}
+              </span>
+              <span className={`text-[9px] px-1 py-0.5 rounded shrink-0 ${ASSET_BADGES[p.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
+                {p.asset_type === "REAL_ESTATE" ? "🏠" : p.asset_type}
+              </span>
+            </div>
+            <p className="text-[10px] text-bf-text-4">
+              {p.asset_type === "REAL_ESTATE" ? "Inmueble" : `${p.quantity.toLocaleString("es-AR")} u.`}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <div className="text-right">
+            <p className="text-xs font-medium text-bf-text-2">{FLAG[currency]} {fmt(p.current_value_usd)}</p>
+            <p className="text-[10px] text-bf-text-3">{((p.current_value_usd / totalUsd) * 100).toFixed(1)}%</p>
+          </div>
+          <ChevronRight size={12} className="text-bf-text-4 ml-0.5" />
+        </div>
+      </button>
+    );
+  }
+
   return (
     <div>
       {tab === "composicion" ? (
-        <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border space-y-4">
-          {/* Stacked bar */}
-          <div className="h-3 rounded-full overflow-hidden flex gap-px">
-            {Object.entries(byType).map(([type, value]) => (
-              <div
-                key={type}
-                style={{
-                  width: `${(value / totalUsd) * 100}%`,
-                  backgroundColor: ASSET_COLORS[type] || "#64748b",
-                }}
-              />
-            ))}
-          </div>
+        <div className="space-y-3">
 
-          {/* Subtotales renta vs capital */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-bf-gain-dim border border-bf-gain/20 rounded-xl px-3 py-2">
-              <div className="flex items-center gap-1 mb-0.5">
-                <span className="text-sm leading-none">💰</span>
-                <p className="text-[10px] text-bf-renta font-medium">Renta mensual</p>
-              </div>
-              <p className="text-xs font-semibold text-bf-text">
-                +{FLAG[currency]} {fmt(rentaMonthly)}/mes
-              </p>
-              <p className="text-[10px] text-bf-text-3">
-                {totalUsd > 0 ? ((rentaTotal / totalUsd) * 100).toFixed(0) : 0}% del portafolio
-              </p>
-            </div>
-            <div className="bg-bf-surface-2 border border-bf-border rounded-xl px-3 py-2">
-              <div className="flex items-center gap-1 mb-0.5">
-                <span className="text-sm leading-none">📈</span>
-                <p className="text-[10px] text-bf-capital font-medium">Capital USD</p>
-              </div>
-              <p className="text-xs font-semibold text-bf-text">
-                {FLAG[currency]} {fmt(capitalTotal)}
-              </p>
-              <p className="text-[10px] text-bf-text-3">
-                {totalUsd > 0 ? ((capitalTotal / totalUsd) * 100).toFixed(0) : 0}% del portafolio
-              </p>
-            </div>
-          </div>
-
-          {/* By-type legend */}
-          <div className="space-y-2">
-            {Object.entries(byType)
-              .sort((a, b) => b[1] - a[1])
-              .map(([type, value]) => (
-                <div key={type} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: ASSET_COLORS[type] || "#64748b" }}
-                    />
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-normal ${ASSET_BADGES[type] || "bf-chip-cash"}`}>
-                      {type}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs font-medium text-bf-text-2">
-                      {FLAG[currency]} {fmt(value)}
-                    </span>
-                    <span className="text-[10px] text-bf-text-3 ml-1.5">
-                      {((value / totalUsd) * 100).toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
+          {/* ── SECCIÓN 1: CONSOLIDADO ─────────────────────────────── */}
+          <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
+            {/* Barra de composición */}
+            <div className="h-2 flex gap-px">
+              {Object.entries(byType).sort((a,b) => b[1]-a[1]).map(([type, value]) => (
+                <div key={type} style={{ width: `${(value/totalUsd)*100}%`, backgroundColor: ASSET_COLORS[type] || "#64748b" }} />
               ))}
-          </div>
+            </div>
 
-          {/* Position list — agrupado por ALYC */}
-          <div className="pt-1 border-t border-bf-border space-y-3">
-            {Object.entries(bySource).map(([source, sourcePositions]) => {
-              const collapsed  = !!collapsedSources[source];
-              const groupTotal = sourcePositions.reduce((s, p) => s + p.current_value_usd, 0);
-              const isConnected = connectedProviders.includes(source);
-              return (
-                <div key={source}>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <SourceGroupHeader
-                        source={source}
-                        collapsed={collapsed}
-                        groupTotal={groupTotal}
-                        fmt={fmt}
-                        currency={currency as "USD" | "ARS"}
-                        onToggle={() => toggleSource(source)}
-                      />
-                    </div>
-                    {isConnected && (
-                      <SyncButton connectedProviders={[source]} />
-                    )}
-                  </div>
-
-                  {!collapsed && (
-                    <div className="space-y-0.5 mt-1">
-                      {sourcePositions.map((p) => {
-                        if (p.asset_type === "CASH") {
-                          const isManual = p.source === "MANUAL";
-                          const isEditing = editingId === p.id;
-                          return (
-                            <div key={p.id} className="w-full py-2 px-1">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-base leading-none">💵</span>
-                                    <span className="text-xs font-semibold text-bf-text-2">
-                                      {cashLabel(p.ticker)}
-                                    </span>
-                                  </div>
-                                  <p className="text-[10px] text-bf-text-3 mt-0.5">
-                                    {cashSubtitle(p.ticker)}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="text-right">
-                                    <p className="text-xs font-medium text-bf-text-2">
-                                      {FLAG[currency]} {fmt(p.current_value_usd)}
-                                    </p>
-                                    <p className="text-[10px] text-bf-text-4">{hint(p.current_value_usd)}</p>
-                                    <p className="text-[10px] text-bf-text-3">
-                                      {((p.current_value_usd / totalUsd) * 100).toFixed(2)}% del total
-                                    </p>
-                                  </div>
-                                  {isManual && !isEditing && (
-                                    <div className="flex flex-col gap-1 shrink-0">
-                                      <button
-                                        onClick={() => { setEditingId(p.id); setEditAmount(String(p.ticker === "CASH_ARS" ? Math.round(p.current_value_usd * mep) : p.current_value_usd)); }}
-                                        className="p-2.5 text-bf-text-4 hover:text-bf-text-2 transition-colors"
-                                        title="Editar"
-                                      >
-                                        <Pencil size={12} />
-                                      </button>
-                                      <button
-                                        onClick={() => deletePosition(p.id)}
-                                        className="p-2.5 text-bf-text-4 hover:text-red-400 transition-colors"
-                                        title="Eliminar"
-                                      >
-                                        <Trash2 size={12} />
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              {isEditing && (
-                                <div className="flex items-center gap-3 mt-2">
-                                  <input
-                                    type="text"
-                                    inputMode="decimal"
-                                    pattern="[0-9]*\.?[0-9]*"
-                                    value={editAmount}
-                                    onChange={(e) => setEditAmount(e.target.value)}
-                                    autoFocus
-                                    placeholder="0"
-                                    className="flex-1 bg-bf-surface-2 border border-bf-border-2 rounded-lg px-2 py-1.5 text-[16px] leading-tight text-bf-text focus:outline-none focus:border-blue-500"
-                                  />
-                                  <span className="text-[10px] text-bf-text-3 shrink-0">
-                                    {p.ticker === "CASH_ARS" ? "ARS" : "USD"}
-                                  </span>
-                                  <button
-                                    onClick={() => saveEdit(p.id, p.ticker)}
-                                    disabled={savingEdit}
-                                    className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors disabled:opacity-40"
-                                  >
-                                    <Check size={12} />
-                                  </button>
-                                  <button
-                                    onClick={() => setEditingId(null)}
-                                    className="min-w-[44px] min-h-[44px] flex items-center justify-center text-bf-text-3 hover:text-bf-text-2 transition-colors"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        }
-                        return (
-                          <button
-                            key={p.id}
-                            onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
-                            className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-bf-surface-2/60 active:bg-bf-surface-2/80 active:scale-[0.98] transition-all duration-75 text-left"
-                          >
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs leading-none">{jobIcon(p.asset_type)}</span>
-                                <span className="text-xs font-semibold text-bf-text-2">
-                                  {p.asset_type === "REAL_ESTATE" ? p.description : p.ticker}
-                                </span>
-                                <span className={`text-[9px] px-1 py-0.5 rounded ${ASSET_BADGES[p.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
-                                  {p.asset_type === "REAL_ESTATE" ? assetLabelWithEmoji("REAL_ESTATE") : p.asset_type}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-bf-text-3">
-                                {p.asset_type === "REAL_ESTATE" ? assetLabel("REAL_ESTATE") : `${p.quantity.toLocaleString("es-AR")} u.`}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <div className="text-right">
-                                <p className="text-xs font-medium text-bf-text-2">
-                                  {FLAG[currency]} {fmt(p.current_value_usd)}
-                                </p>
-                                <p className="text-[10px] text-bf-text-4">{hint(p.current_value_usd)}</p>
-                                <p className="text-[10px] text-bf-text-3">
-                                  {((p.current_value_usd / totalUsd) * 100).toFixed(2)}% del total
-                                </p>
-                              </div>
-                              <ChevronRight size={12} className="text-bf-text-4 shrink-0 ml-1" />
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+            <div className="p-4 space-y-3">
+              {/* Renta vs Capital */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-emerald-950/30 border border-emerald-800/40 rounded-xl px-3 py-2.5">
+                  <p className="text-[10px] text-emerald-400 font-medium mb-1">💰 Renta mensual</p>
+                  <p className="text-sm font-bold text-bf-text">+{fmt(rentaMonthly)}<span className="text-[10px] text-bf-text-3 font-normal">/mes</span></p>
+                  <p className="text-[10px] text-bf-text-4 mt-0.5">{totalUsd > 0 ? ((rentaTotal/totalUsd)*100).toFixed(0) : 0}% del portafolio</p>
                 </div>
-              );
-            })}
+                <div className="bg-violet-950/20 border border-violet-800/30 rounded-xl px-3 py-2.5">
+                  <p className="text-[10px] text-violet-400 font-medium mb-1">📈 Capital</p>
+                  <p className="text-sm font-bold text-bf-text">{fmt(capitalTotal)}</p>
+                  <p className="text-[10px] text-bf-text-4 mt-0.5">{totalUsd > 0 ? ((capitalTotal/totalUsd)*100).toFixed(0) : 0}% del portafolio</p>
+                </div>
+              </div>
+
+              {/* Leyenda por tipo */}
+              <div className="space-y-1.5 pt-1 border-t border-bf-border/50">
+                {Object.entries(byType).sort((a,b) => b[1]-a[1]).map(([type, value]) => (
+                  <div key={type} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ASSET_COLORS[type] || "#64748b" }} />
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${ASSET_BADGES[type] || "bf-chip-cash"}`}>{type}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-bf-text-2">{fmt(value)}</span>
+                      <span className="text-[10px] text-bf-text-4 w-8 text-right">{((value/totalUsd)*100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
+          {/* ── SECCIÓN 2: BROKERS CONECTADOS ─────────────────────── */}
+          {brokerSources.length > 0 && (
+            <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
+              <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                <p className="text-[10px] text-bf-text-4 uppercase tracking-widest font-medium">Brokers conectados</p>
+              </div>
+              <div className="divide-y divide-bf-border/40">
+                {brokerSources.map(([source, sourcePositions]) => {
+                  const collapsed = !!collapsedSources[source];
+                  const groupTotal = sourcePositions.reduce((s, p) => s + p.current_value_usd, 0);
+                  return (
+                    <div key={source} className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => toggleSource(source)}
+                          className="flex-1 flex items-center justify-between py-1 hover:opacity-80 transition-opacity">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${SOURCE_BADGES[source] ?? "bf-chip-manual"}`}>{source}</span>
+                            <span className="text-[11px] text-bf-text-3">{SOURCE_LABELS[source] ?? source}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-bf-text-2">{fmt(groupTotal)}</span>
+                            <ChevronDown size={12} className={`text-bf-text-4 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+                          </div>
+                        </button>
+                        <SyncButton connectedProviders={[source]} />
+                      </div>
+                      {!collapsed && (
+                        <div className="mt-1 space-y-0.5">
+                          {sourcePositions.map(p => <PositionRow key={p.id} p={p} />)}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── SECCIÓN 3: MANUAL ─────────────────────────────────── */}
+          {manualPositions.length > 0 && (
+            <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
+              <div className="px-4 py-2">
+                <button onClick={() => toggleSource("MANUAL")}
+                  className="w-full flex items-center justify-between py-1 hover:opacity-80 transition-opacity">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] text-bf-text-4 uppercase tracking-widest font-medium">Manual</p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-bf-text-2">{fmt(manualPositions.reduce((s,p)=>s+p.current_value_usd,0))}</span>
+                    <ChevronDown size={12} className={`text-bf-text-4 transition-transform ${collapsedSources["MANUAL"] ? "-rotate-90" : ""}`} />
+                  </div>
+                </button>
+                {!collapsedSources["MANUAL"] && (
+                  <div className="mt-1 space-y-0.5">
+                    {manualPositions.map(p => <PositionRow key={p.id} p={p} />)}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="bg-bf-surface rounded-2xl p-4 border border-bf-border space-y-3">
