@@ -77,7 +77,7 @@ export function ConnectIOLForm({ onSuccess }: Props) {
   }
 
   return (
-    <div className="mt-3 space-y-3">
+    <div className="mt-3 space-y-3 max-w-sm mx-auto">
       <div className="flex items-start gap-2 bg-blue-950/30 border border-blue-900/40 rounded-xl px-3 py-2.5">
         <ShieldCheck size={13} className="text-blue-400 shrink-0 mt-0.5" />
         <div className="space-y-0.5">
