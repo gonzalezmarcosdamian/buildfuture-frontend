@@ -186,6 +186,113 @@ function SourceGroupHeader({
   );
 }
 
+// ── PositionRow — componente a nivel de módulo para evitar remount en cada render ──
+interface PositionRowProps {
+  p: Position;
+  totalUsd: number;
+  mep: number;
+  currency: "USD" | "ARS";
+  // mep passed to onStartEdit for CASH_ARS amount calculation
+  fmt: (n: number) => string;
+  hint: (n: number) => string;
+  editingId: number | null;
+  editAmount: string;
+  savingEdit: boolean;
+  onStartEdit: (id: number, amount: string) => void;
+  onSaveEdit: (id: number, ticker: string) => void;
+  onCancelEdit: () => void;
+  onSetEditAmount: (v: string) => void;
+  onDelete: (id: number) => void;
+  onNavigate: (ticker: string) => void;
+}
+
+function PositionRow({ p, totalUsd, mep, currency, fmt, hint, editingId, editAmount, savingEdit, onStartEdit, onSaveEdit, onCancelEdit, onSetEditAmount, onDelete, onNavigate }: PositionRowProps) {
+  if (p.asset_type === "CASH") {
+    const isManual = p.source === "MANUAL";
+    const isEditing = editingId === p.id;
+    return (
+      <div className="flex flex-col gap-1 py-2 px-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm leading-none">💵</span>
+            <div>
+              <p className="text-xs font-semibold text-bf-text-2">{cashLabel(p.ticker)}</p>
+              <p className="text-[10px] text-bf-text-4">{cashSubtitle(p.ticker)}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <p className="text-xs font-medium text-bf-text-2">{FLAG[currency]} {fmt(p.current_value_usd)}</p>
+              <p className="text-[10px] text-bf-text-4">{hint(p.current_value_usd)}</p>
+            </div>
+            {isManual && !isEditing && (
+              <div className="flex gap-0.5">
+                <button
+                  onClick={() => onStartEdit(p.id, String(p.ticker === "CASH_ARS" ? Math.round(p.current_value_usd * mep) : p.current_value_usd))}
+                  className="p-2 text-bf-text-4 hover:text-bf-text-2"
+                >
+                  <Pencil size={12} />
+                </button>
+                <button onClick={() => onDelete(p.id)} className="p-2 text-bf-text-4 hover:text-red-400">
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        {isEditing && (
+          <div className="flex items-center gap-2 mt-1">
+            <input
+              type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*"
+              value={editAmount} onChange={(e) => onSetEditAmount(e.target.value)}
+              autoFocus placeholder="0"
+              className="flex-1 bg-bf-surface-2 border border-bf-border-2 rounded-lg px-2 py-1.5 text-[16px] text-bf-text focus:outline-none focus:border-blue-500"
+            />
+            <span className="text-[10px] text-bf-text-3 shrink-0">{p.ticker === "CASH_ARS" ? "ARS" : "USD"}</span>
+            <button onClick={() => onSaveEdit(p.id, p.ticker)} disabled={savingEdit}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-600 rounded-lg disabled:opacity-40">
+              <Check size={12} />
+            </button>
+            <button onClick={onCancelEdit}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-bf-text-3">
+              <X size={12} />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+  return (
+    <button
+      onClick={() => onNavigate(p.ticker)}
+      className="w-full flex items-center justify-between py-2 px-2 rounded-xl hover:bg-bf-surface-2/60 active:scale-[0.98] transition-all duration-75 text-left"
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-bf-text-2 truncate">
+              {p.asset_type === "REAL_ESTATE" ? p.description : p.ticker}
+            </span>
+            <span className={`text-[9px] px-1 py-0.5 rounded shrink-0 ${ASSET_BADGES[p.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
+              {p.asset_type === "REAL_ESTATE" ? "🏠" : p.asset_type}
+            </span>
+          </div>
+          <p className="text-[10px] text-bf-text-4">
+            {p.asset_type === "REAL_ESTATE" ? "Inmueble" : `${p.quantity.toLocaleString("es-AR")} u.`}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        <div className="text-right">
+          <p className="text-xs font-medium text-bf-text-2">{FLAG[currency]} {fmt(p.current_value_usd)}</p>
+          <p className="text-[10px] text-bf-text-3">{((p.current_value_usd / totalUsd) * 100).toFixed(1)}%</p>
+        </div>
+        <ChevronRight size={12} className="text-bf-text-4 ml-0.5" />
+      </div>
+    </button>
+  );
+}
+
 export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "daily", positionDeltas = [], deltasLoading = false, expectedDevaluationPct = 0.20 }: Omit<Props, "connectedProviders"> & { connectedProviders?: string[] }) {
   const tab = activeTab;
   const { currency } = useCurrency();
@@ -205,7 +312,9 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
   }
 
   async function deletePosition(id: number) {
-    await authFetch(`/positions/manual/${id}`, { method: "DELETE" });
+    const res = await authFetch(`/positions/manual/${id}`, { method: "DELETE" });
+    if (!res.ok) { toast.error("No se pudo eliminar la posición"); return; }
+    toast.success("Posición eliminada");
     router.refresh();
   }
 
@@ -280,81 +389,6 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
   // Separar brokers conectados de manual
   const brokerSources = Object.entries(bySource).filter(([src]) => src !== "MANUAL");
   const manualPositions = bySource["MANUAL"] ?? [];
-
-  // Posición row — reutilizado en brokers y manual
-  function PositionRow({ p }: { p: Position }) {
-    if (p.asset_type === "CASH") {
-      const isManual = p.source === "MANUAL";
-      const isEditing = editingId === p.id;
-      return (
-        <div key={p.id} className="flex flex-col gap-1 py-2 px-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm leading-none">💵</span>
-              <div>
-                <p className="text-xs font-semibold text-bf-text-2">{cashLabel(p.ticker)}</p>
-                <p className="text-[10px] text-bf-text-4">{cashSubtitle(p.ticker)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="text-right">
-                <p className="text-xs font-medium text-bf-text-2">{FLAG[currency]} {fmt(p.current_value_usd)}</p>
-                <p className="text-[10px] text-bf-text-4">{hint(p.current_value_usd)}</p>
-              </div>
-              {isManual && !isEditing && (
-                <div className="flex gap-0.5">
-                  <button onClick={() => { setEditingId(p.id); setEditAmount(String(p.ticker === "CASH_ARS" ? Math.round(p.current_value_usd * mep) : p.current_value_usd)); }}
-                    className="p-2 text-bf-text-4 hover:text-bf-text-2"><Pencil size={12} /></button>
-                  <button onClick={() => deletePosition(p.id)}
-                    className="p-2 text-bf-text-4 hover:text-red-400"><Trash2 size={12} /></button>
-                </div>
-              )}
-            </div>
-          </div>
-          {isEditing && (
-            <div className="flex items-center gap-2 mt-1">
-              <input type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*"
-                value={editAmount} onChange={(e) => setEditAmount(e.target.value)}
-                autoFocus placeholder="0"
-                className="flex-1 bg-bf-surface-2 border border-bf-border-2 rounded-lg px-2 py-1.5 text-[16px] text-bf-text focus:outline-none focus:border-blue-500" />
-              <span className="text-[10px] text-bf-text-3 shrink-0">{p.ticker === "CASH_ARS" ? "ARS" : "USD"}</span>
-              <button onClick={() => saveEdit(p.id, p.ticker)} disabled={savingEdit}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-600 rounded-lg disabled:opacity-40"><Check size={12} /></button>
-              <button onClick={() => setEditingId(null)}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-bf-text-3"><X size={12} /></button>
-            </div>
-          )}
-        </div>
-      );
-    }
-    return (
-      <button onClick={() => router.push(`/portfolio/${encodeURIComponent(p.ticker)}`)}
-        className="w-full flex items-center justify-between py-2 px-2 rounded-xl hover:bg-bf-surface-2/60 active:scale-[0.98] transition-all duration-75 text-left">
-        <div className="flex items-center gap-2 min-w-0">
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-bf-text-2 truncate">
-                {p.asset_type === "REAL_ESTATE" ? p.description : p.ticker}
-              </span>
-              <span className={`text-[9px] px-1 py-0.5 rounded shrink-0 ${ASSET_BADGES[p.asset_type] || "bg-bf-surface-3 text-bf-text-2"}`}>
-                {p.asset_type === "REAL_ESTATE" ? "🏠" : p.asset_type}
-              </span>
-            </div>
-            <p className="text-[10px] text-bf-text-4">
-              {p.asset_type === "REAL_ESTATE" ? "Inmueble" : `${p.quantity.toLocaleString("es-AR")} u.`}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <div className="text-right">
-            <p className="text-xs font-medium text-bf-text-2">{FLAG[currency]} {fmt(p.current_value_usd)}</p>
-            <p className="text-[10px] text-bf-text-3">{((p.current_value_usd / totalUsd) * 100).toFixed(1)}%</p>
-          </div>
-          <ChevronRight size={12} className="text-bf-text-4 ml-0.5" />
-        </div>
-      </button>
-    );
-  }
 
   return (
     <div>
@@ -445,7 +479,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
                       </div>
                       {!collapsed && (
                         <div className="mt-1 space-y-0.5">
-                          {sourcePositions.map(p => <PositionRow key={p.id} p={p} />)}
+                          {sourcePositions.map(p => <PositionRow key={p.id} p={p} totalUsd={totalUsd} mep={mep} currency={currency as "USD"|"ARS"} fmt={fmt} hint={hint} editingId={editingId} editAmount={editAmount} savingEdit={savingEdit} onStartEdit={(id, amt) => { setEditingId(id); setEditAmount(amt); }} onSaveEdit={saveEdit} onCancelEdit={() => setEditingId(null)} onSetEditAmount={setEditAmount} onDelete={deletePosition} onNavigate={(ticker) => router.push(`/portfolio/${encodeURIComponent(ticker)}`)} />)}
                         </div>
                       )}
                     </div>
@@ -471,7 +505,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
                 </button>
                 {!collapsedSources["MANUAL"] && (
                   <div className="mt-1 space-y-0.5">
-                    {manualPositions.map(p => <PositionRow key={p.id} p={p} />)}
+                    {manualPositions.map(p => <PositionRow key={p.id} p={p} totalUsd={totalUsd} mep={mep} currency={currency as "USD"|"ARS"} fmt={fmt} hint={hint} editingId={editingId} editAmount={editAmount} savingEdit={savingEdit} onStartEdit={(id, amt) => { setEditingId(id); setEditAmount(amt); }} onSaveEdit={saveEdit} onCancelEdit={() => setEditingId(null)} onSetEditAmount={setEditAmount} onDelete={deletePosition} onNavigate={(ticker) => router.push(`/portfolio/${encodeURIComponent(ticker)}`)} />)}
                   </div>
                 )}
               </div>
