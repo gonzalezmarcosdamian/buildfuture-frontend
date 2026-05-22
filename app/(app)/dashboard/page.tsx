@@ -1,10 +1,10 @@
 import { fetchBudget, fetchGamification, fetchPortfolio, fetchProfile, fetchCapitalGoals } from "@/lib/api-server";
-import { RecommendationList } from "@/components/recommendations/RecommendationList";
 import { DashboardHero } from "@/components/portfolio/DashboardHero";
 import { FTUFlow } from "@/components/ftu/FTUFlow";
 import { ValuePropsScreen } from "@/components/ftu/ValuePropsScreen";
 import { ProjectionCard } from "@/components/goals/ProjectionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { StreakCard } from "@/components/gamification/StreakCard";
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
@@ -15,6 +15,8 @@ export default async function Dashboard() {
     fetchProfile().catch(() => ({ risk_profile: null, available: false })),
     fetchCapitalGoals().catch(() => []),
   ]);
+
+  const streak = gamification.streak ?? null;
 
   const goalsTargetTotal = capitalGoals.reduce((sum: number, g: { target_usd: number }) => sum + g.target_usd, 0);
 
@@ -44,7 +46,6 @@ export default async function Dashboard() {
   // MEP: fuente única — summary del backend (calculado junto con total_ars).
   // Fallback a budget.fx_rate si el backend aún no expone summary.mep.
   const mep = portfolio?.summary?.mep ?? budget?.fx_rate ?? 1430;
-  const savingsARS = budget?.savings_monthly_ars ?? 0;
 
   return (
     <div className="px-4 pt-8 pb-24 space-y-4">
@@ -74,14 +75,11 @@ export default async function Dashboard() {
         mep={mep}
         goalsTargetTotal={goalsTargetTotal > 0 ? goalsTargetTotal : null}
         goalsCount={capitalGoals.length}
-        streak={gamification.streak ?? null}
+        streak={streak}
       />
 
-      {/* 2 — Sugerencias */}
-      <RecommendationList
-        capitalArs={savingsARS > 0 ? Math.round(savingsARS) : 500000}
-        userProfile={profile?.risk_profile ?? null}
-      />
+      {/* 2 — Racha de inversión */}
+      {streak && <StreakCard streak={streak} />}
 
       {/* 3 — Proyección DCA / interés compuesto (colapsada) */}
       <ProjectionCard mep={mep} />
