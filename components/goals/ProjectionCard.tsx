@@ -308,7 +308,7 @@ export function ProjectionCard({ mep = 1430 }: { mep?: number }) {
   const [loading, setLoading] = useState(true);
   const [horizon, setHorizon] = useState(10);
   const [showInfo, setShowInfo] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [customRatePct, setCustomRatePct] = useState(8.0);
 
   useEffect(() => {
