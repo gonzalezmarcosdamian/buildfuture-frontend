@@ -36,6 +36,7 @@ export default async function Portfolio() {
         capitalTotalUsd={summary.capital_total_usd ?? null}
         cashTotalUsd={summary.cash_total_usd ?? null}
         expectedDevaluationPct={summary.expected_devaluation_pct ?? 0.20}
+        lastSyncedDate={summary.last_synced_date ?? null}
       />
 
       <PortfolioClient

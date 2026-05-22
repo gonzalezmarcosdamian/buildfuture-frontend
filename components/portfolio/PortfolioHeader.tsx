@@ -3,6 +3,23 @@ import { useCurrency } from "@/lib/currency-context";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { RentaInfoButton } from "@/components/portfolio/RentaModal";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
+import { AlertTriangle, Clock } from "lucide-react";
+
+const STALE_DAYS = 3; // días sin sync → alerta
+
+function useSyncStatus(lastSyncedDate: string | null | undefined) {
+  if (!lastSyncedDate) return { label: null, stale: false, daysSince: null };
+  const last = new Date(lastSyncedDate);
+  const now = new Date();
+  const daysSince = Math.floor((now.getTime() - last.getTime()) / 86_400_000);
+  const isToday = daysSince === 0;
+  const label = isToday
+    ? "Actualizado hoy"
+    : daysSince === 1
+    ? "Actualizado ayer"
+    : `Hace ${daysSince} días`;
+  return { label, stale: daysSince >= STALE_DAYS, daysSince };
+}
 
 const RENTA_TYPES = new Set(["LETRA", "FCI"]);
 const CAPITAL_TYPES = new Set(["CEDEAR", "ETF", "CRYPTO"]);
@@ -24,7 +41,8 @@ interface Props {
   positions: Position[];
   capitalTotalUsd?: number | null;
   cashTotalUsd?: number | null;
-  expectedDevaluationPct?: number; // devaluación ARS/USD anual estimada por el servidor (dinámica)
+  expectedDevaluationPct?: number;
+  lastSyncedDate?: string | null;
 }
 
 export function PortfolioHeader({
@@ -38,8 +56,10 @@ export function PortfolioHeader({
   capitalTotalUsd,
   cashTotalUsd,
   expectedDevaluationPct = 0.20,
+  lastSyncedDate,
 }: Props) {
   const { currency } = useCurrency();
+  const sync = useSyncStatus(lastSyncedDate);
 
   // Renta fija: LETRA/FCI/BOND con yield ajustado por devaluación esperada (valor dinámico del servidor).
   // Misma fórmula que split_portfolio_buckets en backend:
@@ -142,6 +162,30 @@ export function PortfolioHeader({
           </div>
         </div>
       </div>
+
+      {/* ══ SYNC STATUS ══════════════════════════════════════ */}
+      {sync.label && (
+        <div className="border-t border-bf-border/40 px-5 py-2.5">
+          {sync.stale ? (
+            <div className="flex items-center gap-2 bg-amber-950/30 border border-amber-800/50 rounded-xl px-3 py-2">
+              <AlertTriangle size={13} className="text-amber-400 shrink-0" />
+              <div>
+                <p className="text-[11px] font-medium text-amber-300">
+                  Datos desactualizados · {sync.label}
+                </p>
+                <p className="text-[10px] text-amber-400/70">
+                  Sincronizá tu broker para ver valores actuales
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <Clock size={11} className="text-bf-text-4" />
+              <p className="text-[10px] text-bf-text-4">{sync.label}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
