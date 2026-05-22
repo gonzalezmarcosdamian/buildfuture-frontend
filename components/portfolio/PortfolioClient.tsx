@@ -74,15 +74,15 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export function PortfolioClient({ positions, totalUsd, mep, history, connectedProviders = [], expectedDevaluationPct = 0.20 }: Props) {
-  const [mode, setMode] = useState<ViewMode>("composicion");
+  const [mode, setMode] = useState<ViewMode>("composicion"); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
   const [period, setPeriod] = useState<Period>("daily");
   const [positionDeltas, setPositionDeltas] = useState<PositionDelta[]>([]);
   const [deltasLoading, setDeltasLoading] = useState(false);
 
-  const chartMode = mode === "rendimientos" ? "rendimiento" : "tenencia";
+  const chartMode = mode === "rendimientos" ? "rendimiento" : "tenencia"; // eslint-disable-line @typescript-eslint/no-unused-vars
   const activeInfoKey: NonNullable<InfoModal> = mode === "rendimientos" ? "rendimiento" : "tenencia";
-  const info = INFO_CONTENT[activeInfoKey];
+  const info = INFO_CONTENT[activeInfoKey]; // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const fetchDeltas = useCallback(async (p: Period) => {
     setDeltasLoading(true);

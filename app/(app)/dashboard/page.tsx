@@ -5,6 +5,7 @@ import { ValuePropsScreen } from "@/components/ftu/ValuePropsScreen";
 import { ProjectionCard } from "@/components/goals/ProjectionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { StreakCard } from "@/components/gamification/StreakCard";
+import { AdvisorCard } from "@/components/advisor/AdvisorCard";
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
@@ -78,10 +79,13 @@ export default async function Dashboard() {
         streak={streak}
       />
 
-      {/* 2 — Racha de inversión */}
+      {/* 2 — Invest Advisor */}
+      <AdvisorCard />
+
+      {/* 3 — Racha de inversión */}
       {streak && <StreakCard streak={streak} />}
 
-      {/* 3 — Proyección DCA / interés compuesto (colapsada) */}
+      {/* 4 — Proyección DCA / interés compuesto (colapsada) */}
       <ProjectionCard mep={mep} />
 
     </div>
