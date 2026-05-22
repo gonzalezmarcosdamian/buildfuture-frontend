@@ -109,7 +109,7 @@ function SectionHero() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-950/60 border border-emerald-800/50 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-medium text-emerald-400 tracking-wide uppercase">Beta cerrada · Acceso por invitación</span>
+              <span className="text-[11px] font-medium text-emerald-400 tracking-wide uppercase">Beta cerrada · Portafolio + IA Advisor</span>
             </div>
 
             {/* Headline */}
@@ -386,14 +386,9 @@ function PortfolioMockup() {
   );
 }
 
-// ── Mockup sugerencias ────────────────────────────────────────────────────────
+// ── Mockup Invest Advisor ──────────────────────────────────────────────────────
 
-function SugerenciasMockup() {
-  const items = [
-    { icon: "💰", name: "LECAP Junio 2026", label: "TNA ARS", range: "48% — 55%", risk: "Bajo", tag: "Renta fija" },
-    { icon: "📈", name: "SPY CEDEAR", label: "ret. USD/año", range: "8% — 22%", risk: "Moderado", tag: "Renta variable" },
-    { icon: "🌐", name: "QQQ CEDEAR", label: "ret. USD/año", range: "10% — 28%", risk: "Alto", tag: "Renta variable" },
-  ];
+function AdvisorMockup() {
   return (
     <div className="relative">
       <div className="mx-auto w-[280px] sm:w-[320px] bg-slate-900 rounded-[2.5rem] border border-slate-700/60 shadow-2xl overflow-hidden">
@@ -401,32 +396,44 @@ function SugerenciasMockup() {
           <div className="w-20 h-1.5 bg-slate-700 rounded-full" />
         </div>
         <div className="px-4 pb-6 pt-2 space-y-3">
-          <div>
-            <p className="text-sm font-bold text-slate-100">Sugerencias</p>
-            <p className="text-[9px] text-slate-500">Basadas en tu perfil moderado</p>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">🤖</span>
+              <p className="text-sm font-bold text-slate-100">Invest Advisor</p>
+            </div>
+            <span className="text-[9px] px-2 py-0.5 bg-emerald-950/60 border border-emerald-800/50 text-emerald-400 rounded-full">4/5 hoy</span>
           </div>
-          <div className="space-y-2.5">
-            {items.map((item) => (
-              <div key={item.name} className="bg-slate-800/50 rounded-xl p-3 space-y-2">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">{item.icon}</span>
-                    <div>
-                      <p className="text-[10px] font-semibold text-slate-200">{item.name}</p>
-                      <span className="text-[8px] px-1.5 py-0.5 bg-slate-700 text-slate-400 rounded-full">{item.tag}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-[9px] text-slate-500">{item.label}</p>
-                  <p className="text-[11px] font-bold text-emerald-400">{item.range}</p>
-                </div>
-              </div>
+          {/* Chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { icon: "📊", label: "Mi cartera", active: true },
+              { icon: "📈", label: "Técnico", active: false },
+              { icon: "🏢", label: "Fundamental", active: false },
+              { icon: "🌍", label: "Macro ARG", active: false },
+              { icon: "🎯", label: "Escenario", active: false },
+            ].map((t) => (
+              <span key={t.label} className={`flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-medium border ${t.active ? "bg-blue-600 border-blue-500 text-white" : "bg-slate-800 border-slate-700 text-slate-400"}`}>
+                {t.icon} {t.label}
+              </span>
             ))}
           </div>
+          {/* Respuesta simulada */}
+          <div className="bg-slate-800/60 rounded-xl p-3 space-y-2">
+            <p className="text-[9px] font-semibold text-blue-300">Análisis de portafolio</p>
+            <p className="text-[8.5px] text-slate-400 leading-relaxed">
+              <span className="text-slate-200 font-medium">Postura general:</span> Tu portafolio está bien orientado hacia renta. FCI + LECAP representan el 58% — bien posicionado para el contexto actual.
+            </p>
+            <p className="text-[8.5px] text-slate-400 leading-relaxed">
+              <span className="text-slate-200 font-medium">Una acción:</span> El 30% en CRYPTO es alto para tu perfil. Considerá rotar parte a ON dolarizadas para sumar yield en USD con menor volatilidad.
+            </p>
+          </div>
+          <button className="w-full flex items-center justify-center gap-1.5 text-[9px] text-slate-500 hover:text-slate-400">
+            <span>↺</span> Nuevo análisis
+          </button>
         </div>
       </div>
-      <div className="absolute -inset-8 -z-10 bg-emerald-600/8 blur-3xl rounded-full" />
+      <div className="absolute -inset-8 -z-10 bg-blue-600/8 blur-3xl rounded-full" />
     </div>
   );
 }
@@ -451,11 +458,11 @@ const PILARES = [
     flip: true,
   },
   {
-    emoji: "💸",
-    tag: "Las dos palancas",
-    headline: "Dos decisiones aceleran\ntu libertad financiera.",
-    body: "La primera: achicar gastos. Cada peso que sacás de gastos fijos es un peso que va a trabajar para vos. BuildFuture te muestra cuánto impacta en tu fecha de libertad.\n\nLa segunda: invertir con disciplina, todos los meses. No hay truco. El tiempo hace el trabajo pesado. BuildFuture calcula cuánto podés meter este mes y te proyecta cuándo ese hábito te da libertad.",
-    mockup: <SugerenciasMockup />,
+    emoji: "🤖",
+    tag: "Invest Advisor",
+    headline: "Tu analista personal,\nen 5 preguntas por día.",
+    body: "Tocás 'Mi cartera' y el advisor analiza tu portafolio real en segundos: concentración, balance renta/capital, libertad financiera y qué hacer ahora.\n\nO pedile análisis técnico de AL30, fundamental de MELI, contexto macro argentino o el impacto de una noticia en tu portafolio. 5 consultas diarias, sin costo adicional.",
+    mockup: <AdvisorMockup />,
     flip: false,
   },
 ];
@@ -761,7 +768,7 @@ function SectionComoFunciona() {
             <span className="text-emerald-400">en 5 minutos.</span>
           </h2>
           <p className="text-slate-500 max-w-lg mx-auto">
-            Acceso personal. Sin datos bancarios. Sin riesgos. Sin planillas.
+            Acceso personal. Sin datos bancarios. Sin riesgos. Sin planillas. Con IA Advisor incluido.
           </p>
         </div>
 
@@ -914,7 +921,14 @@ const ROADMAP = [
     title: "Portafolio unificado + libertad financiera",
     status: "En vivo",
     statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400",
-    desc: "IOL, Cocos, PPI, Binance. Barra de renta. Metas de capital. Sugerencias por perfil.",
+    desc: "IOL, Cocos, PPI, Binance. Barra de renta y capital. Metas. Sync automático con estado por broker.",
+  },
+  {
+    icon: Cpu,
+    title: "Invest Advisor — IA sobre tu portafolio real",
+    status: "En vivo",
+    statusColor: "bg-emerald-950/60 border-emerald-800/50 text-emerald-400",
+    desc: "Análisis de cartera, técnico, fundamental, macro ARG y escenarios. 5 consultas diarias con tu portafolio como contexto.",
   },
   {
     icon: Target,
@@ -929,13 +943,6 @@ const ROADMAP = [
     status: "Próximamente",
     statusColor: "bg-slate-800 border-slate-700 text-slate-400",
     desc: "Aprendés mientras usás. No un curso. Tu situación real, explicada en el momento justo.",
-  },
-  {
-    icon: Cpu,
-    title: "Simulador de decisiones",
-    status: "En exploración",
-    statusColor: "bg-slate-800/50 border-slate-800 text-slate-600",
-    desc: "¿Qué pasa si invierto $500 más por mes durante 5 años? Respuesta inmediata, con tu portafolio real como base.",
   },
   {
     icon: Globe,
@@ -1011,11 +1018,12 @@ function SectionVision() {
 function SocialProofStats() {
   const STATS = [
     { value: "4", label: "brokers integrados" },
+    { value: "5", label: "tipos de análisis IA" },
     { value: "100%", label: "solo lectura" },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 mb-16 max-w-sm mx-auto">
+    <div className="grid grid-cols-3 gap-3 mb-16 max-w-xl mx-auto">
       {STATS.map((s) => (
         <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center space-y-1">
           <p className="text-2xl font-extrabold text-emerald-400">{s.value}</p>
@@ -1113,7 +1121,8 @@ const FAQS = [
   { q: "¿Puedo cargar mi departamento en alquiler?", a: "Sí. Ingresás el nombre del inmueble, la dirección, el valor en USD y el alquiler mensual que cobrás. BuildFuture calcula el yield anual y lo incorpora a tu barra de libertad financiera. Para muchos usuarios, el depto es el activo que más mueve el número. No necesitás ninguna integración — lo actualizás cuando querés." },
   { q: "No tengo broker ni acciones. Solo tengo un departamento alquilado y efectivo. ¿BuildFuture me sirve?", a: "Sí. Podés cargar tu inmueble manualmente con dirección, valuación y renta, y registrar tu efectivo en ARS o USD. La app calcula cuánto falta para cubrir tus gastos con esos activos y te muestra tu avance hacia la libertad financiera — sin necesidad de conectar ningún broker. Conectar uno lo hace automático, pero no es obligatorio para empezar." },
   { q: "¿Mis datos se venden a terceros?", a: "No. Nunca. Usamos proveedores de infraestructura (Supabase, Railway, Vercel) pero no compartimos ni vendemos información personal o financiera." },
-  { q: "¿Las sugerencias son asesoramiento financiero?", a: "No. Son sugerencias algorítmicas con fines educativos, basadas en tu perfil de riesgo. No constituyen asesoramiento financiero personalizado bajo la Ley 26.831. Toda decisión es tuya." },
+  { q: "¿El Invest Advisor es asesoramiento financiero?", a: "No. El Invest Advisor genera análisis informativos con IA (Claude de Anthropic) usando tu portafolio real como contexto. No constituye asesoramiento financiero personalizado bajo la Ley 26.831. Es una herramienta educativa para entender mejor tu portafolio. Toda decisión de inversión es tuya." },
+  { q: "¿Qué puede analizar el Invest Advisor?", a: "Cinco tipos de análisis: tu cartera completa (diagnóstico, concentración, freedom %), análisis técnico de un instrumento, análisis fundamental, contexto macro argentino (MEP, tasa vs inflación, régimen), y escenarios (impacto de una noticia en tu portafolio). Tenés 5 consultas por día, se resetean a medianoche." },
 ];
 
 function SectionFAQ() {
