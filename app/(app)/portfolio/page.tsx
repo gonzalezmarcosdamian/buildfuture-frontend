@@ -1,25 +1,17 @@
-import { fetchPortfolio, fetchPortfolioHistory, fetchBudget, fetchIntegrations } from "@/lib/api-server";
+import { fetchPortfolio, fetchPortfolioHistory } from "@/lib/api-server";
 import { PortfolioHeader } from "@/components/portfolio/PortfolioHeader";
 import { PortfolioClient } from "@/components/portfolio/PortfolioClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function Portfolio() {
-  const [data, history, budget, integrations] = await Promise.all([
+  const [data, history] = await Promise.all([
     fetchPortfolio(),
     fetchPortfolioHistory("daily"),
-    fetchBudget().catch(() => null),
-    fetchIntegrations().catch(() => []),
   ]);
-  const connectedALYCs: string[] = Array.isArray(integrations)
-    ? integrations
-        .filter((i: { provider_type: string; is_connected: boolean; auto_sync_enabled: boolean }) =>
-          i.is_connected && i.auto_sync_enabled)
-        .map((i: { provider: string }) => i.provider)
-    : [];
 
   const { positions, summary } = data;
-  const mep = summary?.mep ?? budget?.fx_rate ?? 1430;
+  const mep = summary?.mep ?? 1430;
 
   return (
     <div className="px-4 pt-8 pb-24 space-y-4">
@@ -44,7 +36,7 @@ export default async function Portfolio() {
         totalUsd={summary.total_usd}
         mep={mep}
         history={history}
-        connectedProviders={connectedALYCs}
+        connectedProviders={[]}
         expectedDevaluationPct={summary.expected_devaluation_pct ?? 0.20}
       />
     </div>
