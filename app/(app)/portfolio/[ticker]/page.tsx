@@ -6,9 +6,16 @@ import { ChevronLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function InstrumentPage({ params }: { params: Promise<{ ticker: string }> }) {
+export default async function InstrumentPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ ticker: string }>;
+  searchParams: Promise<{ id?: string }>;
+}) {
   const { ticker } = await params;
-  const instrument = await fetchInstrumentDetail(decodeURIComponent(ticker)).catch(() => null);
+  const { id } = await searchParams;
+  const instrument = await fetchInstrumentDetail(decodeURIComponent(ticker), id ? parseInt(id) : undefined).catch(() => null);
   if (!instrument) return notFound();
 
   return (
