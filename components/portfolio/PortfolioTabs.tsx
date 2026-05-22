@@ -386,9 +386,20 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
       .filter(([, ps]) => (ps as Position[]).length > 0)
   );
 
+  // Ordenar posiciones: CASH al fondo, resto por valor descendente
+  function sortPositions(ps: Position[]): Position[] {
+    return [...ps].sort((a, b) => {
+      if (a.asset_type === "CASH" && b.asset_type !== "CASH") return 1;
+      if (a.asset_type !== "CASH" && b.asset_type === "CASH") return -1;
+      return b.current_value_usd - a.current_value_usd;
+    });
+  }
+
   // Separar brokers conectados de manual
-  const brokerSources = Object.entries(bySource).filter(([src]) => src !== "MANUAL");
-  const manualPositions = bySource["MANUAL"] ?? [];
+  const brokerSources = Object.entries(bySource)
+    .filter(([src]) => src !== "MANUAL")
+    .map(([src, ps]): [string, Position[]] => [src, sortPositions(ps)]);
+  const manualPositions = sortPositions(bySource["MANUAL"] ?? []);
 
   return (
     <div>
