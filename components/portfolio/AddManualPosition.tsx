@@ -275,11 +275,11 @@ function CryptoForm({ onSuccess, initialEditId }: { onSuccess: () => void; initi
             {results.map((coin) => (
               <button key={coin.id} onClick={() => selectCoin(coin)}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-bf-surface-3 transition-colors text-left">
-                {coin.thumb ? (
-                  <img src={coin.thumb} alt={coin.name} className="w-6 h-6 rounded-full flex-shrink-0" />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-bf-surface-3 flex-shrink-0" />
-                )}
+                {coin.thumb
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={coin.thumb} alt={coin.name} className="w-6 h-6 rounded-full flex-shrink-0" />
+                  : <div className="w-6 h-6 rounded-full bg-bf-surface-3 flex-shrink-0" />
+                }
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-bf-text truncate">{coin.name}</p>
                   <p className="text-[10px] text-bf-text-4">{coin.symbol}{coin.market_cap_rank ? ` · #${coin.market_cap_rank}` : ""}</p>
@@ -293,6 +293,7 @@ function CryptoForm({ onSuccess, initialEditId }: { onSuccess: () => void; initi
       {/* Selected coin badge */}
       {selected && (
         <div className="flex items-center gap-3 bg-blue-600/10 border border-blue-500/30 rounded-xl px-4 py-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           {selected.thumb && <img src={selected.thumb} alt={selected.name} className="w-8 h-8 rounded-full" />}
           <div>
             <p className="text-sm font-semibold text-bf-text">{selected.name}</p>
