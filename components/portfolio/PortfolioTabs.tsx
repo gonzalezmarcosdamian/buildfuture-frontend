@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { TrendingUp, TrendingDown, ChevronRight, ChevronDown, Trash2, Pencil, Check, X } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronRight, ChevronDown, Trash2, Pencil, Check, X, AlertTriangle, Clock } from "lucide-react";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
 import { assetLabelWithEmoji } from "@/lib/assetLabels";
 import { useCurrency } from "@/lib/currency-context";
@@ -118,6 +118,19 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 const FLAG: Record<"USD" | "ARS", string> = { USD: "🇺🇸", ARS: "🇦🇷" };
+
+const STALE_DAYS = 3;
+
+function brokerSyncStatus(positions: Position[]): { label: string; stale: boolean } | null {
+  const dates = positions
+    .filter(p => p.snapshot_date)
+    .map(p => new Date(p.snapshot_date!));
+  if (dates.length === 0) return null;
+  const latest = new Date(Math.max(...dates.map(d => d.getTime())));
+  const daysSince = Math.floor((Date.now() - latest.getTime()) / 86_400_000);
+  const label = daysSince === 0 ? "hoy" : daysSince === 1 ? "ayer" : `hace ${daysSince}d`;
+  return { label, stale: daysSince >= STALE_DAYS };
+}
 
 function cashLabel(ticker: string): string {
   if (ticker.includes("USD")) return "Disponible USD";
@@ -400,16 +413,30 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
                 {brokerSources.map(([source, sourcePositions]) => {
                   const collapsed = !!collapsedSources[source];
                   const groupTotal = sourcePositions.reduce((s, p) => s + p.current_value_usd, 0);
+                  const sync = brokerSyncStatus(sourcePositions);
                   return (
                     <div key={source} className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         <button onClick={() => toggleSource(source)}
                           className="flex-1 flex items-center justify-between py-1 hover:opacity-80 transition-opacity">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${SOURCE_BADGES[source] ?? "bf-chip-manual"}`}>{source}</span>
-                            <span className="text-[11px] text-bf-text-3">{SOURCE_LABELS[source] ?? source}</span>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium shrink-0 ${SOURCE_BADGES[source] ?? "bf-chip-manual"}`}>{source}</span>
+                            <div className="min-w-0">
+                              <span className="text-[11px] text-bf-text-3">{SOURCE_LABELS[source] ?? source}</span>
+                              {sync && (
+                                <div className={`flex items-center gap-1 mt-0.5 ${sync.stale ? "text-amber-400" : "text-bf-text-4"}`}>
+                                  {sync.stale
+                                    ? <AlertTriangle size={9} className="shrink-0" />
+                                    : <Clock size={9} className="shrink-0" />
+                                  }
+                                  <span className="text-[9px]">
+                                    {sync.stale ? `Sin sync desde ${sync.label}` : `Sync ${sync.label}`}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <span className="text-xs font-semibold text-bf-text-2">{fmt(groupTotal)}</span>
                             <ChevronDown size={12} className={`text-bf-text-4 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
                           </div>
