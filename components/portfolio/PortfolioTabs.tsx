@@ -203,7 +203,7 @@ interface PositionRowProps {
   onCancelEdit: () => void;
   onSetEditAmount: (v: string) => void;
   onDelete: (id: number) => void;
-  onNavigate: (ticker: string) => void;
+  onNavigate: (ticker: string, id: number) => void;
 }
 
 function PositionRow({ p, totalUsd, mep, currency, fmt, hint, editingId, editAmount, savingEdit, onStartEdit, onSaveEdit, onCancelEdit, onSetEditAmount, onDelete, onNavigate }: PositionRowProps) {
@@ -264,7 +264,7 @@ function PositionRow({ p, totalUsd, mep, currency, fmt, hint, editingId, editAmo
   }
   return (
     <button
-      onClick={() => onNavigate(p.ticker)}
+      onClick={() => onNavigate(p.ticker, p.id)}
       className="w-full flex items-center justify-between py-2 px-2 rounded-xl hover:bg-bf-surface-2/60 active:scale-[0.98] transition-all duration-75 text-left"
     >
       <div className="flex items-center gap-2 min-w-0">
@@ -490,7 +490,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
                       </div>
                       {!collapsed && (
                         <div className="mt-1 space-y-0.5">
-                          {sourcePositions.map(p => <PositionRow key={p.id} p={p} totalUsd={totalUsd} mep={mep} currency={currency as "USD"|"ARS"} fmt={fmt} hint={hint} editingId={editingId} editAmount={editAmount} savingEdit={savingEdit} onStartEdit={(id, amt) => { setEditingId(id); setEditAmount(amt); }} onSaveEdit={saveEdit} onCancelEdit={() => setEditingId(null)} onSetEditAmount={setEditAmount} onDelete={deletePosition} onNavigate={(ticker) => router.push(`/portfolio/${encodeURIComponent(ticker)}`)} />)}
+                          {sourcePositions.map(p => <PositionRow key={p.id} p={p} totalUsd={totalUsd} mep={mep} currency={currency as "USD"|"ARS"} fmt={fmt} hint={hint} editingId={editingId} editAmount={editAmount} savingEdit={savingEdit} onStartEdit={(id, amt) => { setEditingId(id); setEditAmount(amt); }} onSaveEdit={saveEdit} onCancelEdit={() => setEditingId(null)} onSetEditAmount={setEditAmount} onDelete={deletePosition} onNavigate={(ticker, id) => router.push(`/portfolio/${encodeURIComponent(ticker)}?id=${id}`)} />)}
                         </div>
                       )}
                     </div>
@@ -516,7 +516,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
                 </button>
                 {!collapsedSources["MANUAL"] && (
                   <div className="mt-1 space-y-0.5">
-                    {manualPositions.map(p => <PositionRow key={p.id} p={p} totalUsd={totalUsd} mep={mep} currency={currency as "USD"|"ARS"} fmt={fmt} hint={hint} editingId={editingId} editAmount={editAmount} savingEdit={savingEdit} onStartEdit={(id, amt) => { setEditingId(id); setEditAmount(amt); }} onSaveEdit={saveEdit} onCancelEdit={() => setEditingId(null)} onSetEditAmount={setEditAmount} onDelete={deletePosition} onNavigate={(ticker) => router.push(`/portfolio/${encodeURIComponent(ticker)}`)} />)}
+                    {manualPositions.map(p => <PositionRow key={p.id} p={p} totalUsd={totalUsd} mep={mep} currency={currency as "USD"|"ARS"} fmt={fmt} hint={hint} editingId={editingId} editAmount={editAmount} savingEdit={savingEdit} onStartEdit={(id, amt) => { setEditingId(id); setEditAmount(amt); }} onSaveEdit={saveEdit} onCancelEdit={() => setEditingId(null)} onSetEditAmount={setEditAmount} onDelete={deletePosition} onNavigate={(ticker, id) => router.push(`/portfolio/${encodeURIComponent(ticker)}?id=${id}`)} />)}
                   </div>
                 )}
               </div>

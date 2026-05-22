@@ -76,8 +76,9 @@ export async function fetchProfile(): Promise<{ risk_profile: string | null; ava
   }
 }
 
-export async function fetchInstrumentDetail(ticker: string) {
-  const res = await serverFetch(`/portfolio/instrument/${encodeURIComponent(ticker)}`);
+export async function fetchInstrumentDetail(ticker: string, id?: number) {
+  const qs = id !== undefined ? `?id=${id}` : "";
+  const res = await serverFetch(`/portfolio/instrument/${encodeURIComponent(ticker)}${qs}`);
   if (res.status === 404) return null;
   if (!res.ok) throw new Error("Failed to fetch instrument");
   return res.json();
