@@ -173,8 +173,68 @@ function MarkdownText({ text }: { text: string }) {
 
 // ── Componente principal ───────────────────────────────────────────────────────
 
+interface HistoryItem {
+  id: number;
+  query_type: string;
+  ticker: string | null;
+  context_answers: Record<string, string> | null;
+  response: string;
+  created_at: string;
+}
+
+const TYPE_ICONS: Record<string, string> = {
+  portfolio: "📊", technical: "📈", fundamental: "🏢", macro: "🌍", scenario: "🎯",
+};
+
+function HistoryCard({ item, onReopen }: { item: HistoryItem; onReopen: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const label = QUESTIONNAIRES[item.query_type as QueryType]?.label ?? item.query_type;
+  const firstAnswer = item.context_answers ? Object.values(item.context_answers)[0] : null;
+  const time = item.created_at
+    ? new Date(item.created_at).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
+    : "";
+
+  return (
+    <div className="bg-bf-surface-2/60 border border-bf-border/60 rounded-xl overflow-hidden">
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="w-full flex items-center justify-between px-3 py-2.5 text-left hover:bg-bf-surface-3/30 transition-colors"
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm shrink-0">{TYPE_ICONS[item.query_type] ?? "💬"}</span>
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-bf-text-2 truncate">{label}</p>
+            {firstAnswer && <p className="text-[10px] text-bf-text-4 truncate">{firstAnswer}</p>}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 ml-2">
+          <span className="text-[10px] text-bf-text-4">{time}</span>
+          <span className="text-bf-text-4 text-xs">{expanded ? "▲" : "▼"}</span>
+        </div>
+      </button>
+      {expanded && (
+        <div className="px-3 pb-3 space-y-2 border-t border-bf-border/40 pt-2">
+          {item.context_answers && Object.entries(item.context_answers).map(([q, a]) => (
+            <p key={q} className="text-[11px] text-bf-text-3">
+              <span className="text-bf-text-4">{q.replace(/[¿?]/g, "").trim().substring(0, 40)}:</span> {a}
+            </p>
+          ))}
+          <div className="bg-bf-surface border border-bf-border/40 rounded-xl p-3 mt-2">
+            <MarkdownText text={item.response} />
+          </div>
+          <button onClick={onReopen}
+            className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors">
+            Hacer otra consulta similar →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AdvisorFlow() {
   const [credits, setCredits] = useState<{ remaining: number; limit: number }>({ remaining: 5, limit: 5 });
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [step, setStep] = useState<"type" | "questions" | "response">("type");
   const [selectedType, setSelectedType] = useState<QueryType | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -184,9 +244,14 @@ export function AdvisorFlow() {
   const [loading, setLoading] = useState(false);
   const responseRef = useRef<HTMLDivElement>(null);
 
+  const refreshHistory = useCallback(() => {
+    authFetch("/advisor/history").then((r) => r.json()).then(setHistory).catch(() => {});
+  }, []);
+
   useEffect(() => {
     authFetch("/advisor/credits").then((r) => r.json()).then(setCredits).catch(() => {});
-  }, []);
+    refreshHistory();
+  }, [refreshHistory]);
 
   useEffect(() => {
     if (responseRef.current) responseRef.current.scrollTop = responseRef.current.scrollHeight;
@@ -269,7 +334,8 @@ export function AdvisorFlow() {
       }
     }
     setLoading(false);
-  }, [selectedType, questions]);
+    refreshHistory();
+  }, [selectedType, questions, refreshHistory]);
 
   function restart() {
     setStep("type");
@@ -286,32 +352,49 @@ export function AdvisorFlow() {
 
   if (step === "type") {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-bf-text-3">¿Qué querés analizar?</p>
-          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full bg-bf-surface-2 ${creditColor}`}>
-            {credits.remaining}/{credits.limit} consultas hoy
-          </span>
-        </div>
-
-        {hasNoCredits && (
-          <div className="bg-red-950/30 border border-red-800/50 rounded-xl px-4 py-3 text-sm text-red-400 text-center">
-            Usaste tus 5 consultas de hoy · Volvé mañana
+      <div className="space-y-5">
+        {/* Historial del día */}
+        {history.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-[10px] text-bf-text-4 uppercase tracking-widest">Consultas de hoy</p>
+            {history.map((item) => (
+              <HistoryCard
+                key={item.id}
+                item={item}
+                onReopen={() => item.query_type in QUESTIONNAIRES && selectType(item.query_type as QueryType)}
+              />
+            ))}
           </div>
         )}
 
+        {/* Nueva consulta */}
         <div className="space-y-2">
-          {(Object.entries(QUESTIONNAIRES) as [QueryType, typeof QUESTIONNAIRES[QueryType]][]).map(([type, config]) => (
-            <button
-              key={type}
-              onClick={() => !hasNoCredits && selectType(type)}
-              disabled={hasNoCredits}
-              className="w-full flex items-center justify-between bg-bf-surface border border-bf-border hover:border-bf-border-2 rounded-2xl px-4 py-3.5 text-left transition-colors disabled:opacity-40"
-            >
-              <span className="text-sm font-medium text-bf-text">{config.label}</span>
-              <ChevronRight size={16} className="text-bf-text-4" />
-            </button>
-          ))}
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-bf-text-3">Nueva consulta</p>
+            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full bg-bf-surface-2 ${creditColor}`}>
+              {credits.remaining}/{credits.limit} restantes
+            </span>
+          </div>
+
+          {hasNoCredits && (
+            <div className="bg-red-950/30 border border-red-800/50 rounded-xl px-4 py-3 text-sm text-red-400 text-center">
+              Usaste tus 5 consultas de hoy · Volvé mañana
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {(Object.entries(QUESTIONNAIRES) as [QueryType, typeof QUESTIONNAIRES[QueryType]][]).map(([type, config]) => (
+              <button
+                key={type}
+                onClick={() => !hasNoCredits && selectType(type)}
+                disabled={hasNoCredits}
+                className="w-full flex items-center justify-between bg-bf-surface border border-bf-border hover:border-bf-border-2 rounded-2xl px-4 py-3.5 text-left transition-colors disabled:opacity-40"
+              >
+                <span className="text-sm font-medium text-bf-text">{config.label}</span>
+                <ChevronRight size={16} className="text-bf-text-4" />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
