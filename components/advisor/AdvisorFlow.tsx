@@ -131,6 +131,38 @@ const QUESTIONNAIRES = {
       },
     ],
   },
+  ticker: {
+    label: "🔍 Analizar un ticker",
+    questions: [
+      {
+        id: "instrument",
+        text: "¿Qué ticker querés analizar?",
+        inputType: "text" as const,
+        placeholder: "Ej: PAMP, GD35, AL30, MELI, BTC...",
+      },
+      {
+        id: "focus",
+        text: "¿Qué querés saber sobre este instrumento?",
+        options: [
+          "Si está barato o caro en este momento",
+          "Qué podría esperarse en los próximos meses",
+          "Qué riesgo implica para un inversor argentino",
+          "Si podría tener sentido en mi portafolio actual",
+        ],
+      },
+    ],
+  },
+  libre: {
+    label: "💬 Consulta libre",
+    questions: [
+      {
+        id: "query",
+        text: "¿Qué querés explorar?",
+        inputType: "text" as const,
+        placeholder: "Ej: ¿Dónde podría tener sentido poner 3000 USD en una ON hoy? ¿Qué factores pesan en GD35?",
+      },
+    ],
+  },
 } as const;
 
 type QueryType = keyof typeof QUESTIONNAIRES;
@@ -194,6 +226,7 @@ interface HistoryItem {
 
 const TYPE_ICONS: Record<string, string> = {
   portfolio: "📊", technical: "📈", fundamental: "🏢", macro: "🌍", scenario: "🎯",
+  ticker: "🔍", libre: "💬",
 };
 
 function HistoryCard({ item, onReopen }: { item: HistoryItem; onReopen: () => void }) {
@@ -313,12 +346,17 @@ export function AdvisorFlow() {
     const tickerAnswer = finalAnswers[questions.find(q => q.id === "instrument")?.text ?? ""] ?? "";
     const ticker = tickerAnswer ? tickerAnswer.split(/[\s,]/)[0].toUpperCase() : undefined;
 
+    // Para consulta libre, la respuesta es la query principal
+    const libreAnswer = selectedType === "libre"
+      ? (finalAnswers[questions.find(q => q.id === "query")?.text ?? ""] ?? "")
+      : "";
+
     const res = await fetch(`${API_URL}/advisor/query`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify({
         type: selectedType,
-        query: "",
+        query: libreAnswer || "",
         ticker: ticker || undefined,
         context_answers: finalAnswers,
       }),
@@ -484,7 +522,7 @@ export function AdvisorFlow() {
         {loading && !response ? (
           <div className="flex items-center gap-2 text-sm text-bf-text-3 py-4">
             <Loader2 size={14} className="animate-spin text-blue-400" />
-            Analizando con tu portafolio real...
+            {selectedType === "libre" ? "Analizando tu consulta..." : "Analizando con tu portafolio real..."}
           </div>
         ) : response ? (
           <MarkdownText text={response} />
