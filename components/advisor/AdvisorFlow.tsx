@@ -44,6 +44,16 @@ const QUESTIONNAIRES = {
           "Que sea más simple y fácil de entender",
         ],
       },
+      {
+        id: "objective_priority",
+        text: "¿Qué objetivo querés priorizar en el análisis?",
+        options: [
+          "Solo renta — cuánto genera mi portafolio hoy",
+          "Solo capital — cuánto crece mi patrimonio",
+          "Ambos, pero primero renta (libertad financiera ya)",
+          "Ambos, pero primero capital (libertad financiera más adelante)",
+        ],
+      },
     ],
   },
   technical: {
