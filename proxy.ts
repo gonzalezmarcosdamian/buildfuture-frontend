@@ -13,6 +13,12 @@ function isPublic(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // En mock mode (desarrollo/testing) saltear la verificación de Supabase.
+  // La autenticación la maneja el frontend via X-Mock-User header.
+  if (process.env.NEXT_PUBLIC_MOCK_AUTH === "true") {
+    return response;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

@@ -156,7 +156,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium rounded-lg py-2.5 text-sm transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium rounded-xl py-3 text-sm transition-colors min-h-[44px]"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
             {loading ? "..." : mode === "login" ? "Ingresar" : "Enviar email"}

@@ -4,14 +4,23 @@
  */
 import { getServerSession } from "./supabase-server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 async function serverFetch(path: string) {
-  const session = await getServerSession();
+  const mockMode = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
   const headers: HeadersInit = { "Content-Type": "application/json" };
-  if (session?.access_token) {
-    headers["Authorization"] = `Bearer ${session.access_token}`;
+
+  if (!mockMode) {
+    try {
+      const session = await getServerSession();
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
+      }
+    } catch {
+      // Supabase unavailable — proceed unauthenticated
+    }
   }
+
   const res = await fetch(`${API_URL}${path}`, { cache: "no-store", headers });
   return res;
 }

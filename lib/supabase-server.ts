@@ -26,7 +26,11 @@ export async function createSupabaseServer() {
 }
 
 export async function getServerSession() {
-  const supabase = await createSupabaseServer();
-  const { data } = await supabase.auth.getSession();
-  return data.session;
+  try {
+    const supabase = await createSupabaseServer();
+    const { data } = await supabase.auth.getSession();
+    return data.session;
+  } catch {
+    return null;
+  }
 }

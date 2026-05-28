@@ -228,12 +228,13 @@ function PositionRow({ p, totalUsd, mep, currency, fmt, hint, editingId, editAmo
             {isManual && !isEditing && (
               <div className="flex gap-0.5">
                 <button
+                  aria-label="editar posición"
                   onClick={() => onStartEdit(p.id, String(p.ticker === "CASH_ARS" ? Math.round(p.current_value_usd * mep) : p.current_value_usd))}
                   className="p-2 text-bf-text-4 hover:text-bf-text-2"
                 >
                   <Pencil size={12} />
                 </button>
-                <button onClick={() => onDelete(p.id)} className="p-2 text-bf-text-4 hover:text-red-400">
+                <button aria-label="eliminar posición" onClick={() => onDelete(p.id)} className="p-2 text-bf-text-4 hover:text-red-400">
                   <Trash2 size={12} />
                 </button>
               </div>
@@ -300,7 +301,13 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
   const [collapsedSources, setCollapsedSources] = useState<Record<string, boolean>>(() => {
     const sources = [...new Set(positions.map(p => p.source ?? "MANUAL"))];
     const initial: Record<string, boolean> = {};
-    sources.forEach(src => { initial[src] = true; initial[`r_${src}`] = true; });
+    // Si hay pocas fuentes (≤2), mostrar expandido por defecto para mejor discoverability.
+    // Solo colapsar cuando hay muchas fuentes para no abrumar.
+    const shouldCollapse = sources.length > 2;
+    sources.forEach(src => {
+      initial[src] = shouldCollapse;
+      initial[`r_${src}`] = shouldCollapse;
+    });
     return initial;
   });
   const [editingId, setEditingId] = useState<number | null>(null);
