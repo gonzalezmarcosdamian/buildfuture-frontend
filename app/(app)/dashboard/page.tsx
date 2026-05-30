@@ -5,6 +5,7 @@ import { ValuePropsScreen } from "@/components/ftu/ValuePropsScreen";
 import { ProjectionCard } from "@/components/goals/ProjectionCard";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { StreakCard } from "@/components/gamification/StreakCard";
+import { StreakRiskBanner } from "@/components/gamification/StreakRiskBanner";
 import { AdvisorCta } from "@/components/advisor/AdvisorCta";
 export const dynamic = "force-dynamic";
 
@@ -79,10 +80,13 @@ export default async function Dashboard() {
         streak={streak}
       />
 
-      {/* 2 — Invest Advisor CTA */}
+      {/* 2 — Alerta: racha en riesgo (solo si aplica) */}
+      <StreakRiskBanner risk={gamification.streak_risk} />
+
+      {/* 3 — Invest Advisor CTA */}
       <AdvisorCta />
 
-      {/* 3 — Racha de inversión */}
+      {/* 4 — Racha de inversión */}
       {streak && <StreakCard streak={streak} />}
 
       {/* 4 — Proyección DCA / interés compuesto (colapsada) */}
