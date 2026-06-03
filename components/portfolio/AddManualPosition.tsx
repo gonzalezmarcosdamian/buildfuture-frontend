@@ -40,6 +40,7 @@ interface NominatimResult {
 function CashForm({ onSuccess, initialEditId }: { onSuccess: () => void; initialEditId?: number }) {
   const [currency, setCurrency] = useState<"USD" | "ARS">("USD");
   const [amount, setAmount] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
   const [mep, setMep] = useState(1430);
   const [mepLoaded, setMepLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -103,6 +104,7 @@ function CashForm({ onSuccess, initialEditId }: { onSuccess: () => void; initial
             purchase_price_usd: 1.0,
             ppc_ars: isARS ? num : num * mep,
             purchase_fx_rate: mep,
+            purchase_date: purchaseDate || null,
             external_id: null, fci_categoria: null, manual_yield_pct: null,
           }),
         });
@@ -144,6 +146,7 @@ function CashForm({ onSuccess, initialEditId }: { onSuccess: () => void; initial
           </p>
         )}
       </div>
+      {!initialEditId && <PurchaseDateField value={purchaseDate} onChange={setPurchaseDate} />}
       {error && <ErrorBanner msg={error} />}
       <SaveButton onClick={save} saving={saving} disabled={!valid} label={initialEditId ? "Guardar cambios" : "Guardar"} />
     </div>
@@ -159,6 +162,7 @@ function CryptoForm({ onSuccess, initialEditId }: { onSuccess: () => void; initi
   const [selected, setSelected] = useState<CryptoResult | null>(null);
   const [price, setPrice] = useState<number | null>(null);
   const [quantity, setQuantity] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -227,6 +231,7 @@ function CryptoForm({ onSuccess, initialEditId }: { onSuccess: () => void; initi
             purchase_price_usd: price ?? 0,
             ppc_ars: 0,
             purchase_fx_rate: 0,
+            purchase_date: purchaseDate || null,
             external_id: selected.id,
             fci_categoria: null,
             manual_yield_pct: null,
@@ -317,6 +322,7 @@ function CryptoForm({ onSuccess, initialEditId }: { onSuccess: () => void; initi
         )}
       </div>
 
+      {!initialEditId && <PurchaseDateField value={purchaseDate} onChange={setPurchaseDate} />}
       {error && <ErrorBanner msg={error} />}
       <SaveButton onClick={save} saving={saving} disabled={!valid} label={initialEditId ? "Guardar cambios" : "Agregar al portafolio"} />
     </div>
@@ -722,6 +728,27 @@ function RealEstateForm({ onSuccess, initialEditId }: { onSuccess: () => void; i
 }
 
 // ── Shared UI ───────────────────────────────────────────────────────────────
+
+function PurchaseDateField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const today = new Date().toISOString().slice(0, 10);
+  return (
+    <div>
+      <label className="text-xs text-bf-text-3 mb-1.5 block">
+        Fecha de compra <span className="text-bf-text-4">(opcional)</span>
+      </label>
+      <input
+        type="date"
+        max={today}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-bf-surface-2 border border-bf-border-2 rounded-xl px-4 py-3 text-bf-text text-sm focus:outline-none focus:border-blue-500 transition-colors"
+      />
+      <p className="text-[11px] text-bf-text-4 mt-1.5 px-1">
+        Si la indicás, reconstruimos tu historial de tenencia desde esa fecha.
+      </p>
+    </div>
+  );
+}
 
 function ErrorBanner({ msg }: { msg: string }) {
   return (
