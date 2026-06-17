@@ -29,24 +29,33 @@ export function LandingNav() {
             <span className="text-lg font-extrabold text-emerald-400 tracking-tight">Future</span>
           </Link>
 
-          {/* Desktop CTAs */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Right side: login siempre visible + hamburguesa en mobile */}
+          <div className="flex items-center gap-1">
+            {/* Desktop: link discreto */}
             <Link
               href="/login"
-              className="text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-2"
+              className="hidden sm:block text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-2"
             >
               ¿Ya tenés acceso? →
             </Link>
-          </div>
 
-          {/* Mobile hamburger */}
-          <button
-            className="sm:hidden text-slate-400 hover:text-slate-100 transition-colors p-1"
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Menú"
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+            {/* Mobile: botón Ingresar visible — 1 tap, sin abrir el menú */}
+            <Link
+              href="/login"
+              className="sm:hidden text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors px-3 py-2"
+            >
+              Ingresar
+            </Link>
+
+            {/* Mobile hamburger */}
+            <button
+              className="sm:hidden text-slate-400 hover:text-slate-100 transition-colors p-1"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label="Menú"
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
       </nav>
 

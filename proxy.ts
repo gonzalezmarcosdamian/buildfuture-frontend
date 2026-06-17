@@ -42,14 +42,24 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // If not logged in and trying to access protected route, redirect to login
+  // Redirige preservando los cookies que getUser() pudo haber refrescado.
+  // Si no se copian a la respuesta de redirect, un token recién rotado se
+  // pierde y la sesión muere en el próximo request → el usuario aparece
+  // deslogueado (ej: al pasar de /login a /dashboard tras loguearse).
+  const redirectTo = (path: string) => {
+    const redirect = NextResponse.redirect(new URL(path, request.url));
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
+  };
+
+  // No logueado en ruta protegida → login
   if (!user && !isPublic(pathname)) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return redirectTo("/login");
   }
 
-  // If logged in and on login page, redirect to dashboard
+  // Logueado en /login → dashboard
   if (user && pathname.startsWith("/login")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return redirectTo("/dashboard");
   }
 
   return response;
