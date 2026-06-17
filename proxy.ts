@@ -5,18 +5,42 @@ import { NextResponse, type NextRequest } from "next/server";
 const PUBLIC_PATHS = ["/login", "/auth/", "/legal"];
 const PUBLIC_EXACT = ["/"];
 
+// Marketing puro: ni gating ni redirect → no hace falta consultar a Supabase.
+// Saltear getUser() acá evita un round-trip en las páginas más visitadas.
+const NO_AUTH_PATHS = ["/legal"];
+const NO_AUTH_EXACT = ["/"];
+
 function isPublic(pathname: string): boolean {
   if (PUBLIC_EXACT.includes(pathname)) return true;
   return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 }
 
+function needsAuthCheck(pathname: string): boolean {
+  if (NO_AUTH_EXACT.includes(pathname)) return false;
+  return !NO_AUTH_PATHS.some((p) => pathname.startsWith(p));
+}
+
 export async function proxy(request: NextRequest) {
+  const t0 = performance.now();
+  const { pathname } = request.nextUrl;
   let response = NextResponse.next({ request });
 
+  // Visibilidad: Server-Timing (DevTools → Network) + log (Vercel runtime logs).
+  const observe = (res: NextResponse, action: string, authMs: number) => {
+    const totalMs = Math.round(performance.now() - t0);
+    res.headers.set("Server-Timing", `auth;dur=${authMs}, proxy;dur=${totalMs}`);
+    console.warn(`[proxy] ${pathname} ${action} auth=${authMs}ms total=${totalMs}ms`);
+    return res;
+  };
+
   // En mock mode (desarrollo/testing) saltear la verificación de Supabase.
-  // La autenticación la maneja el frontend via X-Mock-User header.
   if (process.env.NEXT_PUBLIC_MOCK_AUTH === "true") {
-    return response;
+    return observe(response, "mock", 0);
+  }
+
+  // Marketing público (landing, legal): servir directo, sin tocar Supabase.
+  if (!needsAuthCheck(pathname)) {
+    return observe(response, "public-skip", 0);
   }
 
   const supabase = createServerClient(
@@ -38,9 +62,11 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
+  const tAuth = performance.now();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const authMs = Math.round(performance.now() - tAuth);
 
   // Redirige preservando los cookies que getUser() pudo haber refrescado.
   // Si no se copian a la respuesta de redirect, un token recién rotado se
@@ -49,7 +75,7 @@ export async function proxy(request: NextRequest) {
   const redirectTo = (path: string) => {
     const redirect = NextResponse.redirect(new URL(path, request.url));
     response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
-    return redirect;
+    return observe(redirect, `→${path}`, authMs);
   };
 
   // No logueado en ruta protegida → login
@@ -62,7 +88,7 @@ export async function proxy(request: NextRequest) {
     return redirectTo("/dashboard");
   }
 
-  return response;
+  return observe(response, user ? "pass-auth" : "pass-anon", authMs);
 }
 
 export const config = {
