@@ -39,13 +39,15 @@ export function LandingNav() {
               ¿Ya tenés acceso? →
             </Link>
 
-            {/* Mobile: botón Ingresar visible — 1 tap, sin abrir el menú */}
-            <Link
+            {/* Mobile: botón Ingresar visible — 1 tap, sin abrir el menú.
+                <a> nativo (no <Link>): navega al primer tap aunque la landing
+                todavía no haya hidratado, evitando los "taps que no reaccionan". */}
+            <a
               href="/login"
               className="sm:hidden text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors px-3 py-2"
             >
               Ingresar
-            </Link>
+            </a>
 
             {/* Mobile hamburger */}
             <button
