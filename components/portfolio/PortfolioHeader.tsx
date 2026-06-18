@@ -1,9 +1,18 @@
 "use client";
+import { useState } from "react";
 import { useCurrency } from "@/lib/currency-context";
 import { CurrencyToggle } from "@/components/ui/CurrencyToggle";
 import { RentaInfoButton } from "@/components/portfolio/RentaModal";
 import { formatUSD, formatARS, formatPct } from "@/lib/formatters";
-import { AlertTriangle, Clock } from "lucide-react";
+import { AlertTriangle, Clock, Info, X } from "lucide-react";
+
+const TOTAL_INFO: string[] = [
+  "Suma el valor de HOY de todas tus posiciones: precio actual × cantidad.",
+  "Incluye todas tus fuentes: brokers conectados (IOL, Cocos, PPI, Binance) y tus cargas manuales (efectivo, cripto, inmuebles).",
+  "Renta mensual: lo que generan tus instrumentos de renta (LECAP, FCI, bonos), ajustado por la devaluación esperada para mostrarlo en USD real.",
+  "Capital acumulado: CEDEARs, ETFs, cripto y efectivo.",
+  "El gráfico de abajo solo dibuja el historial de fuentes con movimientos (IOL, Binance); el resto está en este total pero no en la curva.",
+];
 
 const STALE_DAYS = 3; // días sin sync → alerta
 
@@ -60,6 +69,7 @@ export function PortfolioHeader({
 }: Props) {
   const { currency } = useCurrency();
   const sync = useSyncStatus(lastSyncedDate);
+  const [showTotalInfo, setShowTotalInfo] = useState(false);
 
   // Renta fija: LETRA/FCI/BOND con yield ajustado por devaluación esperada (valor dinámico del servidor).
   // Misma fórmula que split_portfolio_buckets en backend:
@@ -97,10 +107,38 @@ export function PortfolioHeader({
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-1.5 mb-0.5">
           <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">Portafolio total</p>
+          <button
+            onClick={() => setShowTotalInfo((v) => !v)}
+            className="w-5 h-5 flex items-center justify-center rounded-full text-bf-text-3 hover:text-bf-text-2 hover:bg-bf-surface-2 transition-colors shrink-0"
+            aria-label="Qué incluye tu total"
+          >
+            <Info size={13} />
+          </button>
           <CurrencyToggle />
         </div>
         <p className="text-3xl font-extrabold text-bf-text">{total}</p>
         <p className="text-[10px] text-bf-text-3 mt-0.5">{hint}</p>
+
+        {showTotalInfo && (
+          <div className="relative mt-3 bg-bf-surface-2/80 border border-bf-border-2 rounded-2xl p-4 text-xs space-y-2.5">
+            <button
+              onClick={() => setShowTotalInfo(false)}
+              className="absolute top-3 right-3 text-bf-text-3 hover:text-bf-text-2"
+              aria-label="Cerrar"
+            >
+              <X size={14} />
+            </button>
+            <p className="font-semibold text-bf-text-2 pr-5">Qué incluye tu total</p>
+            <ul className="space-y-1.5">
+              {TOTAL_INFO.map((item, i) => (
+                <li key={i} className="flex gap-2 text-bf-text-3">
+                  <span className="text-blue-500 mt-px shrink-0">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {/* ══ RENTA ══════════════════════════════════════════ */}
