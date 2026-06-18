@@ -20,6 +20,12 @@ function needsAuthCheck(pathname: string): boolean {
   return !NO_AUTH_PATHS.some((p) => pathname.startsWith(p));
 }
 
+// Detecta si hay cookie de sesión de Supabase (sb-<ref>-auth-token[.N]).
+// Sin esta cookie el usuario es anónimo: no tiene sentido llamar a getUser().
+function hasAuthCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some((c) => c.name.startsWith("sb-") && c.name.includes("auth-token"));
+}
+
 export async function proxy(request: NextRequest) {
   const t0 = performance.now();
   const { pathname } = request.nextUrl;
@@ -41,6 +47,20 @@ export async function proxy(request: NextRequest) {
   // Marketing público (landing, legal): servir directo, sin tocar Supabase.
   if (!needsAuthCheck(pathname)) {
     return observe(response, "public-skip", 0);
+  }
+
+  // Anónimo (sin cookie de sesión): no llamamos a Supabase — getUser() daría
+  // null igual. Esto hace que /login (y cualquier ruta) cargue instantáneo para
+  // quien todavía no se logueó, evitando un round-trip a Supabase por navegación.
+  if (!hasAuthCookie(request)) {
+    if (!isPublic(pathname)) {
+      return observe(
+        NextResponse.redirect(new URL("/login", request.url)),
+        "→/login(anon)",
+        0
+      );
+    }
+    return observe(response, "anon-skip", 0);
   }
 
   const supabase = createServerClient(
