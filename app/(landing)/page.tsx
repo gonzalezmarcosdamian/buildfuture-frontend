@@ -331,7 +331,7 @@ function PortfolioMockup() {
               <div key={p.ticker} className="flex items-center justify-between bg-slate-800/50 rounded-xl px-3 py-2">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-slate-300">{p.ticker[0]}</span>
+                    <span className="text-[8px] font-bold text-slate-300">{[...p.ticker][0]}</span>
                   </div>
                   <div>
                     <p className="text-[10px] font-semibold text-slate-200">{p.ticker}</p>
