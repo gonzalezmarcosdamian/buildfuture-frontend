@@ -41,21 +41,23 @@ export function LandingNav() {
 
             {/* Mobile: botón Ingresar visible — 1 tap, sin abrir el menú.
                 <a> nativo (no <Link>): navega al primer tap aunque la landing
-                todavía no haya hidratado, evitando los "taps que no reaccionan". */}
+                todavía no haya hidratado.
+                Botón con área táctil ≥44px (antes 36px → se fallaba el toque) +
+                feedback inmediato (active:) para que se note que registró el tap. */}
             <a
               href="/login"
-              className="sm:hidden text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors px-3 py-2"
+              className="sm:hidden flex items-center min-h-[44px] px-4 rounded-xl text-sm font-bold text-slate-950 bg-emerald-500 active:bg-emerald-600 active:scale-95 transition-all"
             >
               Ingresar
             </a>
 
-            {/* Mobile hamburger */}
+            {/* Mobile hamburger — área táctil ≥44px */}
             <button
-              className="sm:hidden text-slate-400 hover:text-slate-100 transition-colors p-1"
+              className="sm:hidden flex items-center justify-center min-w-[44px] min-h-[44px] text-slate-400 active:text-slate-100 active:scale-95 transition-all"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Menú"
             >
-              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
