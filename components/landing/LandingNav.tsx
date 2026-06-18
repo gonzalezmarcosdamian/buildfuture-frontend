@@ -1,17 +1,24 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Loader2 } from "lucide-react";
 
 export function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [entering, setEntering] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Muestra un splash al instante cuando se toca "Ingresar". Da feedback
+  // inmediato (no se vuelve a tocar) mientras navega a /login. No prevenimos
+  // la navegación: el <a>/Link sigue su curso y el splash cubre la pantalla
+  // hasta que /login renderiza.
+  const enter = () => setEntering(true);
 
   return (
     <>
@@ -34,6 +41,7 @@ export function LandingNav() {
             {/* Desktop: link discreto */}
             <Link
               href="/login"
+              onClick={enter}
               className="hidden sm:block text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-2"
             >
               ¿Ya tenés acceso? →
@@ -42,10 +50,10 @@ export function LandingNav() {
             {/* Mobile: botón Ingresar visible — 1 tap, sin abrir el menú.
                 <a> nativo (no <Link>): navega al primer tap aunque la landing
                 todavía no haya hidratado.
-                Botón con área táctil ≥44px (antes 36px → se fallaba el toque) +
-                feedback inmediato (active:) para que se note que registró el tap. */}
+                Botón con área táctil ≥44px + splash al tocar. */}
             <a
               href="/login"
+              onClick={enter}
               className="sm:hidden flex items-center min-h-[44px] px-4 rounded-xl text-sm font-bold text-slate-950 bg-emerald-500 active:bg-emerald-600 active:scale-95 transition-all"
             >
               Ingresar
@@ -76,11 +84,25 @@ export function LandingNav() {
           </Link>
           <Link
             href="/login"
-            className="text-lg text-slate-400 hover:text-slate-200 transition-colors"
-            onClick={() => setMobileOpen(false)}
+            onClick={() => { setMobileOpen(false); enter(); }}
+            className="flex items-center min-h-[44px] px-6 rounded-xl text-base font-bold text-slate-950 bg-emerald-500 active:bg-emerald-600 active:scale-95 transition-all"
           >
-            ¿Ya tenés acceso? →
+            Ingresar
           </Link>
+        </div>
+      )}
+
+      {/* Splash de entrada — feedback inmediato al tocar Ingresar */}
+      {entering && (
+        <div className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center gap-5">
+          <div className="text-center space-y-1">
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              <span className="text-slate-100">Build</span>
+              <span className="text-emerald-400">Future</span>
+            </h1>
+            <p className="text-sm text-slate-400">Entrando…</p>
+          </div>
+          <Loader2 size={22} className="text-emerald-400 animate-spin" />
         </div>
       )}
     </>
