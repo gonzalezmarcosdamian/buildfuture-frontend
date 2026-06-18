@@ -313,15 +313,17 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
       {loading ? (
         <div className="h-44 flex items-center justify-center text-bf-text-4 text-xs">Cargando…</div>
       ) : !data.has_data || chartData.length === 0 ? (
-        <div className="h-44 flex flex-col items-center justify-center gap-1">
-          <p className="text-bf-text-4 text-xs">Sin historial aún</p>
-          <p className="text-bf-text-5 text-[10px]">Los snapshots se acumulan automáticamente</p>
+        <div className="h-44 flex flex-col items-center justify-center gap-1 px-6 text-center">
+          <p className="text-bf-text-4 text-xs">Todavía no podemos reconstruir tu historial</p>
+          <p className="text-bf-text-5 text-[10px] leading-relaxed">
+            El gráfico se reconstruye desde los movimientos de IOL y Binance. Tu total de hoy ya incluye todas tus fuentes.
+          </p>
         </div>
       ) : mode === "tenencia" ? (
         <>
           {onlyOnePoint && (
             <p className="text-[10px] text-bf-text-4 text-center">
-              Primer snapshot registrado — la curva crece con el tiempo
+              Reconstruyendo desde tus movimientos — la curva crece con más historial
             </p>
           )}
           <ResponsiveContainer width="100%" height={164}>

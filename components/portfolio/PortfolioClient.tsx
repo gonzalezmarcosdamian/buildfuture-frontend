@@ -50,12 +50,12 @@ interface Props {
 
 const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: string[] }> = {
   tenencia: {
-    title: "¿Cómo se calcula la tenencia?",
+    title: "Cómo leer el gráfico de tenencia",
     items: [
-      "Valor total del portafolio en cada momento: precio actual × cantidad de cada activo.",
-      "Snapshot diario a las 17:30 ART. Hoy se actualiza con precios en tiempo real.",
-      "CEDEARs: precio ARS de IOL ÷ MEP del día → USD.",
-      "LECAPs y FCI: valor técnico (nominal × precio ARS) ÷ MEP.",
+      "El gráfico reconstruye tu tenencia en el tiempo desde los movimientos reales de IOL (hasta 2 años) y Binance (últimos 30 días).",
+      "Cocos, posiciones manuales y otras fuentes sin historial de movimientos NO se dibujan en la curva — pero SÍ están incluidas en tu total de hoy.",
+      "Tu total consolidado (arriba) suma TODAS las fuentes a valor de hoy: precio actual × cantidad.",
+      "CEDEARs: precio ARS de IOL ÷ MEP del día → USD. LECAPs y FCI: valor técnico ÷ MEP.",
       "Podés ver los valores en USD 🇺🇸 o ARS 🇦🇷 con el selector de moneda.",
     ],
   },
@@ -72,6 +72,15 @@ const INFO_CONTENT: Record<NonNullable<InfoModal>, { title: string; items: strin
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+// Fuentes cuyo historial se puede reconstruir en el tiempo (tienen movimientos).
+// El resto solo aporta su valor de HOY al total consolidado.
+const RECONSTRUCTABLE = new Set(["IOL", "BINANCE"]);
+const SOURCE_LABELS: Record<string, string> = {
+  IOL: "IOL", BINANCE: "Binance", COCOS: "Cocos", PPI: "PPI",
+  MANUAL: "Manual", NEXO: "Nexo", BITSO: "Bitso",
+};
+const sourceLabel = (s: string) => SOURCE_LABELS[s] ?? s;
 
 export function PortfolioClient({ positions, totalUsd, mep, history, connectedProviders = [], expectedDevaluationPct = 0.20 }: Props) {
   const [mode, setMode] = useState<ViewMode>("composicion"); // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -112,6 +121,11 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
   function handlePeriodChange(p: Period) {
     setPeriod(p);
   }
+
+  // Qué fuentes se grafican en el tiempo vs cuáles solo entran al total de hoy
+  const presentSources = Array.from(new Set(positions.map((p) => p.source)));
+  const graphedSources = presentSources.filter((s) => RECONSTRUCTABLE.has(s));
+  const totalOnlySources = presentSources.filter((s) => !RECONSTRUCTABLE.has(s));
 
   // Empty state: sin posiciones — mostrar onboarding de carga
   if (positions.length === 0) {
@@ -195,7 +209,38 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
               </li>
             ))}
           </ul>
+          {/* Desglose real de las fuentes de ESTE usuario */}
+          {presentSources.length > 0 && (
+            <div className="pt-2 mt-1 border-t border-bf-border-2/50 space-y-1.5">
+              <p className="flex gap-2 text-bf-text-3">
+                <span className="shrink-0">📈</span>
+                <span><span className="text-bf-text-2 font-medium">En el gráfico</span> (historial reconstruido):{" "}
+                  {graphedSources.length ? graphedSources.map(sourceLabel).join(", ") : "—"}</span>
+              </p>
+              <p className="flex gap-2 text-bf-text-3">
+                <span className="shrink-0">🧮</span>
+                <span><span className="text-bf-text-2 font-medium">Solo en tu total de hoy</span>:{" "}
+                  {totalOnlySources.length ? totalOnlySources.map(sourceLabel).join(", ") : "—"}</span>
+              </p>
+            </div>
+          )}
         </div>
+      )}
+
+      {/* Chip: qué se grafica vs qué solo entra al total */}
+      {totalOnlySources.length > 0 && (
+        <button
+          onClick={() => setInfoModal("tenencia")}
+          className="w-full flex items-center gap-2 text-left text-[11px] text-bf-text-3 bg-bf-surface-2/60 border border-bf-border rounded-xl px-3 py-2 hover:bg-bf-surface-2 transition-colors"
+        >
+          <Info size={13} className="shrink-0 text-blue-400" />
+          <span>
+            El gráfico muestra el historial de{" "}
+            <span className="text-bf-text-2 font-medium">{graphedSources.map(sourceLabel).join(", ") || "—"}</span>.{" "}
+            <span className="text-bf-text-2 font-medium">{totalOnlySources.map(sourceLabel).join(", ")}</span>{" "}
+            {totalOnlySources.length === 1 ? "está" : "están"} en tu total de hoy. Ver detalle →
+          </span>
+        </button>
       )}
 
       {/* Chart — solo tenencia */}
