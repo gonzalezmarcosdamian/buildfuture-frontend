@@ -48,16 +48,16 @@ export function LandingNav() {
             </Link>
 
             {/* Mobile: botón Ingresar visible — 1 tap, sin abrir el menú.
-                <a> nativo (no <Link>): navega al primer tap aunque la landing
-                todavía no haya hidratado.
-                Botón con área táctil ≥44px + splash al tocar. */}
-            <a
+                <Link> con prefetch: navegación client-side instantánea que
+                mantiene el splash visible durante la transición. Área ≥44px. */}
+            <Link
               href="/login"
+              prefetch
               onClick={enter}
               className="sm:hidden flex items-center min-h-[44px] px-4 rounded-xl text-sm font-bold text-slate-950 bg-emerald-500 active:bg-emerald-600 active:scale-95 transition-all"
             >
               Ingresar
-            </a>
+            </Link>
 
             {/* Mobile hamburger — área táctil ≥44px */}
             <button
