@@ -56,7 +56,7 @@ function SingleSyncButton({ provider }: { provider: string }) {
       <button
         onClick={handleSync}
         disabled={syncing}
-        className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl border transition-colors ${
+        className={`flex items-center gap-1.5 text-xs px-3 min-h-[36px] rounded-xl border transition-colors ${
           ok
             ? "bg-emerald-950/40 border-emerald-800 text-emerald-400"
             : "bg-bf-surface-2/50 border-bf-border-2 text-bf-text-3 hover:text-bf-text-2 hover:border-bf-border-2"

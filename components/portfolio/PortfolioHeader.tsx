@@ -109,7 +109,7 @@ export function PortfolioHeader({
           <p className="text-[10px] text-bf-text-3 uppercase tracking-wider">Portafolio total</p>
           <button
             onClick={() => setShowTotalInfo((v) => !v)}
-            className="w-5 h-5 flex items-center justify-center rounded-full text-bf-text-3 hover:text-bf-text-2 hover:bg-bf-surface-2 transition-colors shrink-0"
+            className="w-9 h-9 flex items-center justify-center rounded-full text-bf-text-3 hover:text-bf-text-2 hover:bg-bf-surface-2 transition-colors shrink-0"
             aria-label="Qué incluye tu total"
           >
             <Info size={13} />

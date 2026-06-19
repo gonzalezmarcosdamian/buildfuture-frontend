@@ -298,7 +298,7 @@ export function PerformanceChart({ initialData, mep = 1430, chartMode, period: p
           <button
             key={p}
             onClick={() => changePeriod(p)}
-            className={`text-[10px] px-2 py-1 rounded-lg transition-colors ${
+            className={`text-[11px] px-3 min-h-[36px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors ${
               activePeriod === p
                 ? "bg-bf-surface-3 text-bf-text"
                 : "text-bf-text-3 hover:text-bf-text-2"

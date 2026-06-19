@@ -167,7 +167,7 @@ test.describe("UX mobile — usuario nuevo (FTU)", () => {
     await page.waitForLoadState("networkidle").catch(() => {});
 
     // No debe haber errores 500 o crashes visibles
-    await expect(page.locator("text=/500|error interno|crashed/i")).not.toBeVisible();
+    await expect(page.locator("text=/error interno|internal server error|client-side exception|unhandled/i")).not.toBeVisible();
     // La página debe tener contenido
     const content = await page.textContent("body");
     expect(content?.length).toBeGreaterThan(100);
@@ -177,7 +177,7 @@ test.describe("UX mobile — usuario nuevo (FTU)", () => {
     await page.goto("/portfolio");
     await page.waitForLoadState("networkidle").catch(() => {});
 
-    await expect(page.locator("text=/500|error interno/i")).not.toBeVisible();
+    await expect(page.locator("text=/error interno|internal server error|client-side exception|unhandled/i")).not.toBeVisible();
     // Debe haber algo útil — un mensaje de estado vacío o CTA
     const content = await page.textContent("body");
     expect(content?.length).toBeGreaterThan(50);
@@ -187,6 +187,6 @@ test.describe("UX mobile — usuario nuevo (FTU)", () => {
     await page.goto("/advisor");
     await page.waitForLoadState("networkidle").catch(() => {});
 
-    await expect(page.locator("text=/500|error interno/i")).not.toBeVisible();
+    await expect(page.locator("text=/error interno|internal server error|client-side exception|unhandled/i")).not.toBeVisible();
   });
 });

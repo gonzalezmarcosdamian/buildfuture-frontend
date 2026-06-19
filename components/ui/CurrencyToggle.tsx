@@ -15,7 +15,7 @@ export function CurrencyToggle({ size = "md" }: { size?: "sm" | "md" }) {
   return (
     <button
       onClick={toggle}
-      className={`inline-flex items-center bg-bf-surface-2 border border-bf-border-2 rounded-xl ${pill} transition-colors hover:border-bf-border-2`}
+      className={`inline-flex items-center min-h-[36px] bg-bf-surface-2 border border-bf-border-2 rounded-xl ${pill} transition-colors hover:border-bf-border-2`}
       aria-label="Cambiar moneda"
     >
       <span className={`font-semibold transition-all ${opt} ${

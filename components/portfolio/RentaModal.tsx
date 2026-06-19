@@ -170,7 +170,7 @@ export function RentaInfoButton({ mep }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-bf-text-3 hover:text-bf-text-2 transition-colors"
+        className="w-9 h-9 -my-2 flex items-center justify-center text-bf-text-3 hover:text-bf-text-2 transition-colors"
         aria-label="¿Cómo se calcula?"
       >
         <Info size={13} />

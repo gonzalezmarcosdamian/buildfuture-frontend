@@ -177,14 +177,14 @@ export function PortfolioClient({ positions, totalUsd, mep, history, connectedPr
       <div className="flex items-center gap-2">
         <div className="flex flex-1 bg-bf-surface rounded-xl p-1 border border-bf-border gap-1">
           <button
-            className="flex-1 text-xs py-1.5 rounded-lg font-medium bg-bf-surface-3 text-bf-text"
+            className="flex-1 text-xs min-h-[36px] py-2 rounded-lg font-medium bg-bf-surface-3 text-bf-text"
           >
             Composición
           </button>
         </div>
         <button
           onClick={() => setInfoModal(infoModal === "tenencia" ? null : "tenencia")}
-          className="w-7 h-7 flex items-center justify-center rounded-full text-bf-text-3 hover:text-bf-text-2 hover:bg-bf-surface-2 transition-colors flex-shrink-0"
+          className="w-9 h-9 flex items-center justify-center rounded-full text-bf-text-3 hover:text-bf-text-2 hover:bg-bf-surface-2 transition-colors flex-shrink-0"
           aria-label="Cómo se calcula"
         >
           <Info size={15} />

@@ -165,7 +165,7 @@ function SourceGroupHeader({
   return (
     <button
       onClick={onToggle}
-      className="w-full flex items-center justify-between py-0.5 hover:opacity-80 transition-opacity"
+      className="w-full flex items-center justify-between min-h-[40px] py-0.5 hover:opacity-80 transition-opacity"
     >
       <div className="flex items-center gap-2">
         <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${badgeCls}`}>
@@ -230,11 +230,11 @@ function PositionRow({ p, totalUsd, mep, currency, fmt, hint, editingId, editAmo
                 <button
                   aria-label="editar posición"
                   onClick={() => onStartEdit(p.id, String(p.ticker === "CASH_ARS" ? Math.round(p.current_value_usd * mep) : p.current_value_usd))}
-                  className="p-2 text-bf-text-4 hover:text-bf-text-2"
+                  className="w-9 h-9 flex items-center justify-center text-bf-text-4 hover:text-bf-text-2"
                 >
                   <Pencil size={12} />
                 </button>
-                <button aria-label="eliminar posición" onClick={() => onDelete(p.id)} className="p-2 text-bf-text-4 hover:text-red-400">
+                <button aria-label="eliminar posición" onClick={() => onDelete(p.id)} className="w-9 h-9 flex items-center justify-center text-bf-text-4 hover:text-red-400">
                   <Trash2 size={12} />
                 </button>
               </div>
@@ -266,7 +266,7 @@ function PositionRow({ p, totalUsd, mep, currency, fmt, hint, editingId, editAmo
   return (
     <button
       onClick={() => onNavigate(p.ticker, p.id)}
-      className="w-full flex items-center justify-between py-2 px-2 rounded-xl hover:bg-bf-surface-2/60 active:scale-[0.98] transition-all duration-75 text-left"
+      className="w-full flex items-center justify-between min-h-[44px] py-2 px-2 rounded-xl hover:bg-bf-surface-2/60 active:scale-[0.98] transition-all duration-75 text-left"
     >
       <div className="flex items-center gap-2 min-w-0">
         <div>
@@ -470,7 +470,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
                     <div key={source} className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         <button onClick={() => toggleSource(source)}
-                          className="flex-1 flex items-center justify-between py-1 hover:opacity-80 transition-opacity">
+                          className="flex-1 flex items-center justify-between min-h-[40px] py-1 hover:opacity-80 transition-opacity">
                           <div className="flex items-center gap-2 min-w-0">
                             <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium shrink-0 ${SOURCE_BADGES[source] ?? "bf-chip-manual"}`}>{source}</span>
                             <div className="min-w-0">
@@ -512,7 +512,7 @@ export function PortfolioTabs({ positions, totalUsd, mep, activeTab, period = "d
             <div className="bg-bf-surface rounded-2xl border border-bf-border overflow-hidden">
               <div className="px-4 py-2">
                 <button onClick={() => toggleSource("MANUAL")}
-                  className="w-full flex items-center justify-between py-1 hover:opacity-80 transition-opacity">
+                  className="w-full flex items-center justify-between min-h-[40px] py-1 hover:opacity-80 transition-opacity">
                   <div className="flex items-center gap-2">
                     <p className="text-[10px] text-bf-text-4 uppercase tracking-widest font-medium">Manual</p>
                   </div>
